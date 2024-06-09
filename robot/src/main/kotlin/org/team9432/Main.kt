@@ -2,6 +2,21 @@
 package org.team9432
 
 import edu.wpi.first.wpilibj.RobotBase
+import org.team9432.io.Buttons
+import org.team9432.lib.robot.CoroutineRobot
+import org.team9432.resources.Indexer
+import org.team9432.resources.Intake
+import org.team9432.resources.Shooter
+
+object Robot: CoroutineRobot() {
+    override suspend fun init() {
+        Intake
+        Shooter
+        Indexer
+
+        Buttons.bind()
+    }
+}
 
 /**
  * Main initialization function. Do not perform any initialization here
@@ -19,4 +34,4 @@ import edu.wpi.first.wpilibj.RobotBase
  * Refactoring when renaming the object, it will get changed everywhere
  * including here.)
  */
-fun main() = RobotBase.startRobot { TODO("Insert robot reference!") }
+fun main() = RobotBase.startRobot { Robot }
