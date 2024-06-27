@@ -2,7 +2,9 @@
 package org.team9432
 
 import edu.wpi.first.wpilibj.RobotBase
+import edu.wpi.first.wpilibj.RobotController
 import org.team9432.io.Buttons
+import org.team9432.lib.LibraryState
 import org.team9432.lib.robot.CoroutineRobot
 import org.team9432.resources.Indexer
 import org.team9432.resources.Intake
@@ -12,10 +14,19 @@ import org.team9432.resources.swerve.Swerve
 
 object Robot: CoroutineRobot() {
     override suspend fun init() {
+        Logging.start()
+
         Intake
         Shooter
         Indexer
         Swerve
+
+        if (LibraryState.isSimulation) {
+            addPeriodic {
+                Swerve.swerve.updateSimState(0.02, RobotController.getBatteryVoltage())
+            }
+        }
+
         Buttons.bind()
     }
 }

@@ -1,11 +1,11 @@
 package org.team9432.io
 
+import org.team9432.Orchestra
 import org.team9432.lib.input.XboxController
 import org.team9432.lib.resource.use
 import org.team9432.lib.resource.useUntilCancelled
 import org.team9432.resources.Indexer
 import org.team9432.resources.Intake
-import org.team9432.resources.Orchestra
 import org.team9432.resources.Shooter
 
 object Buttons {
@@ -39,8 +39,7 @@ object Buttons {
             }
         }
 
-        controller.x.onTrue {
-            Orchestra.play("output.chrp")
-        }
+        controller.x.onTrue { Orchestra.loadAndPlay("mario.chrp") }
+        controller.y.onTrue { Orchestra.loadAndPlay("megalovania.chrp") }
     }
 }

@@ -1,4 +1,4 @@
-package org.team9432.resources
+package org.team9432
 
 import com.ctre.phoenix6.Orchestra
 import org.team9432.resources.swerve.Swerve
@@ -17,7 +17,7 @@ object Orchestra {
         orchestra.addInstrument(Swerve.swerve.getModule(3).steerMotor)
     }
 
-    fun play(track: String) {
+    fun loadAndPlay(track: String) {
         orchestra.loadMusic(track)
         orchestra.play()
     }

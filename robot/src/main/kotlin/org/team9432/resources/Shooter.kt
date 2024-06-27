@@ -9,13 +9,13 @@ import org.team9432.lib.wrappers.Spark
 import org.team9432.lib.wrappers.neo.LoggedNeo
 
 object Shooter: Resource("Shooter") {
-    private val topMotor = LoggedNeo(getConfig())
-//    private val bottomMotor = LoggedNeo(getConfig())
+    private val topMotor = LoggedNeo(getConfig(4, "Top"))
+    private val bottomMotor = LoggedNeo(getConfig(3, "Bottom"))
 
-    val topPid = PIDController(0.0, 0.0, 0.0)
-    val bottomPid = PIDController(0.0, 0.0, 0.0)
+    private val topPid = PIDController(0.0, 0.0, 0.0)
+    private val bottomPid = PIDController(0.0, 0.0, 0.0)
 
-    var state = State.IDLE
+    private var state = State.IDLE
 
     enum class State(val getTopVoltage: () -> Double, val getBottomVoltage: () -> Double) {
         IDLE({ 0.0 }, { 0.0 }),
@@ -26,10 +26,10 @@ object Shooter: Resource("Shooter") {
     init {
         CoroutineRobot.addPeriodic {
             val topVoltage = topPid.calculate(topMotor.getAngle().rotations, state.getTopVoltage())
-//            val bottomVoltage = bottomPid.calculate(bottomMotor.getAngle().rotations, state.getBottomVoltage())
+            val bottomVoltage = bottomPid.calculate(bottomMotor.getAngle().rotations, state.getBottomVoltage())
 
             topMotor.setVoltage(topVoltage)
-//            bottomMotor.setVoltage(bottomVoltage)
+            bottomMotor.setVoltage(bottomVoltage)
         }
     }
 
@@ -42,11 +42,12 @@ object Shooter: Resource("Shooter") {
         while (!topPid.atSetpoint() && !bottomPid.atSetpoint()) delay(20)
     }
 
-    private fun getConfig() = LoggedNeo.Config(
-        canID = 4,
-        deviceName = "Intake",
+    private fun getConfig(canID: Int, additionalQualifier: String) = LoggedNeo.Config(
+        canID = canID,
+        deviceName = "Shooter",
         gearRatio = 1.0,
-        logName = "Intake",
+        logName = "Shooter",
+        additionalQualifier = additionalQualifier,
         motorType = Spark.MotorType.NEO,
         simJkgMetersSquared = 0.003,
         sparkConfig = Spark.Config()

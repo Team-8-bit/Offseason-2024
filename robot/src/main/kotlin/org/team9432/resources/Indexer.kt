@@ -27,15 +27,11 @@ object Indexer: Resource("Indexer") {
         motor.setVoltage(state.getVoltage())
     }
 
-//    override val defaultAction: Action = {
-//        state = State.IDLE
-//    }
-
     private fun getConfig() = LoggedNeo.Config(
         canID = 2,
-        deviceName = "Intake",
+        deviceName = "Indexer",
         gearRatio = 1.0,
-        logName = "Intake",
+        logName = "Indexer",
         motorType = Spark.MotorType.NEO,
         simJkgMetersSquared = 0.003,
         sparkConfig = Spark.Config()

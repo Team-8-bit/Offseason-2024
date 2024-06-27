@@ -16,7 +16,7 @@ object Intake: Resource("Intake") {
 
     init {
         CoroutineRobot.addPeriodic {
-            table.set("Job", currentActionName ?: "null")
+            table["Job"] = currentActionName ?: "null"
         }
     }
 
@@ -30,10 +30,6 @@ object Intake: Resource("Intake") {
         this.state = state
         motor.setVoltage(state.getVoltage())
     }
-
-//    override val defaultAction: Action = {
-//        state = State.IDLE
-//    }
 
     private fun getConfig() = LoggedNeo.Config(
         canID = 1,
