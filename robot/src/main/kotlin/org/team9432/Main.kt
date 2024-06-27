@@ -7,13 +7,15 @@ import org.team9432.lib.robot.CoroutineRobot
 import org.team9432.resources.Indexer
 import org.team9432.resources.Intake
 import org.team9432.resources.Shooter
+import org.team9432.resources.swerve.Swerve
+
 
 object Robot: CoroutineRobot() {
     override suspend fun init() {
         Intake
         Shooter
         Indexer
-
+        Swerve
         Buttons.bind()
     }
 }

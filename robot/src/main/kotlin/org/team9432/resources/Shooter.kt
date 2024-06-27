@@ -10,7 +10,7 @@ import org.team9432.lib.wrappers.neo.LoggedNeo
 
 object Shooter: Resource("Shooter") {
     private val topMotor = LoggedNeo(getConfig())
-    private val bottomMotor = LoggedNeo(getConfig())
+//    private val bottomMotor = LoggedNeo(getConfig())
 
     val topPid = PIDController(0.0, 0.0, 0.0)
     val bottomPid = PIDController(0.0, 0.0, 0.0)
@@ -26,10 +26,10 @@ object Shooter: Resource("Shooter") {
     init {
         CoroutineRobot.addPeriodic {
             val topVoltage = topPid.calculate(topMotor.getAngle().rotations, state.getTopVoltage())
-            val bottomVoltage = bottomPid.calculate(bottomMotor.getAngle().rotations, state.getBottomVoltage())
+//            val bottomVoltage = bottomPid.calculate(bottomMotor.getAngle().rotations, state.getBottomVoltage())
 
             topMotor.setVoltage(topVoltage)
-            bottomMotor.setVoltage(bottomVoltage)
+//            bottomMotor.setVoltage(bottomVoltage)
         }
     }
 
@@ -43,7 +43,7 @@ object Shooter: Resource("Shooter") {
     }
 
     private fun getConfig() = LoggedNeo.Config(
-        canID = 0,
+        canID = 4,
         deviceName = "Intake",
         gearRatio = 1.0,
         logName = "Intake",

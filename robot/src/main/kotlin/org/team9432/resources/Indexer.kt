@@ -1,7 +1,7 @@
 package org.team9432.resources
 
-import org.team9432.lib.resource.Action
 import org.team9432.lib.resource.Resource
+import org.team9432.lib.util.enumValue
 import org.team9432.lib.wrappers.Beambreak
 import org.team9432.lib.wrappers.Spark
 import org.team9432.lib.wrappers.neo.LoggedNeo
@@ -10,11 +10,11 @@ object Indexer: Resource("Indexer") {
     private val motor = LoggedNeo(getConfig())
     val sensor = Beambreak(1)
 
-    var state = State.IDLE
-        set(value) {
-            motor.setVoltage(value.getVoltage())
-            field = value
-        }
+    private var state by table.enumValue("State", State.IDLE)
+
+    init {
+        table.getBooleanTopic("Beambreak").publish()
+    }
 
     enum class State(val getVoltage: () -> Double) {
         LOAD({ 5.0 }),
@@ -22,12 +22,17 @@ object Indexer: Resource("Indexer") {
         IDLE({ 0.0 });
     }
 
-    override val defaultAction: Action = {
-        state = State.IDLE
+    fun set(state: State) {
+        this.state = state
+        motor.setVoltage(state.getVoltage())
     }
 
+//    override val defaultAction: Action = {
+//        state = State.IDLE
+//    }
+
     private fun getConfig() = LoggedNeo.Config(
-        canID = 0,
+        canID = 2,
         deviceName = "Intake",
         gearRatio = 1.0,
         logName = "Intake",
