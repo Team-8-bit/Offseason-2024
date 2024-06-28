@@ -28,12 +28,14 @@ object Indexer: Resource("Indexer") {
     }
 
     private fun getConfig() = LoggedNeo.Config(
-        canID = 2,
+        canID = 12,
         deviceName = "Indexer",
         gearRatio = 1.0,
         logName = "Indexer",
         motorType = Spark.MotorType.NEO,
         simJkgMetersSquared = 0.003,
-        sparkConfig = Spark.Config()
+        sparkConfig = Spark.Config(
+            inverted = false
+        )
     )
 }

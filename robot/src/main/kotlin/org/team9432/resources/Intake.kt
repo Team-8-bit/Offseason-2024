@@ -32,12 +32,14 @@ object Intake: Resource("Intake") {
     }
 
     private fun getConfig() = LoggedNeo.Config(
-        canID = 1,
+        canID = 11,
         deviceName = "Intake",
         gearRatio = 1.0,
         logName = "Intake",
         motorType = Spark.MotorType.NEO,
         simJkgMetersSquared = 0.003,
-        sparkConfig = Spark.Config()
+        sparkConfig = Spark.Config(
+            inverted = true
+        )
     )
 }
