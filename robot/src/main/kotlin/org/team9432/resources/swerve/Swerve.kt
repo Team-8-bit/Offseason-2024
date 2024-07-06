@@ -1,9 +1,12 @@
 package org.team9432.resources.swerve
 
+import com.choreo.lib.Choreo
 import com.ctre.phoenix6.Utils
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest
+import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.networktables.StructArrayPublisher
 import edu.wpi.first.networktables.StructPublisher
@@ -14,6 +17,8 @@ import org.team9432.lib.LibraryState
 import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.lib.resource.Action
 import org.team9432.lib.resource.Resource
+import org.team9432.lib.resource.toAction
+import org.team9432.lib.resource.use
 import org.team9432.lib.robot.CoroutineRobot
 
 
@@ -21,17 +26,28 @@ object Swerve: Resource("Swerve") {
     val swerve = TunerConstants.drivetrain
 
     init {
-        val request = SwerveRequest.FieldCentric()
-                .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
-                .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
-
         if (LibraryState.isSimulation) {
             startSimThread()
         }
 
-            updateDrive(request)
         CoroutineRobot.startPeriodic {
             log()
+        }
+    }
+
+    private val teleopRequest: SwerveRequest.FieldCentric = SwerveRequest.FieldCentric()
+        .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
+        .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
+
+    override val defaultAction: Action = {
+        robotPeriodic {
+            swerve.setControl(
+                teleopRequest
+                    .withVelocityX(-controller.leftY * 5)
+                    .withVelocityY(-controller.leftX * 5)
+                    .withRotationalRate(-controller.rightX * Math.toRadians(360.0))
+            )
+            false
         }
     }
 
@@ -55,19 +71,27 @@ object Swerve: Resource("Swerve") {
         }
     }
 
-    private fun updateDrive(request: SwerveRequest.FieldCentric) {
-        swerve.setControl(
-            request
-                .withVelocityX(-controller.leftY * 5)
-                .withVelocityY(-controller.leftX * 5)
-                .withRotationalRate(-controller.rightX * Math.toRadians(360.0))
-        )
-    }
-
     private val publisher: StructPublisher<Pose2d> = table.getStructTopic("Pose", Pose2d.struct).publish()
     private val statePublisher: StructArrayPublisher<SwerveModuleState> = table.getStructArrayTopic("States", SwerveModuleState.struct).publish()
     private fun log() {
         publisher.set(swerve.state.Pose ?: Pose2d())
         statePublisher.set(swerve.state.ModuleStates)
+    }
+
+    private val xPid = PIDController(1.0, 0.0, 0.0)
+    private val yPid = PIDController(1.0, 0.0, 0.0)
+    private val rPid = PIDController(1.0, 0.0, 0.0)
+
+    suspend fun followChoreo(name: String) {
+        val trajectory = Choreo.getTrajectory(name)
+        val poseSupplier = { swerve.state.Pose }
+        val choreoControlFunction = Choreo.choreoSwerveController(xPid, yPid, rPid)
+        val speedsRequest = SwerveRequest.ApplyChassisSpeeds()
+        val outputChassisSpeeds: (ChassisSpeeds) -> Unit = { swerve.setControl(speedsRequest.withSpeeds(it)) }
+        val shouldMirrorTrajectory: () -> Boolean = { false }
+
+        val command = Choreo.choreoSwerveCommand(trajectory, poseSupplier, choreoControlFunction, outputChassisSpeeds, shouldMirrorTrajectory)
+
+        use(Swerve, action = command.toAction())
     }
 }

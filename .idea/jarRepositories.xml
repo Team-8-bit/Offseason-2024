@@ -32,6 +32,11 @@
       <option name="url" value="file:/$PROJECT_DIR$/../../../Public/wpilib/2024/maven/" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="WPILocal" />
+      <option name="name" value="WPILocal" />
+      <option name="url" value="file:/$PROJECT_DIR$/../../../Public/wpilib/2024/maven/" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="WPIFRCMavenVendorCacheRelease" />
       <option name="name" value="WPIFRCMavenVendorCacheRelease" />
       <option name="url" value="https://frcmaven.wpi.edu/artifactory/vendor-mvn-release" />
@@ -109,6 +114,11 @@
     <remote-repository>
       <option name="id" value="WPILocal" />
       <option name="name" value="WPILocal" />
+      <option name="url" value="file:/$PROJECT_DIR$/../../../Public/wpilib/2024/maven" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="WPILocal" />
+      <option name="name" value="WPILocal" />
       <option name="url" value="file:/$USER_HOME$/Public/wpilib/2024/maven/" />
     </remote-repository>
     <remote-repository>
@@ -117,14 +127,9 @@
       <option name="url" value="file:/$USER_HOME$/Public/wpilib/2024/maven" />
     </remote-repository>
     <remote-repository>
-      <option name="id" value="WPILocal" />
-      <option name="name" value="WPILocal" />
-      <option name="url" value="file:/C:/Users/Public/wpilib/2024/maven/" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="WPILocal" />
-      <option name="name" value="WPILocal" />
-      <option name="url" value="file:/C:/Users/Public/wpilib/2024/maven" />
+      <option name="id" value="WPI287cff6e-1b60-4412-8059-f6834fb30e30_0Release" />
+      <option name="name" value="WPI287cff6e-1b60-4412-8059-f6834fb30e30_0Release" />
+      <option name="url" value="https://SleipnirGroup.github.io/ChoreoLib/dep" />
     </remote-repository>
   </component>
 </project>

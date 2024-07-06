@@ -7,6 +7,7 @@ import org.team9432.lib.resource.use
 import org.team9432.resources.Indexer
 import org.team9432.resources.Intake
 import org.team9432.resources.Shooter
+import org.team9432.resources.swerve.Swerve
 import kotlin.time.Duration.Companion.seconds
 
 object Buttons {
@@ -46,5 +47,7 @@ object Buttons {
 
         controller.x.onTrue { Orchestra.loadAndPlay("mario.chrp") }
         controller.y.onTrue { Orchestra.loadAndPlay("megalovania.chrp") }
+
+        controller.a.onTrue { Swerve.followChoreo("Path One") }
     }
 }
