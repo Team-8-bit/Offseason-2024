@@ -1,8 +1,6 @@
 package org.team9432.resources
 
 import edu.wpi.first.math.controller.PIDController
-import kotlinx.coroutines.delay
-import org.team9432.lib.resource.Action
 import org.team9432.lib.resource.Resource
 import org.team9432.lib.robot.CoroutineRobot
 import org.team9432.lib.wrappers.Spark
@@ -24,7 +22,7 @@ object Shooter: Resource("Shooter") {
     }
 
     init {
-        CoroutineRobot.addPeriodic {
+        CoroutineRobot.startPeriodic {
             val topVoltage = topPid.calculate(topMotor.getAngle().rotations, state.getTopVoltage())
             val bottomVoltage = bottomPid.calculate(bottomMotor.getAngle().rotations, state.getBottomVoltage())
 

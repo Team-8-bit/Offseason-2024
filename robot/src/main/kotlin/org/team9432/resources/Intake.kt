@@ -15,7 +15,7 @@ object Intake: Resource("Intake") {
     private var state by table.enumValue("State", State.IDLE)
 
     init {
-        CoroutineRobot.addPeriodic {
+        CoroutineRobot.startPeriodic {
             table["Job"] = currentActionName ?: "null"
         }
     }

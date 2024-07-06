@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotController
 import org.team9432.io.Buttons.controller
 import org.team9432.lib.LibraryState
+import org.team9432.lib.coroutines.robotPeriodic
+import org.team9432.lib.resource.Action
 import org.team9432.lib.resource.Resource
 import org.team9432.lib.robot.CoroutineRobot
 
@@ -27,8 +29,8 @@ object Swerve: Resource("Swerve") {
             startSimThread()
         }
 
-        CoroutineRobot.addPeriodic {
             updateDrive(request)
+        CoroutineRobot.startPeriodic {
             log()
         }
     }
