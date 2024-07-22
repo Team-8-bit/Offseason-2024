@@ -8,6 +8,7 @@ import org.team9432.resources.Indexer
 import org.team9432.resources.Intake
 import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
+import org.team9432.vision.PhotonVision
 
 
 object Robot: CoroutineRobot() {
@@ -20,6 +21,7 @@ object Robot: CoroutineRobot() {
         Swerve
 
         Buttons
+        PhotonVision
     }
 }
 

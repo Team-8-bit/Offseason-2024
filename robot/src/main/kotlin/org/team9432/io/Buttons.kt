@@ -77,7 +77,7 @@ object Buttons {
 //        controller.x.onTrue { Orchestra.loadAndPlay("mario.chrp") }
 //        controller.y.onTrue { Orchestra.loadAndPlay("megalovania.chrp") }
 
-//        controller.a.onTrue { Swerve.followChoreo("Path One") }
+        controller.a.onTrue { Swerve.followChoreo("NewPath") }
         controller.back.onTrue { Swerve.swerve.seedFieldRelative() }
     }
 
