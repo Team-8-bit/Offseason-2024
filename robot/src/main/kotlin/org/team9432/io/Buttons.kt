@@ -5,7 +5,7 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest
 import kotlinx.coroutines.delay
 import org.team9432.lib.input.XboxController
 import org.team9432.lib.resource.use
-import org.team9432.resources.Indexer
+import org.team9432.resources.Loader
 import org.team9432.resources.Intake
 import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
@@ -28,63 +28,92 @@ object Buttons {
 
 
     init {
+        controller.y.onTrue {
+            use(Intake, Shooter, Loader, Swerve, cancelConflicts = true) {
+                Intake.set(Intake.State.IDLE)
+                Shooter.setState(Shooter.State.IDLE)
+                Loader.set(Loader.State.IDLE)
+            }
+        }
+
         controller.leftBumper
             .onTrue {
                 Intake.set(Intake.State.INTAKE)
-                Indexer.set(Indexer.State.LOAD)
+                Loader.set(Loader.State.LOAD)
             }
             .onFalse {
+                delay(2.0.seconds)
                 Intake.set(Intake.State.IDLE)
-                Indexer.set(Indexer.State.IDLE)
+                Loader.set(Loader.State.IDLE)
             }
 
         controller.b
             .whileTrue {
-                use(Shooter, Indexer) {
-                    Indexer.set(Indexer.State.REVERSE)
+                use(Shooter, Loader) {
+                    Loader.set(Loader.State.REVERSE)
                     delay(0.15.seconds)
-                    Indexer.set(Indexer.State.IDLE)
+                    Loader.set(Loader.State.IDLE)
                     Shooter.setState(Shooter.State.SHOOT)
                 }
             }
             .onFalse {
-                use(Shooter, Indexer, cancelConflicts = true) {
-                    Indexer.set(Indexer.State.LOAD)
+                use(Shooter, Loader, cancelConflicts = true) {
+                    Loader.set(Loader.State.LOAD)
                     delay(1.seconds)
                     Shooter.setState(Shooter.State.IDLE)
-                    Indexer.set(Indexer.State.IDLE)
+                    Loader.set(Loader.State.IDLE)
                 }
             }
 
         controller.a
             .whileTrue {
-                use(Shooter, Indexer) {
-                    Indexer.set(Indexer.State.REVERSE)
+                use(Shooter, Loader) {
+                    Loader.set(Loader.State.REVERSE)
                     delay(0.15.seconds)
-                    Indexer.set(Indexer.State.IDLE)
+                    Loader.set(Loader.State.IDLE)
                     Shooter.setState(Shooter.State.AMP)
                 }
             }
             .onFalse {
-                use(Shooter, Indexer, cancelConflicts = true) {
-                    Indexer.set(Indexer.State.LOAD)
+                use(Shooter, Loader, cancelConflicts = true) {
+                    Loader.set(Loader.State.LOAD)
                     delay(1.seconds)
                     Shooter.setState(Shooter.State.IDLE)
-                    Indexer.set(Indexer.State.IDLE)
+                    Loader.set(Loader.State.IDLE)
                 }
             }
 
 //        controller.x.onTrue { Orchestra.loadAndPlay("mario.chrp") }
 //        controller.y.onTrue { Orchestra.loadAndPlay("megalovania.chrp") }
 
-        controller.a.onTrue { Swerve.followChoreo("NewPath") }
+        //controller.a.onTrue { Swerve.followChoreo("NewPath") }
         controller.back.onTrue { Swerve.swerve.seedFieldRelative() }
+
+//        controller.x
+//            .whileTrue {
+//                use(Shooter) {
+//                    Shooter.setState(Shooter.State.DASHBOARD_SPEEDS)
+//                }
+//            }
+//            .onFalse {
+//                use(Shooter, cancelConflicts = true) {
+//                    Shooter.setState(Shooter.State.IDLE)
+//                }
+//            }
+
+//        val tests = Shooter.getSysId()
+//        val (quasistaticForward, quasistaticReverse, dynamicForward, dynamicReverse) = tests
+
+//        controller.a.onTrue(quasistaticForward)
+//        controller.b.onTrue(quasistaticReverse)
+//        controller.x.onTrue(dynamicForward)
+//        controller.y.onTrue(dynamicReverse)
     }
 
     private fun calculateRotationalSpeed(): Double {
         val rightAxis = controller.rightTriggerAxis
         val leftAxis = controller.leftTriggerAxis
-        return ((rightAxis.pow(2) * -1) + leftAxis.pow(2)) * Math.toRadians(360.0)
+        return ((rightAxis.pow(2) * -1) + leftAxis.pow(2)) * Math.toRadians(270.0)
     }
 
     private fun getTranslationalSpeed(rawJoystick: Double): Double {

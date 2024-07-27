@@ -6,7 +6,7 @@ import org.team9432.lib.wrappers.Beambreak
 import org.team9432.lib.wrappers.Spark
 import org.team9432.lib.wrappers.neo.LoggedNeo
 
-object Indexer: Resource("Indexer") {
+object Loader: Resource("Indexer") {
     private val motor = LoggedNeo(getConfig())
     val sensor = Beambreak(1)
 

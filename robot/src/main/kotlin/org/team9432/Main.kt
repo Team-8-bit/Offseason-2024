@@ -2,13 +2,23 @@
 package org.team9432
 
 import edu.wpi.first.wpilibj.RobotBase
+import kotlinx.coroutines.launch
 import org.team9432.io.Buttons
+import org.team9432.lib.led.animations.solid
+import org.team9432.lib.led.color.Color
+import org.team9432.lib.led.color.predefined.Red
+import org.team9432.lib.led.management.AnimationManager
+import org.team9432.lib.led.management.Section
+import org.team9432.lib.led.strip.LEDStrip
+import org.team9432.lib.led.strip.RioLedStrip
 import org.team9432.lib.robot.CoroutineRobot
-import org.team9432.resources.Indexer
+import org.team9432.lib.robot.RobotScope
+import org.team9432.resources.Loader
 import org.team9432.resources.Intake
 import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
 import org.team9432.vision.PhotonVision
+import kotlin.time.Duration.Companion.milliseconds
 
 
 object Robot: CoroutineRobot() {
@@ -17,11 +27,25 @@ object Robot: CoroutineRobot() {
 
         Intake
         Shooter
-        Indexer
+        Loader
         Swerve
 
         Buttons
         PhotonVision
+
+//        LEDStrip.create(RioLedStrip(30, 0))
+//
+//        RobotScope.launch {
+//            AnimationManager.run(20.milliseconds)
+//        }
+//
+//        val leds = Section((0..29).toSet())
+//
+//        leds.solid(Color.Red)
+    }
+
+    override suspend fun autonomous() {
+        Auto.runFourNote()
     }
 }
 

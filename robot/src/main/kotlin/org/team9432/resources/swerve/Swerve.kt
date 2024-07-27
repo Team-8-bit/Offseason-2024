@@ -1,6 +1,7 @@
 package org.team9432.resources.swerve
 
 import com.choreo.lib.Choreo
+import com.choreo.lib.ChoreoTrajectory
 import com.ctre.phoenix6.Utils
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain.SwerveDriveState
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest
@@ -31,6 +32,7 @@ import org.team9432.lib.unit.Length
 import org.team9432.lib.unit.inMeters
 import org.team9432.lib.unit.meters
 import org.team9432.lib.util.PoseUtil.applyFlip
+import org.team9432.lib.util.set
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.hypot
@@ -77,25 +79,26 @@ object Swerve: Resource("Swerve") {
     private val publisher: StructPublisher<Pose2d> = table.getStructTopic("Pose", Pose2d.struct).publish()
     private val statePublisher: StructArrayPublisher<SwerveModuleState> = table.getStructArrayTopic("States", SwerveModuleState.struct).publish()
     private val trajPublisher: StructArrayPublisher<Pose2d> = table.getStructArrayTopic("Traj", Pose2d.struct).publish()
+
     private fun log() {
         publisher.set(currentState.Pose ?: Pose2d())
         statePublisher.set(currentState.ModuleStates)
+        table.set("SpeakerDistance", distanceToSpeaker().inMeters)
     }
 
     private val xPid = PIDController(1.0, 0.0, 0.0)
     private val yPid = PIDController(1.0, 0.0, 0.0)
     private val rPid = PIDController(1.0, 0.0, 0.0)
 
-    suspend fun followChoreo(name: String) {
-        val trajectory = Choreo.getTrajectory(name)
-
-        trajPublisher.set(trajectory.flipped().poses)
-
+    suspend fun followChoreo(trajectory: ChoreoTrajectory) {
         val poseSupplier = { swerve.state.Pose }
         val choreoControlFunction = Choreo.choreoSwerveController(xPid, yPid, rPid)
         val speedsRequest = SwerveRequest.ApplyChassisSpeeds()
         val outputChassisSpeeds: (ChassisSpeeds) -> Unit = { swerve.setControl(speedsRequest.withSpeeds(it)) }
         val shouldMirrorTrajectory: () -> Boolean = { LibraryState.alliance == Alliance.Red }
+
+        if (shouldMirrorTrajectory()) trajPublisher.set(trajectory.flipped().poses)
+        else trajPublisher.set(trajectory.poses)
 
         val command = Choreo.choreoSwerveCommand(trajectory, poseSupplier, choreoControlFunction, outputChassisSpeeds, shouldMirrorTrajectory)
 

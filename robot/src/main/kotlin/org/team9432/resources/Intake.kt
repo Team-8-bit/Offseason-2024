@@ -6,6 +6,7 @@ import org.team9432.lib.resource.Resource
 import org.team9432.lib.robot.CoroutineRobot
 import org.team9432.lib.util.enumValue
 import org.team9432.lib.util.set
+import org.team9432.lib.wrappers.Beambreak
 
 object Intake: Resource("Intake") {
     private val leader = CANSparkMax(10, CANSparkLowLevel.MotorType.kBrushless)
@@ -13,14 +14,21 @@ object Intake: Resource("Intake") {
 
     private var state by table.enumValue("State", State.IDLE)
 
+    private val beambreak = Beambreak(9)
+
     init {
         CoroutineRobot.startPeriodic {
             table["Job"] = currentActionName ?: "null"
+            log()
         }
 
         leader.inverted = true
         follower.inverted = true
         follower.follow(leader)
+    }
+
+    private fun log() {
+        table["Beambreak"] = beambreak.isTripped()
     }
 
     enum class State(val getVoltage: () -> Double) {
