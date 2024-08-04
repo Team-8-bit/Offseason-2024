@@ -52,11 +52,11 @@ object Swerve: Resource("Swerve") {
         }
 
         RobotScope.launch {
-            use(Swerve) { } // make it so the default command runs, to be fixed later
+            use(Swerve, name = "DefaultSetter") { } // make it so the default command runs, to be fixed later
         }
 
         CoroutineRobot.startPeriodic {
-            currentState = swerve.getState()
+            currentState = swerve.state
 
             log()
 
@@ -138,7 +138,7 @@ object Swerve: Resource("Swerve") {
         }
     }
 
-    fun getPose() = currentState.Pose
+    fun getPose(): Pose2d = currentState.Pose ?: Pose2d()
 
     /** Returns the angle between the two given positions. */
     fun angleTo(pose: Translation2d, currentPose: Translation2d = getPose().translation): Rotation2d {

@@ -11,25 +11,25 @@ import kotlin.time.Duration.Companion.seconds
 
 object Auto {
     fun startIntaking() {
-        Intake.set(Intake.State.INTAKE)
-        Loader.set(Loader.State.LOAD)
+        Intake.setState(Intake.State.INTAKE)
+        Loader.setState(Loader.State.LOAD)
     }
 
     private fun stopIntaking() {
-        Intake.set(Intake.State.IDLE)
-        Loader.set(Loader.State.IDLE)
+        Intake.setState(Intake.State.IDLE)
+        Loader.setState(Loader.State.IDLE)
     }
 
     private suspend fun shoot() {
-        Loader.set(Loader.State.REVERSE)
+        Loader.setState(Loader.State.REVERSE)
         delay(0.15.seconds)
-        Loader.set(Loader.State.IDLE)
+        Loader.setState(Loader.State.IDLE)
         Shooter.setState(Shooter.State.SHOOT)
-        delay(1.seconds)
-        Loader.set(Loader.State.LOAD)
+        delay(3.seconds)
+        Loader.setState(Loader.State.LOAD)
         delay(1.seconds)
         Shooter.setState(Shooter.State.IDLE)
-        Loader.set(Loader.State.IDLE)
+        Loader.setState(Loader.State.IDLE)
     }
 
     suspend fun runFourNote() {

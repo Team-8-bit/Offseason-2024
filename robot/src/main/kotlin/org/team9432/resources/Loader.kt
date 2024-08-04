@@ -22,7 +22,7 @@ object Loader: Resource("Indexer") {
         IDLE({ 0.0 });
     }
 
-    fun set(state: State) {
+    fun setState(state: State) {
         this.state = state
         motor.setVoltage(state.getVoltage())
     }

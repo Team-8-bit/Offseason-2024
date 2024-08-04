@@ -46,8 +46,9 @@ object Shooter: Resource("Shooter") {
         IDLE({ ShooterSpeeds(0.0, 0.0) }),
         SHOOT({ ShooterSpeeds(8.0, 8.0) }),
         VISION_SHOOT({ getMapValue(Swerve.distanceToSpeaker()) }),
+        SUBWOOFER({ ShooterSpeeds(6.0, 10.0) }),
         DASHBOARD_SPEEDS({ ShooterSpeeds(topTargetSpeedEntry.getDouble(0.0), bottomTargetSpeedEntry.getDouble(0.0)) }),
-        AMP({ ShooterSpeeds(0.7, 4.6) });
+        AMP({ ShooterSpeeds(1.0, 5.0) });
     }
 
     init {
@@ -79,8 +80,9 @@ object Shooter: Resource("Shooter") {
         addMapValue(1.0.meters, ShooterSpeeds(top = 6.0, bottom = 10.0))
     }
 
-    private fun periodic() {
-        val (topVoltage, bottomVoltage) = state.getVoltages()
+    fun periodic() {
+        val newVoltages = state.getVoltages()
+        val (topVoltage, bottomVoltage) = newVoltages
 
 //        val actualSetpoint = Units.rotationsPerMinuteToRadiansPerSecond(topVoltage)
 //
@@ -99,20 +101,30 @@ object Shooter: Resource("Shooter") {
 
 //        bottomMotor.setVoltage(bottomVoltage)
 
-        topMotor.setVoltage(topVoltage)
-        bottomMotor.setVoltage(bottomVoltage)
+        setVoltage(topVoltage, bottomVoltage)
+
+        table.set("TopSetVolts", topVoltage)
+        table.set("BottomSetVolts", bottomVoltage)
+
+        table.set("State", state.toString())
 
 //        topActualSpeedEntry.setValue(topMotor.encoder.velocity)
 //        bottomActualSpeedEntry.setValue(bottomMotor.encoder.velocity)
 
-        table.set("positionRad", Units.rotationsToRadians(topMotor.encoder.position))
-        table.set("appliedVolts", topMotor.appliedOutput * topMotor.busVoltage)
-        table.set("currentAmps", topMotor.outputCurrent)
-        table.set("velocityRadPerSec", Units.rotationsPerMinuteToRadiansPerSecond(topMotor.encoder.velocity))
+//        table.set("positionRad", Units.rotationsToRadians(topMotor.encoder.position))
+//        table.set("appliedVolts", topMotor.appliedOutput * topMotor.busVoltage)
+//        table.set("currentAmps", topMotor.outputCurrent)
+//        table.set("velocityRadPerSec", Units.rotationsPerMinuteToRadiansPerSecond(topMotor.encoder.velocity))
     }
 
     fun setState(state: State) {
         Shooter.state = state
+    }
+
+    private fun setVoltage(topVoltage: Double, bottomVoltage: Double) {
+//        println("Top Voltage: $topVoltage, Bottom Voltage: $bottomVoltage")
+        topMotor.setVoltage(topVoltage)
+        bottomMotor.setVoltage(bottomVoltage)
     }
 
     data class ShooterSpeeds(val top: Double, val bottom: Double)

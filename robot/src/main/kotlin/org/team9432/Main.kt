@@ -1,24 +1,15 @@
 @file:JvmName("Main") // set the compiled Java class name to "Main" rather than "MainKt"
 package org.team9432
 
+import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.RobotBase
-import kotlinx.coroutines.launch
 import org.team9432.io.Buttons
-import org.team9432.lib.led.animations.solid
-import org.team9432.lib.led.color.Color
-import org.team9432.lib.led.color.predefined.Red
-import org.team9432.lib.led.management.AnimationManager
-import org.team9432.lib.led.management.Section
-import org.team9432.lib.led.strip.LEDStrip
-import org.team9432.lib.led.strip.RioLedStrip
 import org.team9432.lib.robot.CoroutineRobot
-import org.team9432.lib.robot.RobotScope
-import org.team9432.resources.Loader
 import org.team9432.resources.Intake
+import org.team9432.resources.Loader
 import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
 import org.team9432.vision.PhotonVision
-import kotlin.time.Duration.Companion.milliseconds
 
 
 object Robot: CoroutineRobot() {
@@ -32,6 +23,9 @@ object Robot: CoroutineRobot() {
 
         Buttons
         PhotonVision
+
+        PortForwarder.add(5800, "10.94.32.11", 5800)
+        PortForwarder.add(5800, "10.94.32.12", 5800)
 
 //        LEDStrip.create(RioLedStrip(30, 0))
 //
