@@ -3,7 +3,7 @@ package org.team9432
 
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.RobotBase
-import org.team9432.io.Buttons
+import org.team9432.oi.Buttons
 import org.team9432.lib.robot.CoroutineRobot
 import org.team9432.resources.Intake
 import org.team9432.resources.Loader

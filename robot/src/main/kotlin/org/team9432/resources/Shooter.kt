@@ -17,6 +17,7 @@ import org.team9432.lib.robot.CoroutineRobot
 import org.team9432.lib.unit.Length
 import org.team9432.lib.unit.inMeters
 import org.team9432.lib.unit.meters
+import org.team9432.lib.util.enumValue
 import org.team9432.lib.util.set
 import org.team9432.resources.swerve.Swerve
 
@@ -24,12 +25,10 @@ object Shooter: Resource("Shooter") {
     private val topMotor = CANSparkFlex(14, CANSparkLowLevel.MotorType.kBrushless)
     private val bottomMotor = CANSparkFlex(13, CANSparkLowLevel.MotorType.kBrushless)
 
-    private var state = State.IDLE
+    private var state by table.enumValue("State", State.IDLE)
 
     private val topTargetSpeedEntry = table.getEntry("TopTargetSpeed")
-    private val topActualSpeedEntry = table.getEntry("TopActualSpeed")
     private val bottomTargetSpeedEntry = table.getEntry("BottomTargetSpeed")
-    private val bottomActualSpeedEntry = table.getEntry("BottomActualSpeed")
     private val pidP = table.getEntry("pidP")
     private val pidI = table.getEntry("pidI")
     private val pidD = table.getEntry("pidD")
@@ -88,7 +87,6 @@ object Shooter: Resource("Shooter") {
 //
 //        topMotor.setVoltage((ff.calculate(actualSetpoint) * 2) + pid.calculate(Units.rotationsPerMinuteToRadiansPerSecond(topMotor.encoder.velocity), actualSetpoint))
 //
-//
 //        pid.p = pidP.getDouble(0.0)
 //        pid.i = pidI.getDouble(0.0)
 //        pid.d = pidD.getDouble(0.0)
@@ -99,36 +97,24 @@ object Shooter: Resource("Shooter") {
 //            ffA.getDouble(0.0)
 //        )
 
-//        bottomMotor.setVoltage(bottomVoltage)
-
         setVoltage(topVoltage, bottomVoltage)
 
-        table.set("TopSetVolts", topVoltage)
-        table.set("BottomSetVolts", bottomVoltage)
-
-        table.set("State", state.toString())
-
-//        topActualSpeedEntry.setValue(topMotor.encoder.velocity)
-//        bottomActualSpeedEntry.setValue(bottomMotor.encoder.velocity)
-
-//        table.set("positionRad", Units.rotationsToRadians(topMotor.encoder.position))
-//        table.set("appliedVolts", topMotor.appliedOutput * topMotor.busVoltage)
-//        table.set("currentAmps", topMotor.outputCurrent)
-//        table.set("velocityRadPerSec", Units.rotationsPerMinuteToRadiansPerSecond(topMotor.encoder.velocity))
+        table.set("positionRad", Units.rotationsToRadians(topMotor.encoder.position))
+        table.set("appliedVolts", topMotor.appliedOutput * topMotor.busVoltage)
+        table.set("currentAmps", topMotor.outputCurrent)
+        table.set("velocityRadPerSec", Units.rotationsPerMinuteToRadiansPerSecond(topMotor.encoder.velocity))
     }
 
-    fun setState(state: State) {
-        Shooter.state = state
+    fun set(state: State) {
+        this.state = state
     }
 
     private fun setVoltage(topVoltage: Double, bottomVoltage: Double) {
-//        println("Top Voltage: $topVoltage, Bottom Voltage: $bottomVoltage")
         topMotor.setVoltage(topVoltage)
         bottomMotor.setVoltage(bottomVoltage)
     }
 
     data class ShooterSpeeds(val top: Double, val bottom: Double)
-
 
     private fun addMapValue(distance: Length, speeds: ShooterSpeeds) {
         topShooterMap.put(distance.inMeters, speeds.top)

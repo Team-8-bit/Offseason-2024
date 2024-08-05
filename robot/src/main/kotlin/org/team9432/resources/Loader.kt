@@ -8,13 +8,8 @@ import org.team9432.lib.wrappers.neo.LoggedNeo
 
 object Loader: Resource("Indexer") {
     private val motor = LoggedNeo(getConfig())
-    val sensor = Beambreak(1)
 
     private var state by table.enumValue("State", State.IDLE)
-
-    init {
-        table.getBooleanTopic("Beambreak").publish()
-    }
 
     enum class State(val getVoltage: () -> Double) {
         LOAD({ 5.0 }),

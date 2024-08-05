@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotController
 import kotlinx.coroutines.launch
 import org.team9432.PositionConstants
-import org.team9432.io.Buttons
+import org.team9432.oi.Buttons
 import org.team9432.lib.LibraryState
 import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.lib.resource.Action

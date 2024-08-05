@@ -17,10 +17,7 @@ object Intake: Resource("Intake") {
     private val beambreak = Beambreak(9)
 
     init {
-        CoroutineRobot.startPeriodic {
-            table["Job"] = currentActionName ?: "null"
-            log()
-        }
+        CoroutineRobot.startPeriodic { log() }
 
         leader.inverted = true
         follower.inverted = true

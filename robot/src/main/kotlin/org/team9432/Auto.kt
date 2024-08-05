@@ -11,26 +11,11 @@ import org.team9432.resources.swerve.Swerve
 import kotlin.time.Duration.Companion.seconds
 
 object Auto {
-    fun startIntaking() {
-        Intake.set(Intake.State.INTAKE)
-        Loader.set(Loader.State.LOAD)
-    }
-
-    private fun stopIntaking() {
-        Intake.set(Intake.State.IDLE)
-        Loader.set(Loader.State.IDLE)
-    }
-
     private suspend fun shoot() {
-        Loader.set(Loader.State.REVERSE)
-        delay(0.15.seconds)
-        Loader.set(Loader.State.IDLE)
-        Shooter.setState(Shooter.State.SHOOT)
+        Actions.preshootPullNote()
+        Shooter.set(Shooter.State.SHOOT)
         delay(3.seconds)
-        Loader.set(Loader.State.LOAD)
-        delay(1.seconds)
-        Shooter.setState(Shooter.State.IDLE)
-        Loader.set(Loader.State.IDLE)
+        Actions.shootAndSpinDown()
     }
 
     suspend fun runFourNote() {
@@ -45,20 +30,20 @@ object Auto {
             shoot()
 
             // Collect and shoot the amp note
-            startIntaking()
+            Actions.startIntaking()
             Swerve.followChoreo(ampNote)
-            stopIntaking()
+            Actions.stopIntaking()
             shoot()
 
             // Repeat for the last two
-            startIntaking()
+            Actions.startIntaking()
             Swerve.followChoreo(speakerNote)
-            stopIntaking()
+            Actions.stopIntaking()
             shoot()
 
-            startIntaking()
+            Actions.startIntaking()
             Swerve.followChoreo(stageNote)
-            stopIntaking()
+            Actions.stopIntaking()
             shoot()
         }
     }
