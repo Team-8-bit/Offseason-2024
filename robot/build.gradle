@@ -40,6 +40,11 @@ deploy {
 
 repositories {
     mavenLocal()
+    maven { url = "https://SleipnirGroup.github.io/ChoreoLib/dep" }
+    maven { url = "https://maven.ctr-electronics.com/release/" }
+    maven { url = "https://maven.photonvision.org/repository/internal" }
+    maven { url = "https://maven.photonvision.org/repository/snapshots" }
+    maven { url = "https://maven.revrobotics.com/" }
 }
 
 def deployArtifact = deploy.targets.roborio.artifacts.frcJava
@@ -72,6 +77,20 @@ dependencies {
     wpi.sim.enableRelease().forEach { simulationRelease(it) }
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1-Beta")
+
+    // Choreolib
+    implementation("com.choreo.lib:ChoreoLib-java:2024.2.3")
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    // Phoenix 6
+    implementation("com.ctre.phoenix6:wpiapi-java:24.3.0")
+
+    // Photonvision
+    implementation("org.photonvision:photonlib-java:v2024.3.1")
+    implementation("org.photonvision:photontargeting-java:v2024.3.1")
+
+    // REVLib
+    implementation("com.revrobotics.frc:REVLib-java:2024.2.1")
 }
 
 // Simulation configuration (e.g. environment variables).
