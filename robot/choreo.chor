@@ -1910,8 +1910,7 @@
                     "scope": [
                         6
                     ],
-                    "type": "StopPoint",
-                    "direction": 0
+                    "type": "StopPoint"
                 }
             ],
             "usesControlIntervalGuessing": true,
@@ -3389,6 +3388,6 @@
             "isTrajectoryStale": false
         }
     },
-    "splitTrajectoriesAtStopPoints": true,
+    "splitTrajectoriesAtStopPoints": false,
     "usesObstacles": false
 }

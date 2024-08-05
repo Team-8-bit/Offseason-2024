@@ -30,77 +30,77 @@ object Buttons {
     init {
         controller.y.onTrue {
             use(Intake, Shooter, Loader, Swerve, cancelConflicts = true) {
-                Intake.setState(Intake.State.IDLE)
+                Intake.set(Intake.State.IDLE)
                 Shooter.setState(Shooter.State.IDLE)
-                Loader.setState(Loader.State.IDLE)
+                Loader.set(Loader.State.IDLE)
             }
         }
 
         controller.leftBumper
             .onTrue {
                 use(Intake, Loader, cancelConflicts = true) {
-                    Intake.setState(Intake.State.INTAKE)
-                    Loader.setState(Loader.State.LOAD)
+                    Intake.set(Intake.State.INTAKE)
+                    Loader.set(Loader.State.LOAD)
                 }
             }
             .onFalse {
                 use(Intake, Loader, cancelConflicts = true) {
-                    Intake.setState(Intake.State.IDLE)
-                    Loader.setState(Loader.State.IDLE)
+                    Intake.set(Intake.State.IDLE)
+                    Loader.set(Loader.State.IDLE)
                 }
             }
 
         controller.b
             .whileTrue {
                 use(Shooter, Loader, cancelConflicts = true) {
-                    Loader.setState(Loader.State.REVERSE)
+                    Loader.set(Loader.State.REVERSE)
                     delay(0.15.seconds)
-                    Loader.setState(Loader.State.IDLE)
+                    Loader.set(Loader.State.IDLE)
                     Shooter.setState(Shooter.State.VISION_SHOOT)
                 }
             }
             .onFalse {
                 use(Shooter, Loader, cancelConflicts = true) {
-                    Loader.setState(Loader.State.LOAD)
+                    Loader.set(Loader.State.LOAD)
                     delay(1.seconds)
                     Shooter.setState(Shooter.State.IDLE)
-                    Loader.setState(Loader.State.IDLE)
+                    Loader.set(Loader.State.IDLE)
                 }
             }
 
         controller.x
             .whileTrue {
                 use(Shooter, Loader, cancelConflicts = true) {
-                    Loader.setState(Loader.State.REVERSE)
+                    Loader.set(Loader.State.REVERSE)
                     delay(0.15.seconds)
-                    Loader.setState(Loader.State.IDLE)
+                    Loader.set(Loader.State.IDLE)
                     Shooter.setState(Shooter.State.SUBWOOFER)
                 }
             }
             .onFalse {
                 use(Shooter, Loader, cancelConflicts = true) {
-                    Loader.setState(Loader.State.LOAD)
+                    Loader.set(Loader.State.LOAD)
                     delay(1.seconds)
                     Shooter.setState(Shooter.State.IDLE)
-                    Loader.setState(Loader.State.IDLE)
+                    Loader.set(Loader.State.IDLE)
                 }
             }
 
         controller.a
             .whileTrue {
                 use(Shooter, Loader, cancelConflicts = true) {
-                    Loader.setState(Loader.State.REVERSE)
+                    Loader.set(Loader.State.REVERSE)
                     delay(0.15.seconds)
-                    Loader.setState(Loader.State.IDLE)
+                    Loader.set(Loader.State.IDLE)
                     Shooter.setState(Shooter.State.AMP)
                 }
             }
             .onFalse {
                 use(Shooter, Loader, cancelConflicts = true) {
-                    Loader.setState(Loader.State.LOAD)
+                    Loader.set(Loader.State.LOAD)
                     delay(1.seconds)
                     Shooter.setState(Shooter.State.IDLE)
-                    Loader.setState(Loader.State.IDLE)
+                    Loader.set(Loader.State.IDLE)
                 }
             }
 

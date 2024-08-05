@@ -2,6 +2,7 @@ package org.team9432
 
 import com.choreo.lib.Choreo
 import kotlinx.coroutines.delay
+import org.team9432.generated.ChoreoPaths
 import org.team9432.lib.resource.use
 import org.team9432.resources.Intake
 import org.team9432.resources.Loader
@@ -11,30 +12,30 @@ import kotlin.time.Duration.Companion.seconds
 
 object Auto {
     fun startIntaking() {
-        Intake.setState(Intake.State.INTAKE)
-        Loader.setState(Loader.State.LOAD)
+        Intake.set(Intake.State.INTAKE)
+        Loader.set(Loader.State.LOAD)
     }
 
     private fun stopIntaking() {
-        Intake.setState(Intake.State.IDLE)
-        Loader.setState(Loader.State.IDLE)
+        Intake.set(Intake.State.IDLE)
+        Loader.set(Loader.State.IDLE)
     }
 
     private suspend fun shoot() {
-        Loader.setState(Loader.State.REVERSE)
+        Loader.set(Loader.State.REVERSE)
         delay(0.15.seconds)
-        Loader.setState(Loader.State.IDLE)
+        Loader.set(Loader.State.IDLE)
         Shooter.setState(Shooter.State.SHOOT)
         delay(3.seconds)
-        Loader.setState(Loader.State.LOAD)
+        Loader.set(Loader.State.LOAD)
         delay(1.seconds)
         Shooter.setState(Shooter.State.IDLE)
-        Loader.setState(Loader.State.IDLE)
+        Loader.set(Loader.State.IDLE)
     }
 
     suspend fun runFourNote() {
         use(Swerve, Intake, Loader, Shooter, cancelConflicts = true) {
-            val trajectories = Choreo.getTrajectoryGroup("4AndNothing")
+            val trajectories = Choreo.getTrajectoryGroup(ChoreoPaths.PATH_4_AND_NOTHING)
 
             val (ampNote, speakerNote, stageNote) = trajectories
 

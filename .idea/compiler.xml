@@ -14,6 +14,9 @@
       <module name="dashboard.dashboard-shared.test" target="17" />
       <module name="dashboard.main" target="17" />
       <module name="dashboard.test" target="17" />
+      <module name="lib.choreo-generator" target="17" />
+      <module name="lib.choreo-generator.main" target="17" />
+      <module name="lib.choreo-generator.test" target="17" />
       <module name="lib.lib.main" target="11" />
       <module name="lib.lib.test" target="11" />
       <module name="robotbase.main" target="17" />

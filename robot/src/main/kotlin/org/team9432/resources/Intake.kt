@@ -37,7 +37,7 @@ object Intake: Resource("Intake") {
         IDLE({ 0.0 });
     }
 
-    fun setState(state: State) {
+    fun set(state: State) {
         this.state = state
         leader.setVoltage(state.getVoltage())
     }
