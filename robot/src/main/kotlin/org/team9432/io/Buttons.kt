@@ -29,7 +29,7 @@ object Buttons {
 
     init {
         controller.y.onTrue {
-            use(Intake, Shooter, Loader, Swerve, cancelConflicts = true) {
+            use(Intake, Shooter, Loader, Swerve) {
                 Intake.set(Intake.State.IDLE)
                 Shooter.setState(Shooter.State.IDLE)
                 Loader.set(Loader.State.IDLE)
@@ -38,13 +38,13 @@ object Buttons {
 
         controller.leftBumper
             .onTrue {
-                use(Intake, Loader, cancelConflicts = true) {
+                use(Intake, Loader) {
                     Intake.set(Intake.State.INTAKE)
                     Loader.set(Loader.State.LOAD)
                 }
             }
             .onFalse {
-                use(Intake, Loader, cancelConflicts = true) {
+                use(Intake, Loader) {
                     Intake.set(Intake.State.IDLE)
                     Loader.set(Loader.State.IDLE)
                 }
@@ -52,7 +52,7 @@ object Buttons {
 
         controller.b
             .whileTrue {
-                use(Shooter, Loader, cancelConflicts = true) {
+                use(Shooter, Loader) {
                     Loader.set(Loader.State.REVERSE)
                     delay(0.15.seconds)
                     Loader.set(Loader.State.IDLE)
@@ -60,7 +60,7 @@ object Buttons {
                 }
             }
             .onFalse {
-                use(Shooter, Loader, cancelConflicts = true) {
+                use(Shooter, Loader) {
                     Loader.set(Loader.State.LOAD)
                     delay(1.seconds)
                     Shooter.setState(Shooter.State.IDLE)
@@ -70,7 +70,7 @@ object Buttons {
 
         controller.x
             .whileTrue {
-                use(Shooter, Loader, cancelConflicts = true) {
+                use(Shooter, Loader) {
                     Loader.set(Loader.State.REVERSE)
                     delay(0.15.seconds)
                     Loader.set(Loader.State.IDLE)
@@ -78,7 +78,7 @@ object Buttons {
                 }
             }
             .onFalse {
-                use(Shooter, Loader, cancelConflicts = true) {
+                use(Shooter, Loader) {
                     Loader.set(Loader.State.LOAD)
                     delay(1.seconds)
                     Shooter.setState(Shooter.State.IDLE)
@@ -88,7 +88,7 @@ object Buttons {
 
         controller.a
             .whileTrue {
-                use(Shooter, Loader, cancelConflicts = true) {
+                use(Shooter, Loader) {
                     Loader.set(Loader.State.REVERSE)
                     delay(0.15.seconds)
                     Loader.set(Loader.State.IDLE)
@@ -96,7 +96,7 @@ object Buttons {
                 }
             }
             .onFalse {
-                use(Shooter, Loader, cancelConflicts = true) {
+                use(Shooter, Loader) {
                     Loader.set(Loader.State.LOAD)
                     delay(1.seconds)
                     Shooter.setState(Shooter.State.IDLE)
@@ -107,28 +107,7 @@ object Buttons {
 //        controller.x.onTrue { Orchestra.loadAndPlay("mario.chrp") }
 //        controller.y.onTrue { Orchestra.loadAndPlay("megalovania.chrp") }
 
-        //controller.a.onTrue { Swerve.followChoreo("NewPath") }
         controller.back.onTrue { Swerve.swerve.seedFieldRelative() }
-
-//        controller.x
-//            .whileTrue {
-//                use(Shooter) {
-//                    Shooter.setState(Shooter.State.DASHBOARD_SPEEDS)
-//                }
-//            }
-//            .onFalse {
-//                use(Shooter, cancelConflicts = true) {
-//                    Shooter.setState(Shooter.State.IDLE)
-//                }
-//            }
-
-//        val tests = Shooter.getSysId()
-//        val (quasistaticForward, quasistaticReverse, dynamicForward, dynamicReverse) = tests
-
-//        controller.a.onTrue(quasistaticForward)
-//        controller.b.onTrue(quasistaticReverse)
-//        controller.x.onTrue(dynamicForward)
-//        controller.y.onTrue(dynamicReverse)
     }
 
     private fun getRotationalSpeed(): Double {
