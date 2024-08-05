@@ -45,6 +45,7 @@ repositories {
     maven { url = "https://maven.photonvision.org/repository/internal" }
     maven { url = "https://maven.photonvision.org/repository/snapshots" }
     maven { url = "https://maven.revrobotics.com/" }
+    maven { url = "https://jitpack.io" }
 }
 
 def deployArtifact = deploy.targets.roborio.artifacts.frcJava
@@ -91,6 +92,9 @@ dependencies {
 
     // REVLib
     implementation("com.revrobotics.frc:REVLib-java:2024.2.1")
+
+    // DogLog
+    implementation("com.github.jonahsnider:doglog:2024.5.8")
 }
 
 // Simulation configuration (e.g. environment variables).

@@ -3,18 +3,18 @@ package org.team9432
 
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.RobotBase
-import org.team9432.oi.Buttons
+import org.team9432.lib.doglog.Logger
 import org.team9432.lib.robot.CoroutineRobot
+import org.team9432.oi.Buttons
 import org.team9432.resources.Intake
 import org.team9432.resources.Loader
 import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
 import org.team9432.vision.PhotonVision
 
-
 object Robot: CoroutineRobot() {
     override suspend fun init() {
-        Logging.start()
+        Logger.configureDevelopmentDefaults()
 
         Intake
         Shooter
