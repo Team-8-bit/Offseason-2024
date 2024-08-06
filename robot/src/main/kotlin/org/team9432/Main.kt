@@ -39,7 +39,7 @@ object Robot: CoroutineRobot() {
     }
 
     override suspend fun autonomous() {
-        Auto.runFourNote()
+        Auto.runFourNoteCenter()
     }
 }
 

@@ -4,7 +4,6 @@ import com.choreo.lib.Choreo
 import com.choreo.lib.ChoreoTrajectory
 import com.ctre.phoenix6.Utils
 import com.ctre.phoenix6.hardware.TalonFX
-import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain.SwerveDriveState
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.controller.PIDController
@@ -19,7 +18,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotController
 import kotlinx.coroutines.launch
-import org.team9432.PositionConstants
 import org.team9432.lib.LibraryState
 import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.coroutines.RobotScope
@@ -29,21 +27,14 @@ import org.team9432.lib.resource.Action
 import org.team9432.lib.resource.Resource
 import org.team9432.lib.resource.toAction
 import org.team9432.lib.resource.use
-import org.team9432.lib.unit.Length
-import org.team9432.lib.unit.inMeters
-import org.team9432.lib.unit.meters
-import org.team9432.lib.util.applyFlip
 import org.team9432.oi.Buttons
-import kotlin.math.atan2
-import kotlin.math.hypot
 
 object Swerve: Resource("Swerve") {
     private var hasAppliedOperatorPerspective = false
 
     private val swerve = TunerConstants.drivetrain
 
-    var currentState = SwerveDriveState()
-        private set
+    private var currentState = swerve.state
 
     init {
         swerve.daqThread.setThreadPriority(99)
@@ -81,7 +72,7 @@ object Swerve: Resource("Swerve") {
         Logger.log("Swerve/Pose", getRobotPose())
         Logger.log("Swerve/ModuleStates", currentState.ModuleStates)
         Logger.log("Swerve/ModuleTargets", currentState.ModuleTargets)
-        Logger.log("Swerve/SpeakerDistance", distanceToSpeaker().inMeters)
+        Logger.log("Swerve/Speeds", getRobotSpeeds())
     }
 
     private val xPid = PIDController(1.0, 0.0, 0.0)
@@ -140,26 +131,9 @@ object Swerve: Resource("Swerve") {
     fun setVisionMeasurementStdDevs(visionMeasurementStdDevs: Matrix<N3, N1>) = swerve.setVisionMeasurementStdDevs(visionMeasurementStdDevs)
     fun addVisionMeasurement(visionRobotPoseMeters: Pose2d, timestampSeconds: Double) = swerve.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds)
 
-    /** Returns the angle between the two given positions. */
-    fun angleTo(pose: Translation2d, currentPose: Translation2d = getRobotPose().translation): Rotation2d {
-        return Rotation2d(atan2(pose.y - currentPose.y, pose.x - currentPose.x))
-    }
-
-    /** Returns true if the robot is within [epsilon] of the given pose. */
-    fun isNear(pose: Pose2d, epsilon: Length): Boolean {
-        val robotPose = getRobotPose()
-        return hypot(robotPose.x - pose.x, robotPose.y - pose.y) < epsilon.inMeters
-    }
-
-    /** Return the distance from the robot to another point. */
-    fun distanceTo(pose: Translation2d): Length {
-        return getRobotPose().translation.getDistance(pose).meters
-    }
-
-    private fun getRobotPose(): Pose2d = currentState.Pose ?: Pose2d()
-
-    /** Return the distance from the robot to the speaker. */
-    fun distanceToSpeaker() = distanceTo(PositionConstants.speakerAimPose.applyFlip())
+    fun getRobotPose(): Pose2d = currentState.Pose ?: Pose2d()
+    fun getRobotTranslation(): Translation2d = getRobotPose().translation
+    fun getRobotSpeeds(): ChassisSpeeds = currentState.speeds ?: ChassisSpeeds()
 
     fun getTalons(): List<TalonFX> = buildList {
         for (i in 0..3) {

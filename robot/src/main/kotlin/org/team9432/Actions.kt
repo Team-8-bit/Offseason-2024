@@ -5,6 +5,7 @@ import org.team9432.lib.resource.use
 import org.team9432.resources.Intake
 import org.team9432.resources.Loader
 import org.team9432.resources.Shooter
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 object Actions {
@@ -39,10 +40,25 @@ object Actions {
         }
     }
 
+    suspend fun shoot() {
+        use(Loader) {
+            Loader.setState(Loader.State.LOAD)
+            delay(0.5.seconds)
+            Loader.setState(Loader.State.IDLE)
+        }
+    }
+
     suspend fun pullNoteAndSpinUpTo(state: Shooter.State) {
         use(Shooter, Loader) {
             preshootPullNote()
             Shooter.setState(state)
         }
+    }
+
+    suspend fun runIntakeUntilCollect(simDelay: Duration) {
+        startIntaking()
+        Intake.beambreak.awaitTripped(simDelay = simDelay)
+        delay(0.5.seconds) // Wait for it to get in the loader
+        stopIntaking()
     }
 }

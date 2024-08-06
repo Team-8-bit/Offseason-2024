@@ -13,6 +13,7 @@ import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
 import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.doglog.Logger
 import org.team9432.lib.unit.*
+import org.team9432.lib.util.distanceTo
 import org.team9432.resources.swerve.Swerve
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
@@ -68,7 +69,7 @@ object PhotonVision {
             updateMultitag(result) ?: updateNonMultitag(result)
         } ?: return null
 
-        val speed = Swerve.currentState.speeds
+        val speed = Swerve.getRobotSpeeds()
 
         // If the robot isn't really moving, and the tag is close, trust it a lot
         val xyDeviation = if (speed.vxMetersPerSecond + speed.vyMetersPerSecond <= 0.2 && tagArea > 0.3) {
@@ -120,13 +121,13 @@ object PhotonVision {
 
         // Take the position closest to the current robot position from each tag
         val finalTargets = mutableListOf<VisionTarget>()
-        filteredTargets.groupBy { it.id }.values.forEach { tagPoses -> finalTargets.add(tagPoses.minBy { Swerve.distanceTo(it.pose.toPose2d().translation).inMeters }) }
+        filteredTargets.groupBy { it.id }.values.forEach { tagPoses -> finalTargets.add(tagPoses.minBy { Swerve.getRobotPose().distanceTo(it.pose.toPose2d()).inMeters }) }
 
         // Record these final positions
 //        Logger.recordOutput("Vision/AllPoses", *finalTargets.map { it.pose }.toTypedArray())
 
         // Return the one that's closest to where the robot already is
-        val target = finalTargets.minByOrNull { Swerve.distanceTo(it.pose.toPose2d().translation).inMeters } ?: return null
+        val target = finalTargets.minByOrNull { Swerve.getRobotPose().distanceTo(it.pose.toPose2d()).inMeters } ?: return null
 
         return VisionResult(target.pose, target.area, listOf(target.id))
     }

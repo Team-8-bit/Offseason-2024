@@ -12,7 +12,7 @@ object Intake: Resource("Intake") {
     private val leader = CANSparkMax(10, CANSparkLowLevel.MotorType.kBrushless)
     private val follower = CANSparkMax(11, CANSparkLowLevel.MotorType.kBrushless)
 
-    private val beambreak = Beambreak(9)
+    val beambreak = Beambreak(9)
 
     private var state = State.IDLE
 

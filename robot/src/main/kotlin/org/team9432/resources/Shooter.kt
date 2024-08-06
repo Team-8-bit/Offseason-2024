@@ -8,15 +8,24 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import kotlinx.coroutines.delay
+import org.team9432.PositionConstants
 import org.team9432.lib.KSysIdConfig
 import org.team9432.lib.SysIdUtil
 import org.team9432.lib.coroutines.CoroutineRobot
+import org.team9432.lib.coroutines.await
 import org.team9432.lib.doglog.Logger
 import org.team9432.lib.resource.Resource
 import org.team9432.lib.unit.Length
+import org.team9432.lib.unit.asRotation2d
 import org.team9432.lib.unit.inMeters
 import org.team9432.lib.unit.meters
+import org.team9432.lib.util.angleTo
+import org.team9432.lib.util.distanceTo
+import org.team9432.lib.util.velocityLessThan
 import org.team9432.resources.swerve.Swerve
+import kotlin.math.abs
+import kotlin.time.Duration.Companion.seconds
 
 object Shooter: Resource("Shooter") {
     private val topMotor = CANSparkFlex(14, CANSparkLowLevel.MotorType.kBrushless)
@@ -33,7 +42,7 @@ object Shooter: Resource("Shooter") {
     enum class State(val getVoltages: () -> ShooterSpeeds) {
         IDLE({ ShooterSpeeds(0.0, 0.0) }),
         SHOOT({ ShooterSpeeds(8.0, 8.0) }),
-        VISION_SHOOT({ getMapValue(Swerve.distanceToSpeaker()) }),
+        VISION_SHOOT({ getMapValue(distanceToSpeaker()) }),
         SUBWOOFER({ ShooterSpeeds(6.0, 10.0) }),
         DASHBOARD_SPEEDS({ ShooterSpeeds(SmartDashboard.getNumber("Shooter/TopTargetSpeed", 0.0), SmartDashboard.getNumber("Shooter/BottomTargetSpeed", 0.0)) }),
         AMP({ ShooterSpeeds(1.0, 5.0) });
@@ -77,15 +86,35 @@ object Shooter: Resource("Shooter") {
 //        topMotor.setVoltage((ff.calculate(actualSetpoint) * 2) + pid.calculate(Units.rotationsPerMinuteToRadiansPerSecond(topMotor.encoder.velocity), actualSetpoint))
     }
 
+    fun isReadyToShoot(): Boolean {
+        // TODO: Add flywheel speed check
+        return distanceToSpeaker() < 2.0.meters &&
+                Swerve.getRobotSpeeds().velocityLessThan(metersPerSecond = 1.0, rotationsPerSecond = 0.25) &&
+                getAimingErrorDegrees() < 10
+    }
+
+    suspend fun awaitReady() {
+        delay(1.seconds) // This is just until we get the flywheel pid tuned/working
+        await { isReadyToShoot() }
+    }
+
     private fun log() {
         Logger.log("Shooter/TopMotor", topMotor)
         Logger.log("Shooter/BottomMotor", bottomMotor)
         Logger.log("Shooter/State", state)
+        Logger.log("Shooter/SpeakerDistance", distanceToSpeaker().inMeters)
+        Logger.log("Shooter/isReadyToShoot", isReadyToShoot())
+        Logger.log("Shooter/AimingError", getAimingErrorDegrees())
     }
+
+    private fun getAimingErrorDegrees() = abs((Swerve.getRobotTranslation().angleTo(PositionConstants.speakerAimPose).asRotation2d - Swerve.getRobotPose().rotation).degrees)
 
     fun setState(state: State) {
         this.state = state
     }
+
+    /** Return the distance from the robot to the speaker. */
+    private fun distanceToSpeaker() = Swerve.getRobotTranslation().distanceTo(PositionConstants.speakerAimPose)
 
     data class ShooterSpeeds(val top: Double, val bottom: Double)
 
