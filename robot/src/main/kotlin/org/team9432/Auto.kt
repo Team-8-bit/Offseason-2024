@@ -6,7 +6,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.team9432.generated.ChoreoPaths
 import org.team9432.lib.resource.use
-import org.team9432.lib.util.getAutoFlippedInitialPose
+import org.team9432.lib.util.ChoreoUtil.getAutoFlippedInitialPose
 import org.team9432.resources.Intake
 import org.team9432.resources.Loader
 import org.team9432.resources.Shooter

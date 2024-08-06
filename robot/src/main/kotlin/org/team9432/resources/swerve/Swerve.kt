@@ -1,6 +1,5 @@
 package org.team9432.resources.swerve
 
-import com.choreo.lib.Choreo
 import com.choreo.lib.ChoreoTrajectory
 import com.ctre.phoenix6.Utils
 import com.ctre.phoenix6.hardware.TalonFX
@@ -25,8 +24,9 @@ import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.lib.doglog.Logger
 import org.team9432.lib.resource.Action
 import org.team9432.lib.resource.Resource
-import org.team9432.lib.resource.toAction
 import org.team9432.lib.resource.use
+import org.team9432.lib.util.ChoreoUtil
+import org.team9432.lib.util.allianceSwitch
 import org.team9432.oi.Buttons
 
 object Swerve: Resource("Swerve") {
@@ -62,9 +62,8 @@ object Swerve: Resource("Swerve") {
     }
 
     override val defaultAction: Action = {
-        robotPeriodic {
+        robotPeriodic(isFinished = { false }) {
             swerve.setControl(Buttons.getTeleopSwerveRequest())
-            false
         }
     }
 
@@ -80,17 +79,17 @@ object Swerve: Resource("Swerve") {
     private val rPid = PIDController(1.0, 0.0, 0.0)
 
     suspend fun followChoreo(trajectory: ChoreoTrajectory) {
-        val poseSupplier = { swerve.state.Pose }
-        val choreoControlFunction = Choreo.choreoSwerveController(xPid, yPid, rPid)
         val speedsRequest = SwerveRequest.ApplyChassisSpeeds()
-        val outputChassisSpeeds: (ChassisSpeeds) -> Unit = { swerve.setControl(speedsRequest.withSpeeds(it)) }
-        val shouldMirrorTrajectory: () -> Boolean = { LibraryState.alliance == Alliance.Red }
 
-        Logger.log("Swerve/CurrentTrajectory", if (shouldMirrorTrajectory()) trajectory.flipped().poses else trajectory.poses)
+        val controlFunction = ChoreoUtil.choreoSwerveController(xPid, yPid, rPid, ::getRobotPose)
 
-        val command = Choreo.choreoSwerveCommand(trajectory, poseSupplier, choreoControlFunction, outputChassisSpeeds, shouldMirrorTrajectory)
+        Logger.log("Swerve/CurrentTrajectory", allianceSwitch(blue = trajectory.flipped().poses, red = trajectory.poses))
 
-        use(Swerve, action = command.toAction())
+        use(Swerve) {
+            ChoreoUtil.choreoSwerveAction(trajectory, controlFunction) { chassisSpeedsToApply ->
+                swerve.setControl(speedsRequest.withSpeeds(chassisSpeedsToApply))
+            }
+        }
     }
 
     private fun getOperatorPerspective(alliance: Alliance): Rotation2d {
