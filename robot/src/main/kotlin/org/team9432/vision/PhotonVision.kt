@@ -1,26 +1,23 @@
 package org.team9432.vision
 
 import edu.wpi.first.math.VecBuilder
-import edu.wpi.first.math.geometry.*
+import edu.wpi.first.math.geometry.Pose3d
+import edu.wpi.first.math.geometry.Rotation3d
+import edu.wpi.first.math.geometry.Transform3d
+import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.math.util.Units
-import edu.wpi.first.networktables.NetworkTableInstance
-import edu.wpi.first.networktables.StructArrayEntry
-import edu.wpi.first.networktables.StructArrayPublisher
-import edu.wpi.first.networktables.StructPublisher
 import org.photonvision.PhotonCamera
 import org.photonvision.targeting.PhotonPipelineResult
 import org.team9432.FieldConstants
 import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
-import org.team9432.lib.robot.CoroutineRobot
+import org.team9432.lib.coroutines.CoroutineRobot
+import org.team9432.lib.doglog.Logger
 import org.team9432.lib.unit.*
-import org.team9432.lib.util.set
 import org.team9432.resources.swerve.Swerve
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
-import kotlin.math.floor
 
 object PhotonVision {
-    private val table = NetworkTableInstance.getDefault().getTable("Vision")
     private val camera = PhotonCamera("Limelight")
     private val robotToCamera = robotToCameraArducam
 
@@ -32,20 +29,16 @@ object PhotonVision {
         }
     }
 
-    private val connected = table.getBooleanTopic("Connected").publish()
-    private val estimatedPose = table.getStructArrayTopic("Pose", Pose3d.struct).publish()
-    private val trackedTags = table.getStructArrayTopic("TrackedTags", Pose3d.struct).publish()
-
     private fun update() {
-        connected.set(camera.isConnected)
+        Logger.log("Vision/Connected", camera.isConnected)
 
         val result = camera.latestResult
 
         // Record information
-        result.targets.forEach { target -> table["Tags/${target.fiducialId}/Area"] = target.area }
+        result.targets.forEach { target -> Logger.log("Vision/Tags/${target.fiducialId}/Area", target.area) }
         result.targets.groupBy { it.fiducialId }.forEach { (id, targets) ->
             targets.forEachIndexed { index, visionPose ->
-                table["Tags/$id/Ambiguity-$index"] = visionPose.poseAmbiguity
+                Logger.log("Vision/Tags/$id/Ambiguity-$index", visionPose.poseAmbiguity)
             }
         }
 
@@ -55,13 +48,13 @@ object PhotonVision {
         // Update the robot pose if the vision output isn't null
         if (output != null) {
             val (xyDeviation, pose, tagsUsed) = output
-            Swerve.swerve.setVisionMeasurementStdDevs(VecBuilder.fill(xyDeviation.inMeters, xyDeviation.inMeters, 20.0.degrees.inDegrees))
-            Swerve.swerve.addVisionMeasurement(pose.toPose2d(), result.timestampSeconds)
-            trackedTags.set(tagsUsed.mapNotNull { FieldConstants.aprilTagFieldLayout.getTagPose(it).getOrNull() }.toTypedArray())
-            estimatedPose.set(arrayOf(pose))
+            Swerve.setVisionMeasurementStdDevs(VecBuilder.fill(xyDeviation.inMeters, xyDeviation.inMeters, 20.0.degrees.inDegrees))
+            Swerve.addVisionMeasurement(pose.toPose2d(), result.timestampSeconds)
+            Logger.log("Vision/TrackedTags", tagsUsed.mapNotNull { FieldConstants.aprilTagFieldLayout.getTagPose(it).getOrNull() }.toTypedArray())
+            Logger.log("Vision/EstimatedPose", arrayOf(pose))
         } else {
-            trackedTags.set(emptyArray<Pose3d>())
-            estimatedPose.set(emptyArray<Pose3d>())
+            Logger.log("Vision/TrackedTags", emptyArray<Pose3d>())
+            Logger.log("Vision/EstimatedPose", emptyArray<Pose3d>())
         }
     }
 

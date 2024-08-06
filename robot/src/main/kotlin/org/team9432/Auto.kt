@@ -13,7 +13,7 @@ import kotlin.time.Duration.Companion.seconds
 object Auto {
     private suspend fun shoot() {
         Actions.preshootPullNote()
-        Shooter.set(Shooter.State.SHOOT)
+        Shooter.setState(Shooter.State.SHOOT)
         delay(3.seconds)
         Actions.shootAndSpinDown()
     }
@@ -24,7 +24,7 @@ object Auto {
 
             val (ampNote, speakerNote, stageNote) = trajectories
 
-            Swerve.swerve.seedFieldRelative(trajectories.first().initialPose)
+            Swerve.seedFieldRelative(trajectories.first().initialPose)
 
             // Shoot preload
             shoot()

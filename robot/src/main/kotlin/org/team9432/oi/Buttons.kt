@@ -28,9 +28,9 @@ object Buttons {
     init {
         controller.y.onTrue {
             use(Intake, Shooter, Loader, Swerve) {
-                Intake.set(Intake.State.IDLE)
-                Shooter.set(Shooter.State.IDLE)
-                Loader.set(Loader.State.IDLE)
+                Intake.setState(Intake.State.IDLE)
+                Shooter.setState(Shooter.State.IDLE)
+                Loader.setState(Loader.State.IDLE)
             }
         }
 
@@ -51,7 +51,7 @@ object Buttons {
             .onFalse { Actions.shootAndSpinDown() }
 
         controller.back
-            .onTrue { Swerve.swerve.seedFieldRelative() }
+            .onTrue { Swerve.seedFieldRelative() }
     }
 
 
