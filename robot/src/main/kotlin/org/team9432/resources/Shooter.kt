@@ -10,6 +10,7 @@ import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import kotlinx.coroutines.delay
 import org.team9432.PositionConstants
+import org.team9432.lib.Beambreak
 import org.team9432.lib.KSysIdConfig
 import org.team9432.lib.SysIdUtil
 import org.team9432.lib.coroutines.CoroutineRobot

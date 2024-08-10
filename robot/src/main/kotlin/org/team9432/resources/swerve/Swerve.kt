@@ -27,7 +27,7 @@ import org.team9432.lib.resource.Resource
 import org.team9432.lib.resource.use
 import org.team9432.lib.util.ChoreoUtil
 import org.team9432.lib.util.allianceSwitch
-import org.team9432.oi.Buttons
+import org.team9432.oi.Controls
 
 object Swerve: Resource("Swerve") {
     private var hasAppliedOperatorPerspective = false
@@ -63,7 +63,7 @@ object Swerve: Resource("Swerve") {
 
     override val defaultAction: Action = {
         robotPeriodic(isFinished = { false }) {
-            swerve.setControl(Buttons.getTeleopSwerveRequest())
+            swerve.setControl(Controls.getTeleopSwerveRequest())
         }
     }
 

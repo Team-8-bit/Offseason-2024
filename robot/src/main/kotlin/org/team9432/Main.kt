@@ -5,7 +5,7 @@ import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.RobotBase
 import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.doglog.Logger
-import org.team9432.oi.Buttons
+import org.team9432.oi.Controls
 import org.team9432.resources.Intake
 import org.team9432.resources.Loader
 import org.team9432.resources.Shooter
@@ -21,7 +21,7 @@ object Robot: CoroutineRobot() {
         Loader
         Swerve
 
-        Buttons
+        Controls
         PhotonVision
 
         PortForwarder.add(5800, "10.94.32.11", 5800)

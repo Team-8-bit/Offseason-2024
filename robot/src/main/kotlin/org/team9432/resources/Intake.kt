@@ -12,12 +12,11 @@ object Intake: Resource("Intake") {
     private val leader = CANSparkMax(10, CANSparkLowLevel.MotorType.kBrushless)
     private val follower = CANSparkMax(11, CANSparkLowLevel.MotorType.kBrushless)
 
-    val beambreak = Beambreak(9)
-
     private var state = State.IDLE
 
     enum class State(val getVoltage: () -> Double) {
         INTAKE({ 5.0 }),
+        LOAD({ 2.0 }),
         OUTTAKE({ -5.0 }),
         IDLE({ 0.0 });
     }
@@ -43,7 +42,6 @@ object Intake: Resource("Intake") {
     private fun log() {
         Logger.log("Intake/Leader", leader)
         Logger.log("Intake/Follower", follower)
-        Logger.log("Intake/Beambreak", beambreak)
         Logger.log("Intake/State", state)
     }
 

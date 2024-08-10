@@ -23,7 +23,7 @@ object Auto {
         // While the robot is driving, this one collects and shoots the note (likely only after the robot has stopped)
         launch {
             // Intake and then pull the note in
-            Actions.runIntakeUntilCollect(simDelay = 0.75.seconds)
+            Actions.runIntake(simDelay = 0.75.seconds)
             Actions.preshootPullNote()
             Shooter.setState(Shooter.State.VISION_SHOOT)
             Shooter.awaitReady()
