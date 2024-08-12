@@ -4,6 +4,7 @@ package org.team9432
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.RobotBase
 import org.team9432.lib.coroutines.CoroutineRobot
+import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.lib.doglog.Logger
 import org.team9432.oi.Controls
 import org.team9432.resources.Intake
@@ -12,7 +13,7 @@ import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
 import org.team9432.vision.PhotonVision
 
-object Robot: CoroutineRobot() {
+object Robot: CoroutineRobot(useActionManager = false) {
     override suspend fun init() {
         Logger.configureDevelopmentDefaults()
 
@@ -38,8 +39,16 @@ object Robot: CoroutineRobot() {
 //        leds.solid(Color.Red)
     }
 
+    override suspend fun teleop() {
+        robotPeriodic(isFinished = { false }) {
+            Swerve.setTeleDriveControl()
+        }
+    }
+
     override suspend fun autonomous() {
-        Auto.runFourNoteCenter()
+        RobotController.queueRobotRequest {
+            Auto.runFourNoteCenter()
+        }
     }
 }
 
@@ -59,4 +68,6 @@ object Robot: CoroutineRobot() {
  * Refactoring when renaming the object, it will get changed everywhere
  * including here.)
  */
-fun main() = RobotBase.startRobot { Robot }
+fun main() {
+    RobotBase.startRobot { Robot }
+}

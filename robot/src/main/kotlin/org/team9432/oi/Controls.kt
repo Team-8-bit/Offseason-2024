@@ -3,7 +3,7 @@ package org.team9432.oi
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest
 import org.team9432.Actions
-import org.team9432.lib.input.Trigger
+import org.team9432.RobotController
 import org.team9432.lib.input.XboxController
 import org.team9432.lib.resource.use
 import org.team9432.resources.Intake
@@ -15,8 +15,6 @@ import kotlin.math.withSign
 
 object Controls {
     val controller = XboxController(0)
-
-    val intakeButton = controller.leftBumper
 
     private val teleopRequest: SwerveRequest.FieldCentric = SwerveRequest.FieldCentric()
         .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
@@ -37,24 +35,21 @@ object Controls {
             }
         }
 
-        intakeButton
-            .onTrue { Actions.runIntake() }
-
-//        controller.leftBumper
-//            .onTrue { Actions.runIntakeUntilCollect() }
-//            .onFalse { Actions.stopIntaking() }
+        controller.leftBumper
+            .onTrue { RobotController.setDriverRequest { Actions.runIntake() } }
+            .onFalse { RobotController.setDriverRequest { Actions.idle() } }
 
         controller.b
-            .whileTrue { Actions.pullNoteAndSpinUpTo(Shooter.State.VISION_SHOOT) }
-            .onFalse { Actions.shootAndSpinDown() }
+            .whileTrue { RobotController.setDriverRequest { Actions.pullNoteAndSpinUpTo(Shooter.State.VISION_SHOOT) } }
+            .onFalse { RobotController.setDriverRequest { Actions.shootAndSpinDown() } }
 
         controller.x
-            .whileTrue { Actions.pullNoteAndSpinUpTo(Shooter.State.SUBWOOFER) }
-            .onFalse { Actions.shootAndSpinDown() }
+            .whileTrue { RobotController.setDriverRequest { Actions.pullNoteAndSpinUpTo(Shooter.State.SUBWOOFER) } }
+            .onFalse { RobotController.setDriverRequest { Actions.shootAndSpinDown() } }
 
         controller.a
-            .whileTrue { Actions.pullNoteAndSpinUpTo(Shooter.State.AMP) }
-            .onFalse { Actions.shootAndSpinDown() }
+            .whileTrue { RobotController.setDriverRequest { Actions.pullNoteAndSpinUpTo(Shooter.State.AMP) } }
+            .onFalse { RobotController.setDriverRequest { Actions.shootAndSpinDown() } }
 
         controller.back
             .onTrue { Swerve.seedFieldRelative() }

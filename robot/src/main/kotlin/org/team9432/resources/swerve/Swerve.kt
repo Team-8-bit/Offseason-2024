@@ -61,10 +61,12 @@ object Swerve: Resource("Swerve") {
         }
     }
 
+    fun setTeleDriveControl() {
+        swerve.setControl(Controls.getTeleopSwerveRequest())
+    }
+
     override val defaultAction: Action = {
-        robotPeriodic(isFinished = { false }) {
-            swerve.setControl(Controls.getTeleopSwerveRequest())
-        }
+        robotPeriodic(isFinished = { false }) { setTeleDriveControl() }
     }
 
     private fun log() {
@@ -85,10 +87,8 @@ object Swerve: Resource("Swerve") {
 
         Logger.log("Swerve/CurrentTrajectory", allianceSwitch(blue = trajectory.flipped().poses, red = trajectory.poses))
 
-        use(Swerve) {
-            ChoreoUtil.choreoSwerveAction(trajectory, controlFunction) { chassisSpeedsToApply ->
-                swerve.setControl(speedsRequest.withSpeeds(chassisSpeedsToApply))
-            }
+        ChoreoUtil.choreoSwerveAction(trajectory, controlFunction) { chassisSpeedsToApply ->
+            swerve.setControl(speedsRequest.withSpeeds(chassisSpeedsToApply))
         }
     }
 
