@@ -60,8 +60,8 @@ object TunerConstants {
     // This may need to be tuned to your individual robot
     private const val kCoupleRatio = 0.0
 
-    private const val kDriveGearRatio = 5.9
-    private const val kSteerGearRatio = 23.07692307692308
+    const val kDriveGearRatio = 5.9
+    const val kSteerGearRatio = 23.07692307692308
     private const val kWheelRadiusInches = 2.0
 
     private const val kInvertLeftSide = false

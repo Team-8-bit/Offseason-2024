@@ -41,14 +41,10 @@ object RobotController {
         updateTasks()
     }
 
-    suspend fun joinCurrent() = currentJob?.join()
-
-    fun clearDriverRequest() {
-        if (currentJobIsDriverRequest) currentJob?.cancel()
+    fun queueRobotRequest(action: Action) {
+        queue.add(action)
+        updateTasks()
     }
-
-    fun queueRobotRequest(action: Action) = queue.add(action)
-
 
     fun updateTasks() {
         if (queue.isNotEmpty() && currentJob == null) {
@@ -58,5 +54,12 @@ object RobotController {
         } else if (currentDriverRequest != null && currentJobIsDriverRequest) {
             currentDriverRequest?.let { executeRequest(it, isDriverRequest = true) }
         }
+    }
+
+    suspend fun resetRequests() {
+        currentDriverRequest = null
+        currentJobIsDriverRequest = false
+        queue.clear()
+        currentJob?.cancelAndJoin()
     }
 }

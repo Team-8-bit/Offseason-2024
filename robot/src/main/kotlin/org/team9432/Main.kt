@@ -40,7 +40,7 @@ object Robot: CoroutineRobot(useActionManager = false) {
     }
 
     override suspend fun teleop() {
-        robotPeriodic(isFinished = { false }) {
+        robotPeriodic(isFinished = { !Robot.isTeleopEnabled }) {
             Swerve.setTeleDriveControl()
         }
     }
@@ -49,6 +49,10 @@ object Robot: CoroutineRobot(useActionManager = false) {
         RobotController.queueRobotRequest {
             Auto.runFourNoteCenter()
         }
+    }
+
+    override suspend fun disabled() {
+        RobotController.resetRequests()
     }
 }
 

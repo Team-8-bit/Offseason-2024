@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
+import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotController
@@ -24,6 +25,7 @@ import org.team9432.lib.doglog.Logger
 import org.team9432.lib.resource.Action
 import org.team9432.lib.resource.Resource
 import org.team9432.lib.resource.use
+import org.team9432.lib.unit.degrees
 import org.team9432.lib.util.ChoreoUtil
 import org.team9432.lib.util.allianceSwitch
 import org.team9432.oi.Controls
@@ -60,6 +62,11 @@ object Swerve: Resource("Swerve") {
 
     fun setTeleDriveControl() {
         swerve.setControl(Controls.getTeleopSwerveRequest())
+    }
+
+    private val wheelCharacterizationRequest = SwerveRequest.ApplyChassisSpeeds()
+    fun setWheelCharacterizationDriveControl(rotationsPerSecond: Double) {
+        swerve.setControl(wheelCharacterizationRequest.withSpeeds(ChassisSpeeds(0.0, 0.0, Units.rotationsToRadians(rotationsPerSecond))))
     }
 
     override val defaultAction: Action = {
@@ -122,6 +129,8 @@ object Swerve: Resource("Swerve") {
         }
     }
 
+    fun getGyroHeading() = swerve.pigeon2.angle.degrees
+
     fun seedFieldRelative(pose: Pose2d) = swerve.seedFieldRelative(pose)
     fun seedFieldRelative() = swerve.seedFieldRelative()
     fun setVisionMeasurementStdDevs(visionMeasurementStdDevs: Matrix<N3, N1>) = swerve.setVisionMeasurementStdDevs(visionMeasurementStdDevs)
@@ -130,6 +139,10 @@ object Swerve: Resource("Swerve") {
     fun getRobotPose(): Pose2d = currentState.Pose ?: Pose2d()
     fun getRobotTranslation(): Translation2d = getRobotPose().translation
     fun getRobotSpeeds(): ChassisSpeeds = currentState.speeds ?: ChassisSpeeds()
+
+    fun getModuleWheelPositionsRadians() = getModules().map { Units.rotationsToRadians(it.driveMotor.position.valueAsDouble / TunerConstants.kDriveGearRatio) }
+
+    private fun getModules() = buildList { repeat(4) { add(swerve.getModule(it)) } }
 
     fun getTalons(): List<TalonFX> = buildList {
         for (i in 0..3) {
