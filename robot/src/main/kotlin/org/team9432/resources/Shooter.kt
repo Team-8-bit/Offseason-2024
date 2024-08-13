@@ -82,8 +82,7 @@ object Shooter: Resource("Shooter") {
         return distanceToSpeaker() < 2.0.meters &&
                 Swerve.getRobotSpeeds().velocityLessThan(metersPerSecond = 1.0, rotationsPerSecond = 0.25) &&
                 isAimedAtSpeaker() &&
-                flywheelsAtSpeed() &&
-                !currentTargetSpeeds.isIdle
+                flywheelsAtSpeed()
     }
 
     private fun log() {
