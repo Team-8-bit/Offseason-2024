@@ -5,6 +5,7 @@ import com.choreo.lib.ChoreoTrajectory
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.team9432.generated.ChoreoPaths
+import org.team9432.lib.coroutines.await
 import org.team9432.lib.util.ChoreoUtil.getAutoFlippedInitialPose
 import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
@@ -20,10 +21,10 @@ object Auto {
         launch {
             // Intake and then pull the note in
             Actions.runIntake()
-            Actions.preshootPullNote()
+//            Actions.preshootPullNote()
             Shooter.setState(Shooter.State.VISION_SHOOT)
-            Shooter.awaitReady()
-            Actions.shootAndSpinDown()
+            await { Shooter.isReadyToShootSpeaker() }
+//            Actions.shootAndSpinDown()
         }
     }
 
@@ -31,11 +32,11 @@ object Auto {
         // Spin up shooter
         Shooter.setState(Shooter.State.VISION_SHOOT)
         // Pull the preload in
-        Actions.preshootPullNote()
+//        Actions.preshootPullNote()
         // Wait for the shooter to spin up
-        Shooter.awaitReady()
+        await { Shooter.isReadyToShootSpeaker() }
         // Shoot preload
-        Actions.shootAndSpinDown()
+//        Actions.shootAndSpinDown()
     }
 
     suspend fun runFourNote() {

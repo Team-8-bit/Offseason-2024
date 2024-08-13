@@ -5,10 +5,6 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest
 import org.team9432.Actions
 import org.team9432.RobotController
 import org.team9432.lib.input.XboxController
-import org.team9432.lib.resource.use
-import org.team9432.resources.Intake
-import org.team9432.resources.Loader
-import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
 import kotlin.math.pow
 import kotlin.math.withSign
@@ -27,32 +23,24 @@ object Controls {
             .withRotationalRate(getRotationalSpeed())
 
     init {
-        controller.y.onTrue {
-            use(Intake, Shooter, Loader, Swerve) {
-                Intake.setState(Intake.State.IDLE)
-                Shooter.setState(Shooter.State.IDLE)
-                Loader.setState(Loader.State.IDLE)
-            }
-        }
+        controller.y.onTrue { RobotController.setDriverRequest { Actions.idle() } }
 
         controller.leftBumper
             .onTrue { RobotController.setDriverRequest { Actions.runIntake() } }
             .onFalse { RobotController.setDriverRequest { Actions.idle() } }
 
         controller.b
-            .whileTrue { RobotController.setDriverRequest { Actions.pullNoteAndSpinUpTo(Shooter.State.VISION_SHOOT) } }
-            .onFalse { RobotController.setDriverRequest { Actions.shootAndSpinDown() } }
-
-        controller.x
-            .whileTrue { RobotController.setDriverRequest { Actions.pullNoteAndSpinUpTo(Shooter.State.SUBWOOFER) } }
-            .onFalse { RobotController.setDriverRequest { Actions.shootAndSpinDown() } }
+            .onTrue { RobotController.setDriverRequest { Actions.visionShoot() } }
 
         controller.a
-            .whileTrue { RobotController.setDriverRequest { Actions.pullNoteAndSpinUpTo(Shooter.State.AMP) } }
-            .onFalse { RobotController.setDriverRequest { Actions.shootAndSpinDown() } }
+            .onTrue { RobotController.setDriverRequest { Actions.amp() } }
 
         controller.back
             .onTrue { Swerve.seedFieldRelative() }
+
+        controller.start
+            .onTrue { RobotController.setDriverRequest { Actions.outtake() } }
+            .onFalse { RobotController.setDriverRequest { Actions.idle() } }
     }
 
 

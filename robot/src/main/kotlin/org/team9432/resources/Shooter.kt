@@ -3,18 +3,13 @@ package org.team9432.resources
 import com.revrobotics.CANSparkBase
 import com.revrobotics.CANSparkFlex
 import com.revrobotics.CANSparkLowLevel
-import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
-import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import kotlinx.coroutines.delay
 import org.team9432.PositionConstants
-import org.team9432.lib.Beambreak
 import org.team9432.lib.KSysIdConfig
 import org.team9432.lib.SysIdUtil
 import org.team9432.lib.coroutines.CoroutineRobot
-import org.team9432.lib.coroutines.await
 import org.team9432.lib.doglog.Logger
 import org.team9432.lib.resource.Resource
 import org.team9432.lib.unit.Length
@@ -26,7 +21,6 @@ import org.team9432.lib.util.distanceTo
 import org.team9432.lib.util.velocityLessThan
 import org.team9432.resources.swerve.Swerve
 import kotlin.math.abs
-import kotlin.time.Duration.Companion.seconds
 
 object Shooter: Resource("Shooter") {
     private val topMotor = CANSparkFlex(14, CANSparkLowLevel.MotorType.kBrushless)
@@ -37,8 +31,7 @@ object Shooter: Resource("Shooter") {
     private val topShooterMap = InterpolatingDoubleTreeMap()
     private val bottomShooterMap = InterpolatingDoubleTreeMap()
 
-    private val pid = PIDController(0.0, 0.0, 0.0)
-    private var ff = SimpleMotorFeedforward(0.0, 0.0, 0.0)
+    private val ff = SimpleMotorFeedforward(0.0, 0.0021, 0.0)
 
     enum class State(val getVoltages: () -> ShooterSpeeds) {
         IDLE({ ShooterSpeeds(0.0, 0.0) }),
@@ -52,16 +45,9 @@ object Shooter: Resource("Shooter") {
     init {
         CoroutineRobot.startPeriodic { trackState(); log() }
 
-        SmartDashboard.putNumber("Shooter/TopTargetSpeed", 1000.0)
-        SmartDashboard.putNumber("Shooter/BottomTargetSpeed", 0.0)
-
-        SmartDashboard.putNumber("Shooter/Tuning/pidP", 0.0039231)
-        SmartDashboard.putNumber("Shooter/Tuning/pidI", 0.0)
-        SmartDashboard.putNumber("Shooter/Tuning/pidD", 0.0)
-        SmartDashboard.putNumber("Shooter/Tuning/ffV", 0.0105)
-        SmartDashboard.putNumber("Shooter/Tuning/ffA", 0.0038234)
-
-        pid.setTolerance(Units.rotationsPerMinuteToRadiansPerSecond(100.0))
+        SmartDashboard.putNumber("Shooter/TopTargetSpeed", 500.0)
+        SmartDashboard.putNumber("Shooter/BottomTargetSpeed", 2500.0)
+        SmartDashboard.putNumber("Shooter/Tuning/ffV", 0.0)
 
         topMotor.inverted = false
         topMotor.idleMode = CANSparkBase.IdleMode.kBrake
@@ -73,30 +59,31 @@ object Shooter: Resource("Shooter") {
         bottomMotor.enableVoltageCompensation(10.0)
         bottomMotor.openLoopRampRate = 0.0
 
-        addMapValue(2.0.meters, ShooterSpeeds(top = 10.0, bottom = 5.0))
-        addMapValue(1.5.meters, ShooterSpeeds(top = 8.0, bottom = 8.0))
-        addMapValue(1.0.meters, ShooterSpeeds(top = 6.0, bottom = 10.0))
+        addMapValue(2.0.meters, ShooterSpeeds(top = 5500.0, bottom = 2200.0))
+        addMapValue(1.75.meters, ShooterSpeeds(top = 5000.0, bottom = 3000.0))
+        addMapValue(1.5.meters, ShooterSpeeds(top = 4500.0, bottom = 4000.0))
+        addMapValue(1.0.meters, ShooterSpeeds(top = 2000.0, bottom = 5000.0))
     }
+
+    private var currentTargetSpeeds = ShooterSpeeds(0.0, 0.0)
 
     private fun trackState() {
-        val (topVoltage, bottomVoltage) = state.getVoltages()
-        topMotor.setVoltage(topVoltage)
-        bottomMotor.setVoltage(bottomVoltage)
+        currentTargetSpeeds = state.getVoltages()
+        val (topRPM, bottomRPM) = currentTargetSpeeds
 
-//        val actualSetpoint = Units.rotationsPerMinuteToRadiansPerSecond(topVoltage)
-//        topMotor.setVoltage((ff.calculate(actualSetpoint) * 2) + pid.calculate(Units.rotationsPerMinuteToRadiansPerSecond(topMotor.encoder.velocity), actualSetpoint))
+        Logger.log("Shooter/TopAtSpeed", (topMotor.encoder.velocity - topRPM) < 300)
+        Logger.log("Shooter/BottomAtSpeed", (bottomMotor.encoder.velocity - bottomRPM) < 300)
+
+        topMotor.setVoltage(ff.calculate(topRPM))
+        bottomMotor.setVoltage(ff.calculate(bottomRPM))
     }
 
-    fun isReadyToShoot(): Boolean {
-        // TODO: Add flywheel speed check
+    fun isReadyToShootSpeaker(): Boolean {
         return distanceToSpeaker() < 2.0.meters &&
                 Swerve.getRobotSpeeds().velocityLessThan(metersPerSecond = 1.0, rotationsPerSecond = 0.25) &&
-                getAimingErrorDegrees() < 10
-    }
-
-    suspend fun awaitReady() {
-        delay(1.seconds) // This is just until we get the flywheel pid tuned/working
-        await { isReadyToShoot() }
+                isAimedAtSpeaker() &&
+                flywheelsAtSpeed() &&
+                !currentTargetSpeeds.isIdle
     }
 
     private fun log() {
@@ -104,11 +91,24 @@ object Shooter: Resource("Shooter") {
         Logger.log("Shooter/BottomMotor", bottomMotor)
         Logger.log("Shooter/State", state)
         Logger.log("Shooter/SpeakerDistance", distanceToSpeaker().inMeters)
-        Logger.log("Shooter/isReadyToShoot", isReadyToShoot())
+        Logger.log("Shooter/isReadyToShoot", isReadyToShootSpeaker())
         Logger.log("Shooter/AimingError", getAimingErrorDegrees())
     }
 
+    private fun isAimedAtSpeaker(): Boolean {
+        return if (distanceToSpeaker().inMeters > 1.5) {
+            getAimingErrorDegrees() < 10
+        } else {
+            getAimingErrorDegrees() < 25
+        }
+    }
+
     private fun getAimingErrorDegrees() = abs((Swerve.getRobotTranslation().angleTo(PositionConstants.speakerAimPose).asRotation2d - Swerve.getRobotPose().rotation).degrees)
+
+    fun flywheelsAtSpeed(errorRPM: Int = 300): Boolean {
+        val (topTarget, bottomTarget) = currentTargetSpeeds
+        return abs(bottomMotor.encoder.velocity - bottomTarget) < errorRPM && abs(topMotor.encoder.velocity - topTarget) < errorRPM && !currentTargetSpeeds.isIdle
+    }
 
     fun setState(state: State) {
         this.state = state
@@ -117,7 +117,9 @@ object Shooter: Resource("Shooter") {
     /** Return the distance from the robot to the speaker. */
     private fun distanceToSpeaker() = Swerve.getRobotTranslation().distanceTo(PositionConstants.speakerAimPose)
 
-    data class ShooterSpeeds(val top: Double, val bottom: Double)
+    data class ShooterSpeeds(val top: Double, val bottom: Double) {
+        val isIdle = top == 0.0 && bottom == 0.0
+    }
 
     private fun addMapValue(distance: Length, speeds: ShooterSpeeds) {
         topShooterMap.put(distance.inMeters, speeds.top)
