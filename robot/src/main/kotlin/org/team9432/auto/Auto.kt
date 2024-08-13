@@ -1,17 +1,17 @@
-package org.team9432
+package org.team9432.auto
 
 import com.choreo.lib.Choreo
 import com.choreo.lib.ChoreoTrajectory
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.team9432.generated.ChoreoPaths
-import org.team9432.lib.coroutines.await
 import org.team9432.lib.util.ChoreoUtil.getAutoFlippedInitialPose
-import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 object Auto {
-    suspend fun scoreNote(note: ChoreoTrajectory) = coroutineScope {
+    suspend fun scoreNote(note: ChoreoTrajectory, spindown: Boolean, simPickupDelay: Duration = 0.75.seconds) = coroutineScope {
         // The driving and shooting are run in separate coroutines so they can happen at the same time
 
         // This one just handles the driving
@@ -20,23 +20,13 @@ object Auto {
         // While the robot is driving, this one collects and shoots the note (likely only after the robot has stopped)
         launch {
             // Intake and then pull the note in
-            Actions.runIntake()
-//            Actions.preshootPullNote()
-            Shooter.setState(Shooter.State.VISION_SHOOT)
-            await { Shooter.isReadyToShootSpeaker() }
-//            Actions.shootAndSpinDown()
+            AutoActions.intake(simPickupDelay = simPickupDelay)
+            AutoActions.shoot(spindown)
         }
     }
 
     private suspend fun scorePreload() {
-        // Spin up shooter
-        Shooter.setState(Shooter.State.VISION_SHOOT)
-        // Pull the preload in
-//        Actions.preshootPullNote()
-        // Wait for the shooter to spin up
-        await { Shooter.isReadyToShootSpeaker() }
-        // Shoot preload
-//        Actions.shootAndSpinDown()
+        AutoActions.shoot(spindown = false)
     }
 
     suspend fun runFourNote() {
@@ -48,9 +38,9 @@ object Auto {
 
         scorePreload()
 
-        scoreNote(ampNote)
-        scoreNote(speakerNote)
-        scoreNote(stageNote)
+        scoreNote(ampNote, spindown = false)
+        scoreNote(speakerNote, spindown = false)
+        scoreNote(stageNote, spindown = true)
     }
 
     suspend fun runFourNoteCenter() {
@@ -62,9 +52,9 @@ object Auto {
 
         scorePreload()
 
-        scoreNote(ampNote)
-        scoreNote(speakerNote)
-        scoreNote(stageNote)
+        scoreNote(ampNote, spindown = false)
+        scoreNote(speakerNote, spindown = false)
+        scoreNote(stageNote, spindown = true)
 
         Swerve.followChoreo(center)
     }

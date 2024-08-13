@@ -3,6 +3,7 @@ package org.team9432
 
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.RobotBase
+import org.team9432.auto.Auto
 import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.lib.doglog.Logger

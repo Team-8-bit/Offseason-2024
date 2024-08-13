@@ -8,6 +8,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.team9432.PositionConstants
 import org.team9432.lib.KSysIdConfig
+import org.team9432.lib.LibraryState
 import org.team9432.lib.SysIdUtil
 import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.doglog.Logger
@@ -82,7 +83,7 @@ object Shooter: Resource("Shooter") {
         return distanceToSpeaker() < 2.0.meters &&
                 Swerve.getRobotSpeeds().velocityLessThan(metersPerSecond = 1.0, rotationsPerSecond = 0.25) &&
                 isAimedAtSpeaker() &&
-                flywheelsAtSpeed()
+                (flywheelsAtSpeed() || LibraryState.isSimulation) // Ignore speed in sim as the flywheels aren't simulated yet
     }
 
     private fun log() {
