@@ -142,14 +142,14 @@ object PhotonVision {
     private val robotToCameraArducam
         get() = Transform3d(
             Translation3d(
-                -Units.inchesToMeters(7.301041),
-                Units.inchesToMeters(-1.43244),
-                Units.inchesToMeters(11.91629)
+                Units.inchesToMeters(8.875),
+                -Units.inchesToMeters(5.875),
+                Units.inchesToMeters(8.5)
             ),
             Rotation3d(
                 0.0,
-                Math.toRadians(-12.0),
-                0.0
+                -Math.toRadians(28.125000),
+                Math.toRadians(6.920208)
             )
         )
 }
