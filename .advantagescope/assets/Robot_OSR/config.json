@@ -1,0 +1,21 @@
+{
+  "name": "9432 - OSR",
+  "sourceUrl": "https://cad.onshape.com/documents/c80c4195fa3631cac3794756/w/ba7635ab2889c44de6ca5f40/e/340d261522f994d2481a785b",
+  "rotations": [
+    {
+      "axis": "x",
+      "degrees": 90
+    },
+    {
+      "axis": "z",
+      "degrees": -90
+    }
+  ],
+  "position": [
+    0,
+    0,
+    0
+  ],
+  "cameras": [],
+  "components": []
+}
