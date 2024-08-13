@@ -5,7 +5,6 @@ plugins {
     id("edu.wpi.first.GradleRIO").version("2024.2.1")
     id("org.jetbrains.kotlin.jvm").version("1.9.21")
     id("com.google.devtools.ksp").version("1.9.21-1.0.15")
-    id("org.team9432.lib.choreo-plugin")
 }
 
 def ROBOT_MAIN_CLASS = "org.team9432.Main"
@@ -114,8 +113,6 @@ jar {
 deployArtifact.jarTask = jar
 wpi.java.configureExecutableTasks(jar)
 wpi.java.configureTestTasks(test)
-
-tasks.compileJava.dependsOn('generateChoreoConstants')
 
 tasks.withType(JavaCompile).configureEach {
     // Configure string concat to always inline compile

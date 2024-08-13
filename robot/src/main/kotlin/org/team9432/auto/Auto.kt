@@ -4,7 +4,6 @@ import com.choreo.lib.Choreo
 import com.choreo.lib.ChoreoTrajectory
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import org.team9432.generated.ChoreoPaths
 import org.team9432.lib.util.ChoreoUtil.getAutoFlippedInitialPose
 import org.team9432.resources.swerve.Swerve
 import kotlin.time.Duration
@@ -30,7 +29,7 @@ object Auto {
     }
 
     suspend fun runFourNote() {
-        val trajectories = Choreo.getTrajectoryGroup(ChoreoPaths.PATH_4_AND_NOTHING)
+        val trajectories = Choreo.getTrajectoryGroup("4AndNothing")
 
         val (ampNote, speakerNote, stageNote) = trajectories
 
@@ -44,7 +43,7 @@ object Auto {
     }
 
     suspend fun runFourNoteCenter() {
-        val trajectories = Choreo.getTrajectoryGroup(ChoreoPaths.PATH_4_AND_CENTER)
+        val trajectories = Choreo.getTrajectoryGroup("4AndCenter")
 
         val (ampNote, speakerNote, stageNote, center) = trajectories
 
