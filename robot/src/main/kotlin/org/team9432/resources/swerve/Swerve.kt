@@ -12,7 +12,6 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
-import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotController
@@ -50,11 +49,9 @@ object Swerve: Resource("Swerve") {
         CoroutineRobot.startPeriodic {
             currentState = swerve.state
 
-            if (!hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
-                LibraryState.alliance?.let { allianceColor ->
-                    swerve.setOperatorPerspectiveForward(getOperatorPerspective(allianceColor))
-                    hasAppliedOperatorPerspective = true
-                }
+            LibraryState.alliance?.let { allianceColor ->
+                swerve.setOperatorPerspectiveForward(getOperatorPerspective(allianceColor))
+                hasAppliedOperatorPerspective = true
             }
 
             log()
