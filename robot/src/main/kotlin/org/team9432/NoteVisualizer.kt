@@ -12,6 +12,7 @@ import org.team9432.lib.coroutines.RobotScope
 import org.team9432.lib.doglog.Logger
 import org.team9432.lib.unit.inMeters
 import org.team9432.lib.util.allianceSwitch
+import org.team9432.lib.util.whenSimulated
 import org.team9432.resources.Intake
 import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
@@ -30,31 +31,44 @@ object NoteVisualizer {
     private val fieldNotes = FieldConstants.allNotes.toMutableSet()
 
     private var intakeTranslations = mutableSetOf(
-        Transform2d(Translation2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(8.0)), Rotation2d()),
-        Transform2d(Translation2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(4.0)), Rotation2d()),
-        Transform2d(Translation2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(0.0)), Rotation2d()),
-        Transform2d(Translation2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(-4.0)), Rotation2d()),
-        Transform2d(Translation2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(-8.0)), Rotation2d())
+        Transform2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(8.0), Rotation2d()),
+        Transform2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(4.0), Rotation2d()),
+        Transform2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(0.0), Rotation2d()),
+        Transform2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(-4.0), Rotation2d()),
+        Transform2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(-8.0), Rotation2d())
     )
 
     init {
-        RobotScope.launch {
-            while (true) {
-                val notes = mutableSetOf<Pose3d>()
-
-                robotNoteTransform?.let { notes.add(Pose3d(Swerve.getRobotPose()).transformBy(it)) }
-                shotNotePose?.let { notes.add(it) }
-
-                notes.addAll(fieldNotes.map { Pose3d(Pose2d(it.x, it.y, Rotation2d())) })
-
-                Logger.log("NoteVisualizer", notes.toTypedArray())
-
-                delay(5.milliseconds)
+        whenSimulated { // We don't want this running on the actual robot
+            RobotScope.launch {
+                while (true) {
+                    render()
+                    delay(5.milliseconds)
+                }
             }
-        }
 
-        RobotPeriodicManager.startPeriodic { checkCollectedNotes() }
+            RobotPeriodicManager.startPeriodic { checkCollectedNotes() }
+        }
     }
+
+    /** Renders the current position of notes on the field. */
+    private fun render() {
+        val notes = mutableSetOf<Pose3d>()
+
+        // Robot relative note (i.e. one stored in the loader)
+        robotNoteTransform?.let { notes.add(Pose3d(Swerve.getRobotPose()).transformBy(it)) }
+
+        // Field-relative note (i.e. one moving from the robot to the speaker)
+        shotNotePose?.let { notes.add(it) }
+
+        // Field notes
+        notes.addAll(fieldNotes.map { Pose3d(Pose2d(it.x, it.y, Rotation2d())) })
+
+        Logger.log("NoteVisualizer", notes.toTypedArray())
+    }
+
+
+    /******** Intaking Simulation ********/
 
     private val NOTE_RADIUS_METERS = Units.inchesToMeters(14.0) / 2
 
@@ -83,16 +97,21 @@ object NoteVisualizer {
 
     private var awaitingContinuations = mutableSetOf<CancellableContinuation<Unit>>()
 
+    /** Suspends until the robot picks up a simulated note. */
     suspend fun awaitNotePickup() = suspendCancellableCoroutine { continuation ->
         awaitingContinuations.add(continuation)
     }
+
+
+    /******** Animations ********/
 
     private val blueSpeaker = Translation3d(0.225, 5.55, 2.1)
     private val redSpeaker = Translation3d(16.317, 5.55, 2.1)
 
     private const val SHOT_SPEED_MPS = 6.0
 
-    fun shoot() {
+    fun animateShoot() {
+        if (!Robot.isSimulated) return
         val startPose = Pose3d(Swerve.getRobotPose()).transformBy(loadedTransform)
         val endPose = Pose3d(allianceSwitch(blue = blueSpeaker, red = redSpeaker), startPose.rotation)
 
@@ -103,7 +122,8 @@ object NoteVisualizer {
         animateFieldRelative(startPose, endPose, duration)
     }
 
-    fun align() {
+    fun animateAlign() {
+        if (!Robot.isSimulated) return
         animateRobotRelative(loadedTransform, aligningTransform, 0.15)
         animateRobotRelative(aligningTransform, loadedTransform, 0.2)
     }

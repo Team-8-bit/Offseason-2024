@@ -26,7 +26,7 @@ object Auto {
     }
 
     private suspend fun scorePreload() {
-        NoteVisualizer.align()
+        NoteVisualizer.animateAlign()
         simDelay(1.seconds) // Fake flywheel spinup
         AutoActions.shoot(spindown = false)
     }
