@@ -2,6 +2,7 @@ package org.team9432
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.team9432.lib.LibraryState
 import org.team9432.lib.coroutines.RobotScope
 import org.team9432.lib.coroutines.await
 import org.team9432.oi.Controls
@@ -27,7 +28,12 @@ object Actions {
         await { Shooter.isReadyToShootSpeaker() }
         Loader.setState(Loader.State.LOAD)
         NoteVisualizer.shoot()
-        delay(1.seconds)
+
+        Loader.upperBeambreak.awaitClear(simDelay = 0.5.seconds)
+        Loader.lowerBeambreak.setSimClear()
+
+        delay(0.25.seconds)
+
         Shooter.setState(Shooter.State.IDLE)
         Loader.setState(Loader.State.IDLE)
     }
@@ -46,7 +52,12 @@ object Actions {
         Intake.setState(Intake.State.INTAKE)
         Loader.setState(Loader.State.INTAKE)
 
-        Loader.lowerBeambreak.awaitTripped(simDelay = 1.seconds)
+        if (LibraryState.isSimulation) {
+            NoteVisualizer.awaitNotePickup()
+            Loader.lowerBeambreak.setSimTripped()
+        } else {
+            Loader.lowerBeambreak.awaitTripped()
+        }
 
         RobotScope.launch { Controls.controller.rumbleDuration(2.seconds) }
 

@@ -37,12 +37,12 @@ object Loader: Resource("Loader") {
 
     private fun log() {
         Logger.log("Loader/Motor", motor)
-        Logger.log("Loader/State", state)
         Logger.log("Loader/UpperBeambreak", upperBeambreak)
         Logger.log("Loader/LowerBeambreak", lowerBeambreak)
     }
 
     fun setState(state: State) {
+        Logger.log("Loader/State", state)
         this.state = state
     }
 }

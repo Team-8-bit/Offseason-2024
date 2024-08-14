@@ -26,6 +26,8 @@ object Robot: CoroutineRobot(useActionManager = false) {
         Controls
         PhotonVision
 
+        NoteVisualizer
+
         PortForwarder.add(5800, "10.94.32.11", 5800)
         PortForwarder.add(5800, "10.94.32.12", 5800)
 

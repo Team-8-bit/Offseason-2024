@@ -77,7 +77,7 @@ object Swerve: Resource("Swerve") {
         Logger.log("Swerve/Pose", getRobotPose())
         Logger.log("Swerve/ModuleStates", currentState.ModuleStates)
         Logger.log("Swerve/ModuleTargets", currentState.ModuleTargets)
-        Logger.log("Swerve/Speeds", getRobotSpeeds())
+        Logger.log("Swerve/Speeds", this.getRobotRelativeSpeeds())
     }
 
     private val xPid = PIDController(1.0, 0.0, 0.0)
@@ -138,7 +138,7 @@ object Swerve: Resource("Swerve") {
 
     fun getRobotPose(): Pose2d = currentState.Pose ?: Pose2d()
     fun getRobotTranslation(): Translation2d = getRobotPose().translation
-    fun getRobotSpeeds(): ChassisSpeeds = currentState.speeds ?: ChassisSpeeds()
+    fun getRobotRelativeSpeeds(): ChassisSpeeds = currentState.speeds ?: ChassisSpeeds()
 
     fun getModuleWheelPositionsRadians() = getModules().map { Units.rotationsToRadians(it.driveMotor.position.valueAsDouble / TunerConstants.kDriveGearRatio) }
 

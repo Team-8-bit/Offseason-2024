@@ -72,7 +72,7 @@ object PhotonVision {
             updateMultitag(result) ?: updateNonMultitag(result)
         } ?: return null
 
-        val speed = Swerve.getRobotSpeeds()
+        val speed = Swerve.getRobotRelativeSpeeds()
 
         // If the robot isn't really moving, and the tag is close, trust it a lot
         val xyDeviation = if (speed.vxMetersPerSecond + speed.vyMetersPerSecond <= 0.2 && tagArea > 0.3) {

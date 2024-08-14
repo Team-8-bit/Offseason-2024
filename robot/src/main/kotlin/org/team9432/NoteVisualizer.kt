@@ -1,20 +1,23 @@
 package org.team9432
 
-import edu.wpi.first.math.geometry.Pose3d
-import edu.wpi.first.math.geometry.Rotation3d
-import edu.wpi.first.math.geometry.Transform3d
-import edu.wpi.first.math.geometry.Translation3d
+import edu.wpi.first.math.geometry.*
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.Timer
+import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.coroutines.RobotScope
 import org.team9432.lib.doglog.Logger
 import org.team9432.lib.unit.inMeters
 import org.team9432.lib.util.allianceSwitch
+import org.team9432.resources.Intake
 import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
+import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 
 object NoteVisualizer {
@@ -24,6 +27,16 @@ object NoteVisualizer {
     private var robotNoteTransform: Transform3d? = null
     private var shotNotePose: Pose3d? = null
 
+    private val fieldNotes = FieldConstants.allNotes.toMutableSet()
+
+    private var intakeTranslations = mutableSetOf(
+        Transform2d(Translation2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(8.0)), Rotation2d()),
+        Transform2d(Translation2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(4.0)), Rotation2d()),
+        Transform2d(Translation2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(0.0)), Rotation2d()),
+        Transform2d(Translation2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(-4.0)), Rotation2d()),
+        Transform2d(Translation2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(-8.0)), Rotation2d())
+    )
+
     init {
         RobotScope.launch {
             while (true) {
@@ -32,11 +45,46 @@ object NoteVisualizer {
                 robotNoteTransform?.let { notes.add(Pose3d(Swerve.getRobotPose()).transformBy(it)) }
                 shotNotePose?.let { notes.add(it) }
 
+                notes.addAll(fieldNotes.map { Pose3d(Pose2d(it.x, it.y, Rotation2d())) })
+
                 Logger.log("NoteVisualizer", notes.toTypedArray())
 
                 delay(5.milliseconds)
             }
         }
+
+        CoroutineRobot.startPeriodic { checkCollectedNotes() }
+    }
+
+    private val NOTE_RADIUS_METERS = Units.inchesToMeters(14.0) / 2
+
+    private fun checkCollectedNotes() {
+        val currentIntakePositions = intakeTranslations.map { Swerve.getRobotPose().transformBy(it).translation }
+
+        if (Intake.isIntaking() && Swerve.getRobotRelativeSpeeds().vxMetersPerSecond < -0.5) {
+            fieldNotes.toList().forEach { note ->
+                val isBeingCollected = currentIntakePositions.any { intake ->
+                    note.getDistance(intake) < NOTE_RADIUS_METERS
+                }
+
+                if (isBeingCollected) {
+                    awaitingContinuations.forEach { it.resume(Unit) }
+                    awaitingContinuations.clear()
+
+                    fieldNotes.remove(note)
+                    RobotScope.launch {
+                        delay(30.seconds)
+                        fieldNotes.add(note)
+                    }
+                }
+            }
+        }
+    }
+
+    private var awaitingContinuations = mutableSetOf<CancellableContinuation<Unit>>()
+
+    suspend fun awaitNotePickup() = suspendCancellableCoroutine { continuation ->
+        awaitingContinuations.add(continuation)
     }
 
     private val blueSpeaker = Translation3d(0.225, 5.55, 2.1)

@@ -7,8 +7,8 @@ import org.team9432.lib.constants.EvergreenFieldConstants.centerY
 import org.team9432.lib.unit.Translation2d
 import org.team9432.lib.unit.feet
 import org.team9432.lib.unit.inches
+import org.team9432.lib.util.flip
 
-// All positions are on the blue side of the field and are flipped as needed
 object FieldConstants {
     val aprilTagFieldLayout: AprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField()
 
@@ -23,15 +23,33 @@ object FieldConstants {
     /** Y spacing between center notes. */
     private val centerNoteYSpacing = 5.0.feet + 6.0.inches
 
-    val ampSpikeNote = Translation2d(spikeNoteXCoordinate, centerY + (spikeNoteYSpacing * 2))
-    val centerSpikeNote = Translation2d(spikeNoteXCoordinate, centerY + spikeNoteYSpacing)
-    val stageSpikeNote = Translation2d(spikeNoteXCoordinate, centerY)
+    val blueAmpSpikeNote = Translation2d(spikeNoteXCoordinate, centerY + (spikeNoteYSpacing * 2))
+    val blueCenterSpikeNote = Translation2d(spikeNoteXCoordinate, centerY + spikeNoteYSpacing)
+    val blueStageSpikeNote = Translation2d(spikeNoteXCoordinate, centerY)
+
+    val redAmpSpikeNote = blueAmpSpikeNote.flip()
+    val redCenterSpikeNote = blueCenterSpikeNote.flip()
+    val redStageSpikeNote = blueStageSpikeNote.flip()
 
     val centerNoteOne = Translation2d(centerX, centerY + (centerNoteYSpacing * 2))
     val centerNoteTwo = Translation2d(centerX, centerY + (centerNoteYSpacing * 1))
     val centerNoteThree = Translation2d(centerX, centerY + (centerNoteYSpacing * 0))
     val centerNoteFour = Translation2d(centerX, centerY + (centerNoteYSpacing * -1))
     val centerNoteFive = Translation2d(centerX, centerY + (centerNoteYSpacing * -2))
+
+    val allNotes = setOf(
+        blueAmpSpikeNote,
+        blueCenterSpikeNote,
+        blueStageSpikeNote,
+        redAmpSpikeNote,
+        redCenterSpikeNote,
+        redStageSpikeNote,
+        centerNoteOne,
+        centerNoteTwo,
+        centerNoteThree,
+        centerNoteFour,
+        centerNoteFive
+    )
 
     val speakerYCoordinate = centerY + spikeNoteYSpacing
 }
