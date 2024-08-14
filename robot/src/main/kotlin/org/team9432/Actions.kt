@@ -2,6 +2,7 @@ package org.team9432
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.coroutines.RobotScope
 import org.team9432.lib.coroutines.await
 import org.team9432.oi.Controls
@@ -22,7 +23,7 @@ object Actions {
         Loader.setState(Loader.State.REVERSE)
     }
 
-    suspend fun visionShoot() {
+    suspend fun visionShoot(spindown: Boolean = true) {
         Shooter.setState(Shooter.State.VISION_SHOOT)
         await { Shooter.isReadyToShootSpeaker() }
         Loader.setState(Loader.State.LOAD)
@@ -34,7 +35,7 @@ object Actions {
         delay(0.25.seconds)
 
         Shooter.setState(Shooter.State.IDLE)
-        Loader.setState(Loader.State.IDLE)
+        if (spindown) Loader.setState(Loader.State.IDLE)
     }
 
     suspend fun amp() {
@@ -47,7 +48,7 @@ object Actions {
         Loader.setState(Loader.State.IDLE)
     }
 
-    suspend fun runIntake() {
+    suspend fun intake() {
         Intake.setState(Intake.State.INTAKE)
         Loader.setState(Loader.State.INTAKE)
 
@@ -58,7 +59,9 @@ object Actions {
             Loader.lowerBeambreak.awaitTripped()
         }
 
-        RobotScope.launch { Controls.controller.rumbleDuration(2.seconds) }
+        if (Robot.mode == CoroutineRobot.Mode.TELEOP) {
+            RobotScope.launch { Controls.controller.rumbleDuration(2.seconds) }
+        }
 
         Intake.setState(Intake.State.LOAD)
         Loader.setState(Loader.State.LOAD)

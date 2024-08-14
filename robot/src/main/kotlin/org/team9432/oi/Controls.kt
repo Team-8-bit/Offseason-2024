@@ -26,7 +26,7 @@ object Controls {
         controller.y.onTrue { RobotController.setAction { Actions.idle() } }
 
         controller.leftBumper
-            .onTrue { RobotController.setAction { Actions.runIntake() } }
+            .onTrue { RobotController.setAction { Actions.intake() } }
 
         controller.b
             .onTrue { RobotController.setAction { Actions.visionShoot() } }

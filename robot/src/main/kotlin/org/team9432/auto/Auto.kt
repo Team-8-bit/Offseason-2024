@@ -4,6 +4,7 @@ import com.choreo.lib.Choreo
 import com.choreo.lib.ChoreoTrajectory
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import org.team9432.Actions
 import org.team9432.NoteVisualizer
 import org.team9432.lib.util.ChoreoUtil.getAutoFlippedInitialPose
 import org.team9432.lib.util.simDelay
@@ -20,15 +21,15 @@ object Auto {
         // While the robot is driving, this one collects and shoots the note (likely only after the robot has stopped)
         launch {
             // Intake and then pull the note in
-            AutoActions.intake()
-            AutoActions.shoot(spindown)
+            Actions.intake()
+            Actions.visionShoot(spindown)
         }
     }
 
     private suspend fun scorePreload() {
         NoteVisualizer.animateAlign()
         simDelay(1.seconds) // Fake flywheel spinup
-        AutoActions.shoot(spindown = false)
+        Actions.visionShoot(spindown = false)
     }
 
     suspend fun runFourNote() {
