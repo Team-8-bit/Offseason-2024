@@ -115,7 +115,7 @@ object Shooter: Resource("Shooter") {
     }
 
     /** Return the distance from the robot to the speaker. */
-    private fun distanceToSpeaker() = Swerve.getRobotTranslation().distanceTo(PositionConstants.speakerAimPose)
+    fun distanceToSpeaker() = Swerve.getRobotTranslation().distanceTo(PositionConstants.speakerAimPose)
 
     data class ShooterSpeeds(val top: Double, val bottom: Double) {
         val isIdle = top == 0.0 && bottom == 0.0

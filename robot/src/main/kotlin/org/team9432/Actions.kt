@@ -26,6 +26,7 @@ object Actions {
         Shooter.setState(Shooter.State.VISION_SHOOT)
         await { Shooter.isReadyToShootSpeaker() }
         Loader.setState(Loader.State.LOAD)
+        NoteVisualizer.shoot()
         delay(1.seconds)
         Shooter.setState(Shooter.State.IDLE)
         Loader.setState(Loader.State.IDLE)
@@ -55,6 +56,7 @@ object Actions {
         Intake.setState(Intake.State.IDLE)
 
         repeat(2) {
+            NoteVisualizer.align()
             Loader.setState(Loader.State.REVERSE)
             delay(0.15.seconds)
             Loader.upperBeambreak.setSimClear()
