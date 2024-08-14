@@ -4,20 +4,20 @@
 _Base template for robot code._
 
 ## Projects
+
 - [`robot/`](robot/src/main/kotlin/org/team9432) Robot code.
 
 Uses these additional projects as git submodules:
+
 - [`lib/`](https://github.com/Team-8-bit/robot-lib) Robot code library.
 - [`dashboard/`](https://github.com/Team-8-bit/dashboard) Robot dashboard.
 
-
 ## Inspiration
 
-_Thanks to these teams and organizations for providing open-source code to take inspiration from!_
+_Thanks to these teams for providing open-source code to take inspiration from!_
 
-- The WPILib command based structure
 - Team 1678's readme structure
-- Team 6328's AdvantageKit swerve drive example
+- Team 6328's AdvantageKit swerve drive example and auto builder
 - Team 95's drivetrain skew fix
 - Team 6328's led control
 - Team 254's motor factories
