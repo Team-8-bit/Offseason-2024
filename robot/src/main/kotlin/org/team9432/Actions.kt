@@ -40,7 +40,7 @@ object Actions {
 
     suspend fun amp() {
         Shooter.setState(Shooter.State.DASHBOARD_SPEEDS)
-        await { Shooter.flywheelsAtSpeed(100) }
+        await { Shooter.flywheelsAtSpeed(rpmTolerance = 100) }
         delay(0.4.seconds)
         Loader.setState(Loader.State.LOAD)
         delay(1.seconds)

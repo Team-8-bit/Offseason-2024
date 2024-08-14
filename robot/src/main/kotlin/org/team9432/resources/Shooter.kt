@@ -105,9 +105,9 @@ object Shooter: Resource("Shooter") {
 
     private fun getAimingErrorDegrees() = abs((Swerve.getRobotTranslation().angleTo(PositionConstants.speakerAimPose).asRotation2d - Swerve.getRobotPose().rotation).degrees)
 
-    fun flywheelsAtSpeed(errorRPM: Int = 300): Boolean {
+    fun flywheelsAtSpeed(rpmTolerance: Int = 300): Boolean {
         val (topTarget, bottomTarget) = currentTargetSpeeds
-        return abs(bottomMotor.encoder.velocity - bottomTarget) < errorRPM && abs(topMotor.encoder.velocity - topTarget) < errorRPM && !currentTargetSpeeds.isIdle
+        return abs(bottomMotor.encoder.velocity - bottomTarget) < rpmTolerance && abs(topMotor.encoder.velocity - topTarget) < rpmTolerance && !currentTargetSpeeds.isIdle
     }
 
     fun setState(state: State) {
