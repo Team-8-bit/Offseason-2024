@@ -23,24 +23,23 @@ object Controls {
             .withRotationalRate(getRotationalSpeed())
 
     init {
-        controller.y.onTrue { RobotController.setDriverRequest { Actions.idle() } }
+        controller.y.onTrue { RobotController.setAction { Actions.idle() } }
 
         controller.leftBumper
-            .onTrue { RobotController.setDriverRequest { Actions.runIntake() } }
-            .onFalse { RobotController.setDriverRequest { Actions.idle() } }
+            .onTrue { RobotController.setAction { Actions.runIntake() } }
 
         controller.b
-            .onTrue { RobotController.setDriverRequest { Actions.visionShoot() } }
+            .onTrue { RobotController.setAction { Actions.visionShoot() } }
 
         controller.a
-            .onTrue { RobotController.setDriverRequest { Actions.amp() } }
+            .onTrue { RobotController.setAction { Actions.amp() } }
 
         controller.back
             .onTrue { Swerve.seedFieldRelative() }
 
         controller.start
-            .onTrue { RobotController.setDriverRequest { Actions.outtake() } }
-            .onFalse { RobotController.setDriverRequest { Actions.idle() } }
+            .onTrue { RobotController.setAction { Actions.outtake() } }
+            .onFalse { RobotController.setAction { Actions.idle() } }
     }
 
 

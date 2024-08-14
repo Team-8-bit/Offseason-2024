@@ -47,7 +47,7 @@ object Robot: CoroutineRobot(useActionManager = false) {
     }
 
     override suspend fun autonomous() {
-        RobotController.queueRobotRequest {
+        RobotController.setAction {
             Auto.runFourNoteCenter()
         }
     }

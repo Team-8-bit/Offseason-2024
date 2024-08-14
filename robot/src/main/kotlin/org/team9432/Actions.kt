@@ -49,10 +49,6 @@ object Actions {
 
         RobotScope.launch { Controls.controller.rumbleDuration(2.seconds) }
 
-        RobotController.queueRobotRequest { intakeToLoaderTransition() }
-    }
-
-    private suspend fun intakeToLoaderTransition() {
         Intake.setState(Intake.State.LOAD)
         Loader.setState(Loader.State.LOAD)
         Loader.upperBeambreak.awaitTripped(simDelay = 0.3.seconds)
@@ -61,7 +57,7 @@ object Actions {
         repeat(2) {
             Loader.setState(Loader.State.REVERSE)
             delay(0.15.seconds)
-            Loader.setState(Loader.State.IDLE)
+            Loader.upperBeambreak.setSimClear()
 
             Loader.setState(Loader.State.LOAD)
             Loader.upperBeambreak.awaitTripped(simDelay = 0.2.seconds)
