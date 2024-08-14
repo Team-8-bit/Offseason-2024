@@ -17,8 +17,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotController
 import kotlinx.coroutines.launch
-import org.team9432.lib.LibraryState
-import org.team9432.lib.coroutines.CoroutineRobot
+import org.team9432.Robot
+import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.coroutines.RobotScope
 import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.lib.doglog.Logger
@@ -28,6 +28,7 @@ import org.team9432.lib.resource.use
 import org.team9432.lib.unit.degrees
 import org.team9432.lib.util.ChoreoUtil
 import org.team9432.lib.util.allianceSwitch
+import org.team9432.lib.util.whenSimulated
 import org.team9432.oi.Controls
 
 object Swerve: Resource("Swerve") {
@@ -40,18 +41,16 @@ object Swerve: Resource("Swerve") {
     init {
         swerve.daqThread.setThreadPriority(99)
 
-        if (LibraryState.isSimulation) {
-            startSimThread()
-        }
+        whenSimulated { startSimThread() }
 
         RobotScope.launch {
             use(Swerve, name = "DefaultSetter") { } // make it so the default command runs, to be fixed later
         }
 
-        CoroutineRobot.startPeriodic {
+        RobotPeriodicManager.startPeriodic {
             currentState = swerve.state
 
-            LibraryState.alliance?.let { allianceColor ->
+            Robot.alliance?.let { allianceColor ->
                 swerve.setOperatorPerspectiveForward(getOperatorPerspective(allianceColor))
                 hasAppliedOperatorPerspective = true
             }

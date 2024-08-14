@@ -4,7 +4,7 @@ import com.revrobotics.CANSparkBase
 import com.revrobotics.CANSparkLowLevel
 import com.revrobotics.CANSparkMax
 import org.team9432.lib.Beambreak
-import org.team9432.lib.coroutines.CoroutineRobot
+import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.doglog.Logger
 import org.team9432.lib.resource.Resource
 
@@ -24,7 +24,7 @@ object Loader: Resource("Loader") {
     }
 
     init {
-        CoroutineRobot.startPeriodic { trackState(); log() }
+        RobotPeriodicManager.startPeriodic { trackState(); log() }
 
         motor.inverted = false
         motor.enableVoltageCompensation(11.0)

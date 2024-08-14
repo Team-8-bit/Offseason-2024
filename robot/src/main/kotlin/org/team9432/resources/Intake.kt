@@ -3,7 +3,7 @@ package org.team9432.resources
 import com.revrobotics.CANSparkBase
 import com.revrobotics.CANSparkLowLevel
 import com.revrobotics.CANSparkMax
-import org.team9432.lib.coroutines.CoroutineRobot
+import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.doglog.Logger
 import org.team9432.lib.resource.Resource
 
@@ -21,7 +21,7 @@ object Intake: Resource("Intake") {
     }
 
     init {
-        CoroutineRobot.startPeriodic { trackState(); log() }
+        RobotPeriodicManager.startPeriodic { trackState(); log() }
 
         leader.inverted = true
         leader.enableVoltageCompensation(11.0)

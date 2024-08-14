@@ -3,11 +3,10 @@ package org.team9432.auto
 import com.choreo.lib.Choreo
 import com.choreo.lib.ChoreoTrajectory
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.team9432.NoteVisualizer
-import org.team9432.lib.LibraryState
 import org.team9432.lib.util.ChoreoUtil.getAutoFlippedInitialPose
+import org.team9432.lib.util.simDelay
 import org.team9432.resources.swerve.Swerve
 import kotlin.time.Duration.Companion.seconds
 
@@ -28,9 +27,7 @@ object Auto {
 
     private suspend fun scorePreload() {
         NoteVisualizer.align()
-        if (LibraryState.isSimulation) {
-            delay(1.seconds) // Fake flywheel spinup
-        }
+        simDelay(1.seconds) // Fake flywheel spinup
         AutoActions.shoot(spindown = false)
     }
 

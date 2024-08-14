@@ -7,7 +7,7 @@ import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.team9432.lib.coroutines.CoroutineRobot
+import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.coroutines.RobotScope
 import org.team9432.lib.doglog.Logger
 import org.team9432.lib.unit.inMeters
@@ -53,7 +53,7 @@ object NoteVisualizer {
             }
         }
 
-        CoroutineRobot.startPeriodic { checkCollectedNotes() }
+        RobotPeriodicManager.startPeriodic { checkCollectedNotes() }
     }
 
     private val NOTE_RADIUS_METERS = Units.inchesToMeters(14.0) / 2

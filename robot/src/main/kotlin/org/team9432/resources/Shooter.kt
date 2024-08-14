@@ -7,10 +7,10 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.team9432.PositionConstants
+import org.team9432.Robot
 import org.team9432.lib.KSysIdConfig
-import org.team9432.lib.LibraryState
+import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.SysIdUtil
-import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.doglog.Logger
 import org.team9432.lib.resource.Resource
 import org.team9432.lib.unit.Length
@@ -44,7 +44,7 @@ object Shooter: Resource("Shooter") {
     }
 
     init {
-        CoroutineRobot.startPeriodic { trackState(); log() }
+        RobotPeriodicManager.startPeriodic { trackState(); log() }
 
         SmartDashboard.putNumber("Shooter/TopTargetSpeed", 500.0)
         SmartDashboard.putNumber("Shooter/BottomTargetSpeed", 2500.0)
@@ -83,7 +83,7 @@ object Shooter: Resource("Shooter") {
         return distanceToSpeaker() < 2.0.meters &&
                 Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 1.0, rotationsPerSecond = 0.25) &&
                 isAimedAtSpeaker() &&
-                (flywheelsAtSpeed() || LibraryState.isSimulation) // Ignore speed in sim as the flywheels aren't simulated yet
+                (flywheelsAtSpeed() || Robot.isSimulated) // Ignore speed in sim as the flywheels aren't simulated yet
     }
 
     private fun log() {

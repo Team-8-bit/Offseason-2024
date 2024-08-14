@@ -2,7 +2,7 @@ package org.team9432.auto
 
 import kotlinx.coroutines.delay
 import org.team9432.NoteVisualizer
-import org.team9432.lib.LibraryState
+import org.team9432.Robot
 import org.team9432.lib.coroutines.await
 import org.team9432.resources.Intake
 import org.team9432.resources.Loader
@@ -14,7 +14,7 @@ object AutoActions {
         Intake.setState(Intake.State.INTAKE)
         Loader.setState(Loader.State.INTAKE)
 
-        if (LibraryState.isSimulation) {
+        if (Robot.isSimulated) {
             NoteVisualizer.awaitNotePickup()
             Loader.lowerBeambreak.setSimTripped()
         } else {
