@@ -9,6 +9,7 @@ import edu.wpi.first.math.util.Units
 import org.photonvision.PhotonCamera
 import org.photonvision.targeting.PhotonPipelineResult
 import org.team9432.FieldConstants
+import org.team9432.lib.LibraryState
 import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
 import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.doglog.Logger
@@ -25,8 +26,10 @@ object PhotonVision {
     private const val USE_MULTITAG = true
 
     init {
-        CoroutineRobot.startPeriodic {
-            update()
+        if (!LibraryState.isSimulation) {
+            CoroutineRobot.startPeriodic {
+                update()
+            }
         }
     }
 
