@@ -3,7 +3,10 @@ package org.team9432
 
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.RobotBase
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.team9432.auto.Auto
+import org.team9432.auto.ChoreoTrajectories
 import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.lib.doglog.Logger
@@ -15,6 +18,9 @@ import org.team9432.resources.swerve.Swerve
 import org.team9432.vision.PhotonVision
 
 object Robot: CoroutineRobot(useActionManager = false) {
+    private val autoChooser = SendableChooser<Auto>()
+    private var currentlySelectedAuto: Auto? = null
+
     override suspend fun init() {
         Logger.configureDevelopmentDefaults()
 
@@ -25,11 +31,31 @@ object Robot: CoroutineRobot(useActionManager = false) {
 
         Controls
         PhotonVision
+        Beambreaks
 
         NoteVisualizer
 
         PortForwarder.add(5800, "10.94.32.11", 5800)
         PortForwarder.add(5800, "10.94.32.12", 5800)
+
+        ChoreoTrajectories
+
+        autoChooser.onChange { currentlySelectedAuto = it }
+        Auto.entries.forEach { autoChooser.addOption(it.prettyName, it) }
+        SmartDashboard.putData("AutoChooser", autoChooser)
+
+//        val chooser2 = SwitchableChooser("Autochooser")
+//
+//        chooser2.setOptions(arrayOf("Nothing", "Four Note", "Four Note Center"))
+//
+//        RobotScope.launch {
+//            delay(5.seconds)
+//
+//            chooser2.setOptions(arrayOf("ooh", "look it works"))
+//            delay(4.seconds)
+//            chooser2.setOptions(arrayOf("this is cool", "look it works", "three"))
+//        }
+
 
 //        LEDStrip.create(RioLedStrip(30, 0))
 //
@@ -50,7 +76,7 @@ object Robot: CoroutineRobot(useActionManager = false) {
 
     override suspend fun autonomous() {
         RobotController.setAction {
-            Auto.runFourNoteCenter()
+            currentlySelectedAuto?.auto?.invoke()
         }
     }
 

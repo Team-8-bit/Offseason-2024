@@ -3,16 +3,12 @@ package org.team9432.resources
 import com.revrobotics.CANSparkBase
 import com.revrobotics.CANSparkLowLevel
 import com.revrobotics.CANSparkMax
-import org.team9432.lib.Beambreak
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.doglog.Logger
 import org.team9432.lib.resource.Resource
 
 object Loader: Resource("Loader") {
     private val motor = CANSparkMax(12, CANSparkLowLevel.MotorType.kBrushless)
-
-    val upperBeambreak = Beambreak(7)
-    val lowerBeambreak = Beambreak(6)
 
     private var state = State.IDLE
 
@@ -37,8 +33,6 @@ object Loader: Resource("Loader") {
 
     private fun log() {
         Logger.log("Loader/Motor", motor)
-        Logger.log("Loader/UpperBeambreak", upperBeambreak)
-        Logger.log("Loader/LowerBeambreak", lowerBeambreak)
     }
 
     fun setState(state: State) {

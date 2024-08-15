@@ -88,7 +88,7 @@ object Swerve: Resource("Swerve") {
 
         val controlFunction = ChoreoUtil.choreoSwerveController(xPid, yPid, rPid, ::getRobotPose)
 
-        Logger.log("Swerve/CurrentTrajectory", allianceSwitch(blue = trajectory.flipped().poses, red = trajectory.poses))
+        Logger.log("Swerve/CurrentTrajectory", allianceSwitch(blue = trajectory.poses, red = trajectory.flipped().poses))
 
         ChoreoUtil.choreoSwerveAction(trajectory, controlFunction) { chassisSpeedsToApply ->
             swerve.setControl(speedsRequest.withSpeeds(chassisSpeedsToApply))
