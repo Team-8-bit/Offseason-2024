@@ -2,63 +2,15 @@ package org.team9432.auto
 
 import com.choreo.lib.Choreo
 import com.choreo.lib.ChoreoTrajectory
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import org.team9432.Actions
-import org.team9432.NoteVisualizer
-import org.team9432.lib.util.ChoreoUtil.getAutoFlippedInitialPose
-import org.team9432.lib.util.simDelay
-import org.team9432.resources.swerve.Swerve
-import kotlin.time.Duration.Companion.seconds
 
-object Auto {
-    suspend fun scoreNote(note: ChoreoTrajectory, spindown: Boolean) = coroutineScope {
-        // The driving and shooting are run in separate coroutines so they can happen at the same time
 
-        // This one just handles the driving
-        launch { Swerve.followChoreo(note) }
+object ChoreoTrajectories {
+    val fourAndNothing: ArrayList<ChoreoTrajectory> = Choreo.getTrajectoryGroup("4AndNothing")
+    val fourAndCenter: ArrayList<ChoreoTrajectory> = Choreo.getTrajectoryGroup("4AndCenter")
+}
 
-        // While the robot is driving, this one collects and shoots the note (likely only after the robot has stopped)
-        launch {
-            // Intake and then pull the note in
-            Actions.intake()
-            Actions.visionShoot(spindown)
-        }
-    }
-
-    private suspend fun scorePreload() {
-        NoteVisualizer.animateAlign()
-        simDelay(1.seconds) // Fake flywheel spinup
-        Actions.visionShoot(spindown = false)
-    }
-
-    suspend fun runFourNote() {
-        val trajectories = Choreo.getTrajectoryGroup("4AndNothing")
-
-        val (ampNote, speakerNote, stageNote) = trajectories
-
-        Swerve.seedFieldRelative(trajectories.first().getAutoFlippedInitialPose())
-
-        scorePreload()
-
-        scoreNote(ampNote, spindown = false)
-        scoreNote(speakerNote, spindown = false)
-        scoreNote(stageNote, spindown = true)
-    }
-
-    suspend fun runFourNoteCenter() {
-        val trajectories = Choreo.getTrajectoryGroup("4AndCenter")
-
-        val (ampNote, speakerNote, stageNote, center) = trajectories
-
-        Swerve.seedFieldRelative(trajectories.first().getAutoFlippedInitialPose())
-
-        scorePreload()
-
-        scoreNote(ampNote, spindown = false)
-        scoreNote(speakerNote, spindown = false)
-        scoreNote(stageNote, spindown = true)
-
-        Swerve.followChoreo(center)
-    }
+enum class Auto(val prettyName: String, val auto: suspend () -> Unit) {
+    FOUR_AND_NOTHING("Four and Nothing", FourNote::runFourNote),
+    FOUR_AND_CENTER("Four and Center", FourNote::runFourNoteCenter),
+    NOTHING("Do Nothing", {})
 }
