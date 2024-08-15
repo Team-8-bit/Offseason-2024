@@ -29,8 +29,8 @@ object Actions {
         Loader.setState(Loader.State.LOAD)
         NoteVisualizer.animateShoot()
 
-        Loader.upperBeambreak.awaitClear(simDelay = 0.5.seconds)
-        Loader.lowerBeambreak.setSimClear()
+        Beambreaks.upper.awaitClear(simDelay = 0.5.seconds)
+        Beambreaks.lower.setSimClear()
 
         delay(0.25.seconds)
 
@@ -54,9 +54,9 @@ object Actions {
 
         if (Robot.isSimulated) {
             NoteVisualizer.awaitNotePickup()
-            Loader.lowerBeambreak.setSimTripped()
+            Beambreaks.lower.setSimTripped()
         } else {
-            Loader.lowerBeambreak.awaitTripped()
+            Beambreaks.lower.awaitTripped()
         }
 
         if (Robot.mode == CoroutineRobot.Mode.TELEOP) {
@@ -65,17 +65,17 @@ object Actions {
 
         Intake.setState(Intake.State.LOAD)
         Loader.setState(Loader.State.LOAD)
-        Loader.upperBeambreak.awaitTripped(simDelay = 0.3.seconds)
+        Beambreaks.upper.awaitTripped(simDelay = 0.3.seconds)
         Intake.setState(Intake.State.IDLE)
 
         repeat(2) {
             NoteVisualizer.animateAlign()
             Loader.setState(Loader.State.REVERSE)
             delay(0.15.seconds)
-            Loader.upperBeambreak.setSimClear()
+            Beambreaks.upper.setSimClear()
 
             Loader.setState(Loader.State.LOAD)
-            Loader.upperBeambreak.awaitTripped(simDelay = 0.2.seconds)
+            Beambreaks.upper.awaitTripped(simDelay = 0.2.seconds)
             Loader.setState(Loader.State.IDLE)
         }
     }

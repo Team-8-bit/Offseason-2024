@@ -3,7 +3,7 @@ package org.team9432
 
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.RobotBase
-import org.team9432.auto.Auto
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.lib.doglog.Logger
@@ -15,6 +15,9 @@ import org.team9432.resources.swerve.Swerve
 import org.team9432.vision.PhotonVision
 
 object Robot: CoroutineRobot(useActionManager = false) {
+    private val autoChooser = SendableChooser<suspend () -> Unit>()
+    private var currentlySelectedAuto: (suspend () -> Unit)? = null
+
     override suspend fun init() {
         Logger.configureDevelopmentDefaults()
 
@@ -25,11 +28,30 @@ object Robot: CoroutineRobot(useActionManager = false) {
 
         Controls
         PhotonVision
+        Beambreaks
 
         NoteVisualizer
 
         PortForwarder.add(5800, "10.94.32.11", 5800)
         PortForwarder.add(5800, "10.94.32.12", 5800)
+
+        autoChooser.onChange { currentlySelectedAuto = it }
+
+//        val chooser2 = SwitchableChooser("Autochooser")
+//
+//        chooser2.setOptions(arrayOf("Nothing", "Four Note", "Four Note Center"))
+//
+//        RobotScope.launch {
+//            delay(5.seconds)
+//
+//            chooser2.setOptions(arrayOf("ooh", "look it works"))
+//            delay(4.seconds)
+//            chooser2.setOptions(arrayOf("this is cool", "look it works", "three"))
+//        }
+
+//        autoChooser.addOption("Nothing") {}
+//        autoChooser.addOption("Four Note") { Auto.runFourNote() }
+//        autoChooser.addOption("Four Note Center") { Auto.runFourNoteCenter() }
 
 //        LEDStrip.create(RioLedStrip(30, 0))
 //
@@ -50,7 +72,7 @@ object Robot: CoroutineRobot(useActionManager = false) {
 
     override suspend fun autonomous() {
         RobotController.setAction {
-            Auto.runFourNoteCenter()
+            currentlySelectedAuto?.invoke()
         }
     }
 
