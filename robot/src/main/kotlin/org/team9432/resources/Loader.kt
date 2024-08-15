@@ -17,9 +17,9 @@ object Loader: Resource("Loader") {
     private var state = State.IDLE
 
     enum class State(val getVoltage: () -> Double) {
-        INTAKE({ 5.0 }),
+        INTAKE({ 8.0 }),
         LOAD({ 2.0 }),
-        REVERSE({ -5.0 }),
+        REVERSE({ -8.0 }),
         IDLE({ 0.0 });
     }
 

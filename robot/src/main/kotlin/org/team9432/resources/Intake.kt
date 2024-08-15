@@ -14,7 +14,7 @@ object Intake: Resource("Intake") {
     private var state = State.IDLE
 
     enum class State(val getVoltage: () -> Double) {
-        INTAKE({ 5.0 }),
+        INTAKE({ 10.0 }),
         LOAD({ 2.0 }),
         OUTTAKE({ -5.0 }),
         IDLE({ 0.0 });

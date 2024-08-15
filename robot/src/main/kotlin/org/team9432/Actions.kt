@@ -34,8 +34,8 @@ object Actions {
 
         delay(0.25.seconds)
 
-        Shooter.setState(Shooter.State.IDLE)
-        if (spindown) Loader.setState(Loader.State.IDLE)
+        Loader.setState(Loader.State.IDLE)
+        if (spindown) Shooter.setState(Shooter.State.IDLE)
     }
 
     suspend fun amp() {

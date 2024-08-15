@@ -98,6 +98,8 @@ object Shooter: Resource("Shooter") {
     private fun isAimedAtSpeaker(): Boolean {
         return if (distanceToSpeaker().inMeters > 1.5) {
             getAimingErrorDegrees() < 10
+        } else if (distanceToSpeaker().inMeters > 1.25) {
+            getAimingErrorDegrees() < 15
         } else {
             getAimingErrorDegrees() < 25
         }
