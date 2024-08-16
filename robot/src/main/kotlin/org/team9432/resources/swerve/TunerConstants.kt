@@ -54,7 +54,7 @@ object TunerConstants {
 
     // Theoretical free speed (m/s) at 12v applied output;
     // This needs to be tuned to your individual robot
-    const val kSpeedAt12VoltsMps: Double = 5.41
+    const val kSpeedAt12VoltsMps: Double = 5.19
 
     // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
     // This may need to be tuned to your individual robot
@@ -109,7 +109,7 @@ object TunerConstants {
     private const val kFrontLeftDriveMotorId = 1
     private const val kFrontLeftSteerMotorId = 2
     private const val kFrontLeftEncoderId = 1
-    private const val kFrontLeftEncoderOffset = 0.24755859375
+    private const val kFrontLeftEncoderOffset = 0.2470703125
     private const val kFrontLeftSteerInvert = true
 
     private const val kFrontLeftXPosInches = 6.875
@@ -119,7 +119,7 @@ object TunerConstants {
     private const val kFrontRightDriveMotorId = 3
     private const val kFrontRightSteerMotorId = 4
     private const val kFrontRightEncoderId = 2
-    private const val kFrontRightEncoderOffset = 0.30126953125
+    private const val kFrontRightEncoderOffset = 0.306884765625
     private const val kFrontRightSteerInvert = true
 
     private const val kFrontRightXPosInches = 6.875
@@ -129,7 +129,7 @@ object TunerConstants {
     private const val kBackLeftDriveMotorId = 5
     private const val kBackLeftSteerMotorId = 6
     private const val kBackLeftEncoderId = 3
-    private const val kBackLeftEncoderOffset = -0.059814453125
+    private const val kBackLeftEncoderOffset = -0.056884765625
     private const val kBackLeftSteerInvert = true
 
     private const val kBackLeftXPosInches = -6.875
@@ -139,7 +139,7 @@ object TunerConstants {
     private const val kBackRightDriveMotorId = 7
     private const val kBackRightSteerMotorId = 8
     private const val kBackRightEncoderId = 4
-    private const val kBackRightEncoderOffset = 0.0224609375
+    private const val kBackRightEncoderOffset = 0.018798828125
     private const val kBackRightSteerInvert = true
 
     private const val kBackRightXPosInches = -6.875
