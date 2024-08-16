@@ -68,15 +68,14 @@ object Actions {
         Beambreaks.upper.awaitTripped(simDelay = 0.3.seconds)
         Intake.setState(Intake.State.IDLE)
 
-        repeat(2) {
-            NoteVisualizer.animateAlign()
-            Loader.setState(Loader.State.REVERSE)
-            delay(0.15.seconds)
-            Beambreaks.upper.setSimClear()
+        // Align Note
+        NoteVisualizer.animateAlign()
+        Loader.setState(Loader.State.REVERSE)
+        delay(0.15.seconds)
+        Beambreaks.upper.setSimClear()
 
-            Loader.setState(Loader.State.LOAD)
-            Beambreaks.upper.awaitTripped(simDelay = 0.2.seconds)
-            Loader.setState(Loader.State.IDLE)
-        }
+        Loader.setState(Loader.State.LOAD)
+        Beambreaks.upper.awaitTripped(simDelay = 0.2.seconds)
+        Loader.setState(Loader.State.IDLE)
     }
 }
