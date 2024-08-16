@@ -81,7 +81,7 @@ object Shooter: Resource("Shooter") {
 
     fun isReadyToShootSpeaker(): Boolean {
         return distanceToSpeaker() < 2.0.meters &&
-                Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 1.0, rotationsPerSecond = 0.25) &&
+                Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 0.5, rotationsPerSecond = 0.25) &&
                 isAimedAtSpeaker() &&
                 (flywheelsAtSpeed() || Robot.isSimulated) // Ignore speed in sim as the flywheels aren't simulated yet
     }

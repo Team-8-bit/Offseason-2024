@@ -9,6 +9,7 @@ import org.team9432.Actions
 import org.team9432.Beambreaks
 import org.team9432.NoteVisualizer
 import org.team9432.lib.coroutines.await
+import org.team9432.lib.coroutines.parallel
 import org.team9432.lib.util.ChoreoUtil.getAutoFlippedInitialPose
 import org.team9432.lib.util.simDelay
 import org.team9432.resources.Loader
@@ -18,28 +19,44 @@ import kotlin.time.Duration.Companion.seconds
 
 object FourNote {
     suspend fun runFourNote() {
-        val (ampNote, speakerNote, stageNote) = ChoreoTrajectories.fourAndNothing
+        val trajectories = ChoreoTrajectories.fourAndNothing
+        val (firstPath, ampNote, speakerNote, stageNote) = trajectories
 
-        genericAuto(ampNote, speakerNote, stageNote)
-    }
-
-    suspend fun runFourNoteCenter() {
-        val (ampNote, speakerNote, stageNote, center) = ChoreoTrajectories.fourAndCenter
-
-        genericAuto(ampNote, speakerNote, stageNote)
-        Swerve.followChoreo(center)
-    }
-
-    private suspend fun genericAuto(vararg trajectories: ChoreoTrajectory) {
         Swerve.seedFieldRelative(trajectories.first().getAutoFlippedInitialPose())
 
         Shooter.setState(Shooter.State.VISION_SHOOT)
-        simDelay(1.seconds) // Sim flywheel spinup time
+        parallel(
+            { Swerve.followChoreo(firstPath) },
+            { simDelay(1.seconds) }
+        )
         shootNote()
 
-        for (trajectory in trajectories) scoreNote(trajectory)
+        scoreNote(ampNote)
+        scoreNote(speakerNote)
+        scoreNote(stageNote)
 
         Shooter.setState(Shooter.State.IDLE)
+    }
+
+    suspend fun runFourNoteCenter() {
+        val trajectories = ChoreoTrajectories.fourAndCenter
+        val (firstPath, ampNote, speakerNote, stageNote, center) = trajectories
+
+        Swerve.seedFieldRelative(trajectories.first().getAutoFlippedInitialPose())
+
+        Shooter.setState(Shooter.State.VISION_SHOOT)
+        parallel(
+            { Swerve.followChoreo(firstPath) },
+            { simDelay(1.seconds) }
+        )
+        shootNote()
+
+        scoreNote(ampNote)
+        scoreNote(speakerNote)
+        scoreNote(stageNote)
+
+        Shooter.setState(Shooter.State.IDLE)
+        Swerve.followChoreo(center)
     }
 
     private suspend fun scoreNote(ampNote: ChoreoTrajectory) = coroutineScope {
