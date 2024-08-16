@@ -2,12 +2,25 @@ package org.team9432.oi
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest
+import edu.wpi.first.math.MathUtil
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Transform2d
+import edu.wpi.first.math.geometry.Translation2d
 import org.team9432.Actions
+import org.team9432.Beambreaks
+import org.team9432.PositionConstants
 import org.team9432.RobotController
 import org.team9432.lib.input.XboxController
+import org.team9432.lib.unit.asRotation2d
+import org.team9432.lib.unit.meters
+import org.team9432.lib.util.allianceSwitch
+import org.team9432.lib.util.angleTo
+import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
+import kotlin.math.hypot
 import kotlin.math.pow
-import kotlin.math.withSign
+
 
 object Controls {
     val controller = XboxController(0)
@@ -16,11 +29,38 @@ object Controls {
         .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
         .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
 
-    fun getTeleopSwerveRequest(): SwerveRequest.FieldCentric =
-        teleopRequest
-            .withVelocityX(getTranslationalSpeed(-controller.leftYRaw))
-            .withVelocityY(getTranslationalSpeed(-controller.leftXRaw))
-            .withRotationalRate(getRotationalSpeed())
+    private val teleSpeakerRequest: SwerveRequest.FieldCentricFacingAngle = SwerveRequest.FieldCentricFacingAngle()
+        .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
+        .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
+        .apply {
+            HeadingController.enableContinuousInput(-Math.PI, Math.PI)
+            HeadingController.p = 5.0
+        }
+
+    private val shouldAimAtSpeaker
+        get() =
+            getRotationalSpeed() == 0.0 &&
+                    Shooter.state == Shooter.State.VISION_SHOOT &&
+                    Shooter.distanceToSpeaker() < 5.0.meters &&
+                    Beambreaks.hasNote
+
+    fun getTeleopSwerveRequest(): SwerveRequest {
+        return when {
+            shouldAimAtSpeaker -> teleSpeakerRequest.apply {
+                val speed = getTranslationalSpeed()
+                withVelocityX(speed.x * 5.0)
+                withVelocityY(speed.y * 5.0)
+                withTargetDirection(Swerve.getRobotTranslation().angleTo(PositionConstants.speakerAimPose).asRotation2d.let { allianceSwitch(blue = it, red = it.plus(Rotation2d.fromDegrees(180.0))) })
+            }
+
+            else -> teleopRequest.apply {
+                val speed = getTranslationalSpeed()
+                withVelocityX(speed.x * 5.0)
+                withVelocityY(speed.y * 5.0)
+                withRotationalRate(getRotationalSpeed())
+            }
+        }
+    }
 
     init {
         controller.y.onTrue { RobotController.setAction { Actions.idle() } }
@@ -28,7 +68,7 @@ object Controls {
         controller.leftBumper
             .onTrue { RobotController.setAction { Actions.intake() } }
 
-        controller.b
+        controller.rightBumper.and { Beambreaks.hasNote }
             .onTrue { RobotController.setAction { Actions.visionShoot() } }
 
         controller.a
@@ -44,7 +84,7 @@ object Controls {
 
 
     private fun getRotationalSpeed(): Double {
-        return getTriggerRotationSpeed() + getJoystickRotationSpeed()
+        return getTriggerRotationSpeed() //+ getJoystickRotationSpeed()
     }
 
     private fun getJoystickRotationSpeed(): Double {
@@ -57,8 +97,26 @@ object Controls {
         return ((rightAxis.pow(2) * -1) + leftAxis.pow(2)) * Math.toRadians(270.0)
     }
 
-    private fun getTranslationalSpeed(rawJoystick: Double): Double {
-        val speedSquared = (rawJoystick * rawJoystick).withSign(rawJoystick)
-        return speedSquared * if (controller.rightBumper.invoke()) 3.0 else 5.0
+    // https://github.com/Mechanical-Advantage/RobotCode2024/blob/a025615a52193b7709db7cf14c51c57be17826f2/src/main/java/org/littletonrobotics/frc2024/subsystems/drive/controllers/TeleopDriveController.java#L83
+    private fun getTranslationalSpeed(): Translation2d {
+        val x: Double = -controller.leftYRaw
+        val y: Double = -controller.leftXRaw
+
+        val deadband = 0.15
+
+        // Apply deadband
+        var linearMagnitude = MathUtil.applyDeadband(hypot(x, y), deadband)
+        val linearDirection = Rotation2d(x, y)
+
+        // Square magnitude
+        linearMagnitude = linearMagnitude * linearMagnitude
+
+        // Calcaulate new linear velocity
+        val linearVelocity =
+            Pose2d(Translation2d(), linearDirection)
+                .transformBy(Transform2d(linearMagnitude, 0.0, Rotation2d()))
+                .translation
+
+        return linearVelocity
     }
 }

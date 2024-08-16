@@ -27,7 +27,8 @@ object Shooter: Resource("Shooter") {
     private val topMotor = CANSparkFlex(14, CANSparkLowLevel.MotorType.kBrushless)
     private val bottomMotor = CANSparkFlex(13, CANSparkLowLevel.MotorType.kBrushless)
 
-    private var state = State.IDLE
+    var state = State.IDLE
+        private set
 
     private val topShooterMap = InterpolatingDoubleTreeMap()
     private val bottomShooterMap = InterpolatingDoubleTreeMap()

@@ -20,9 +20,7 @@ import kotlinx.coroutines.launch
 import org.team9432.Robot
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.coroutines.RobotScope
-import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.lib.doglog.Logger
-import org.team9432.lib.resource.Action
 import org.team9432.lib.resource.Resource
 import org.team9432.lib.resource.use
 import org.team9432.lib.unit.degrees
@@ -66,10 +64,6 @@ object Swerve: Resource("Swerve") {
     private val wheelCharacterizationRequest = SwerveRequest.ApplyChassisSpeeds()
     fun setWheelCharacterizationDriveControl(rotationsPerSecond: Double) {
         swerve.setControl(wheelCharacterizationRequest.withSpeeds(ChassisSpeeds(0.0, 0.0, Units.rotationsToRadians(rotationsPerSecond))))
-    }
-
-    override val defaultAction: Action = {
-        robotPeriodic(isFinished = { false }) { setTeleDriveControl() }
     }
 
     private fun log() {
