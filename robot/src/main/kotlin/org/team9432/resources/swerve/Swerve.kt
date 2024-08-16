@@ -17,15 +17,19 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotController
 import kotlinx.coroutines.launch
+import org.team9432.PositionConstants
 import org.team9432.Robot
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.coroutines.RobotScope
+import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.lib.doglog.Logger
 import org.team9432.lib.resource.Resource
 import org.team9432.lib.resource.use
+import org.team9432.lib.unit.asRotation2d
 import org.team9432.lib.unit.degrees
 import org.team9432.lib.util.ChoreoUtil
 import org.team9432.lib.util.allianceSwitch
+import org.team9432.lib.util.angleTo
 import org.team9432.lib.util.whenSimulated
 import org.team9432.oi.Controls
 
@@ -86,6 +90,20 @@ object Swerve: Resource("Swerve") {
 
         ChoreoUtil.choreoSwerveAction(trajectory, controlFunction) { chassisSpeedsToApply ->
             swerve.setControl(speedsRequest.withSpeeds(chassisSpeedsToApply))
+        }
+    }
+
+    private val speakerAimRequest: SwerveRequest.FieldCentricFacingAngle = SwerveRequest.FieldCentricFacingAngle()
+        .apply {
+            HeadingController.enableContinuousInput(-Math.PI, Math.PI)
+            HeadingController.p = 5.0
+        }
+
+    suspend fun aimAtSpeaker() {
+        robotPeriodic(isFinished = { false }) {
+            swerve.setControl(speakerAimRequest.apply {
+                withTargetDirection(getRobotTranslation().angleTo(PositionConstants.speakerAimPose).asRotation2d.let { allianceSwitch(blue = it, red = it.plus(Rotation2d.fromDegrees(180.0))) })
+            })
         }
     }
 

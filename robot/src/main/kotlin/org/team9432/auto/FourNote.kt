@@ -146,7 +146,10 @@ object FourNote {
         if (!Beambreaks.hasNote) {
             intakingJob.cancelAndJoin()
         } else if (Beambreaks.hasNote) {
+            val aimJob = launch { Swerve.aimAtSpeaker() }
+            delay(0.25.seconds)
             shootNote()
+            aimJob.cancelAndJoin()
         }
     }
 
