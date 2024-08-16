@@ -27,7 +27,8 @@ object Shooter: Resource("Shooter") {
     private val topMotor = CANSparkFlex(14, CANSparkLowLevel.MotorType.kBrushless)
     private val bottomMotor = CANSparkFlex(13, CANSparkLowLevel.MotorType.kBrushless)
 
-    private var state = State.IDLE
+    var state = State.IDLE
+        private set
 
     private val topShooterMap = InterpolatingDoubleTreeMap()
     private val bottomShooterMap = InterpolatingDoubleTreeMap()
@@ -81,7 +82,7 @@ object Shooter: Resource("Shooter") {
 
     fun isReadyToShootSpeaker(): Boolean {
         return distanceToSpeaker() < 2.0.meters &&
-                Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 1.0, rotationsPerSecond = 0.25) &&
+                Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 0.5, rotationsPerSecond = 0.25) &&
                 isAimedAtSpeaker() &&
                 (flywheelsAtSpeed() || Robot.isSimulated) // Ignore speed in sim as the flywheels aren't simulated yet
     }
