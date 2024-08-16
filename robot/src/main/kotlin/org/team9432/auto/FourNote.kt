@@ -3,6 +3,7 @@ package org.team9432.auto
 import com.choreo.lib.ChoreoTrajectory
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.team9432.Actions
 import org.team9432.Beambreaks
@@ -56,6 +57,7 @@ object FourNote {
         await { Shooter.isReadyToShootSpeaker() }
         Loader.setState(Loader.State.LOAD)
         NoteVisualizer.animateShoot()
+        delay(0.5.seconds)
         Beambreaks.upper.awaitClear(simDelay = 0.5.seconds)
         Beambreaks.lower.setSimClear()
         Loader.setState(Loader.State.IDLE)

@@ -15,6 +15,7 @@ import org.team9432.resources.Intake
 import org.team9432.resources.Loader
 import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
+import org.team9432.resources.swerve.wheelDiameterTest
 import org.team9432.vision.PhotonVision
 
 object Robot: CoroutineRobot(useActionManager = false) {
@@ -40,6 +41,8 @@ object Robot: CoroutineRobot(useActionManager = false) {
 
         ChoreoTrajectories
 
+        `LEDs!`
+
         autoChooser.onChange { currentlySelectedAuto = it }
         Auto.entries.forEach { autoChooser.addOption(it.prettyName, it) }
         SmartDashboard.putData("AutoChooser", autoChooser)
@@ -55,17 +58,6 @@ object Robot: CoroutineRobot(useActionManager = false) {
 //            delay(4.seconds)
 //            chooser2.setOptions(arrayOf("this is cool", "look it works", "three"))
 //        }
-
-
-//        LEDStrip.create(RioLedStrip(30, 0))
-//
-//        RobotScope.launch {
-//            AnimationManager.run(20.milliseconds)
-//        }
-//
-//        val leds = Section((0..29).toSet())
-//
-//        leds.solid(Color.Red)
     }
 
     override suspend fun teleop() {
@@ -82,6 +74,12 @@ object Robot: CoroutineRobot(useActionManager = false) {
 
     override suspend fun disabled() {
         RobotController.resetRequests()
+    }
+
+    override suspend fun test() {
+        RobotController.setAction {
+            wheelDiameterTest(rotationsPerSecond = 0.125)
+        }
     }
 }
 

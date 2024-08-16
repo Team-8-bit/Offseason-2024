@@ -62,7 +62,7 @@ object TunerConstants {
 
     const val kDriveGearRatio = 5.9
     const val kSteerGearRatio = 23.07692307692308
-    private const val kWheelRadiusInches = 2.0
+    private const val kWheelRadiusInches = 3.84 / 2
 
     private const val kInvertLeftSide = false
     private const val kInvertRightSide = true
