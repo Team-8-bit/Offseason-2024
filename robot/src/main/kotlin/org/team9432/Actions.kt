@@ -9,6 +9,7 @@ import org.team9432.oi.Controls
 import org.team9432.resources.Intake
 import org.team9432.resources.Loader
 import org.team9432.resources.Shooter
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 object Actions {
@@ -65,7 +66,7 @@ object Actions {
 
         Intake.setState(Intake.State.LOAD)
         Loader.setState(Loader.State.LOAD)
-        Beambreaks.upper.awaitTripped(simDelay = 0.3.seconds)
+        Beambreaks.upper.awaitTripped(simDelay = 0.3.seconds, period = 3.milliseconds)
         Intake.setState(Intake.State.IDLE)
 
         // Align Note
@@ -75,7 +76,7 @@ object Actions {
         Beambreaks.upper.setSimClear()
 
         Loader.setState(Loader.State.LOAD)
-        Beambreaks.upper.awaitTripped(simDelay = 0.2.seconds)
+        Beambreaks.upper.awaitTripped(simDelay = 0.2.seconds, period = 3.milliseconds)
         Loader.setState(Loader.State.IDLE)
     }
 }
