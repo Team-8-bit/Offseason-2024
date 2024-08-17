@@ -1,15 +1,14 @@
 package org.team9432
 
 import edu.wpi.first.wpilibj.DriverStation.Alliance
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import kotlinx.coroutines.launch
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.coroutines.RobotScope
-import org.team9432.lib.led.animations.breath
-import org.team9432.lib.led.animations.chaseColors
-import org.team9432.lib.led.animations.pulse
-import org.team9432.lib.led.animations.strobe
+import org.team9432.lib.led.animations.*
 import org.team9432.lib.led.color.Color
+import org.team9432.lib.led.color.fromRGBString
 import org.team9432.lib.led.color.predefined.*
 import org.team9432.lib.led.management.AnimationBindScope
 import org.team9432.lib.led.management.AnimationManager
@@ -21,6 +20,8 @@ import kotlin.time.Duration.Companion.seconds
 
 object `LEDs!` {
     init {
+        SmartDashboard.putBoolean("Workmode", false)
+
         LEDStrip.create(RioLedStrip(300, 0))
 
         RobotScope.launch {
@@ -31,9 +32,15 @@ object `LEDs!` {
 
         val scope = AnimationBindScope.build {
             If({ Robot.mode == CoroutineRobot.Mode.DISABLED }) {
-                setAnimation {
-                    repeat(9999) {
-                        leds.chaseColors(Color.RainbowStripesColors, timePerStep = 0.01.seconds).invoke()
+                If({SmartDashboard.getBoolean("Workmode", false)}) {
+                    setAnimation {
+                        leds.solid(Color.fromRGBString("191919")).invoke()
+                    }
+                }.Else {
+                    setAnimation {
+                        repeat(9999) {
+                            leds.chaseColors(Color.RainbowStripesColors, timePerStep = 0.01.seconds).invoke()
+                        }
                     }
                 }
             }.ElseIf({ Robot.mode == CoroutineRobot.Mode.AUTONOMOUS }) {
