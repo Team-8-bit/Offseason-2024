@@ -30,6 +30,7 @@ object Actions {
         Loader.setState(Loader.State.LOAD)
         NoteVisualizer.animateShoot()
 
+        Beambreaks.upper.awaitTripped()
         Beambreaks.upper.awaitClear(simDelay = 0.5.seconds)
         Beambreaks.lower.setSimClear()
 
@@ -40,15 +41,12 @@ object Actions {
     }
 
     suspend fun subwooferShoot() {
-        Shooter.setState(Shooter.State.SUBWOOFER)
-        await { Shooter.isReadyToShootSpeaker() }
+        Shooter.setState(Shooter.State.DASHBOARD_SPEEDS)
+        await { Shooter.flywheelsAtSpeed() }
         Loader.setState(Loader.State.LOAD)
         NoteVisualizer.animateShoot()
 
-        Beambreaks.upper.awaitClear(simDelay = 0.5.seconds)
-        Beambreaks.lower.setSimClear()
-
-        delay(0.25.seconds)
+        delay(1.5.seconds)
 
         Loader.setState(Loader.State.IDLE)
         Shooter.setState(Shooter.State.IDLE)
@@ -85,13 +83,15 @@ object Actions {
         Intake.setState(Intake.State.IDLE)
 
         // Align Note
-        NoteVisualizer.animateAlign()
-        Loader.setState(Loader.State.REVERSE)
-        delay(0.15.seconds)
-        Beambreaks.upper.setSimClear()
+        repeat(3) {
+            NoteVisualizer.animateAlign()
+            Loader.setState(Loader.State.REVERSE)
+            delay(0.15.seconds)
+            Beambreaks.upper.setSimClear()
 
-        Loader.setState(Loader.State.LOAD)
-        Beambreaks.upper.awaitTripped(simDelay = 0.2.seconds, period = 3.milliseconds)
-        Loader.setState(Loader.State.IDLE)
+            Loader.setState(Loader.State.LOAD)
+            Beambreaks.upper.awaitTripped(simDelay = 0.2.seconds, period = 3.milliseconds)
+            Loader.setState(Loader.State.IDLE)
+        }
     }
 }
