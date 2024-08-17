@@ -157,9 +157,12 @@ object FourNote {
         await { Shooter.isReadyToShootSpeaker() }
         Loader.setState(Loader.State.LOAD)
         NoteVisualizer.animateShoot()
-        delay(0.5.seconds)
+
+        Beambreaks.upper.awaitTripped()
         Beambreaks.upper.awaitClear(simDelay = 0.5.seconds)
         Beambreaks.lower.setSimClear()
+
+        delay(0.5.seconds)
         Loader.setState(Loader.State.IDLE)
     }
 }
