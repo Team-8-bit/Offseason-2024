@@ -1,4 +1,4 @@
-package org.team9432.vision
+package org.team9432
 
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.geometry.Pose3d
@@ -8,8 +8,6 @@ import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.math.util.Units
 import org.photonvision.PhotonCamera
 import org.photonvision.targeting.PhotonPipelineResult
-import org.team9432.FieldConstants
-import org.team9432.Robot
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
 import org.team9432.lib.doglog.Logger
@@ -19,7 +17,7 @@ import org.team9432.resources.swerve.Swerve
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
-object PhotonVision {
+object Vision{
     private val camera = PhotonCamera("Limelight")
     private val robotToCamera = robotToCameraArducam
 

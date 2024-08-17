@@ -16,7 +16,6 @@ import org.team9432.resources.Loader
 import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
 import org.team9432.resources.swerve.wheelDiameterTest
-import org.team9432.vision.PhotonVision
 
 object Robot: CoroutineRobot(useActionManager = false) {
     private val autoChooser = SendableChooser<Auto>()
@@ -31,7 +30,7 @@ object Robot: CoroutineRobot(useActionManager = false) {
         Swerve
 
         Controls
-        PhotonVision
+        Vision
         Beambreaks
 
         NoteVisualizer
