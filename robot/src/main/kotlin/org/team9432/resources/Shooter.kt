@@ -40,7 +40,7 @@ object Shooter: Resource("Shooter") {
         IDLE({ ShooterSpeeds(0.0, 0.0) }),
         SHOOT({ ShooterSpeeds(8.0, 8.0) }),
         VISION_SHOOT({ getMapValue(distanceToSpeaker()) }),
-        SUBWOOFER({ ShooterSpeeds(6.0, 10.0) }),
+        SUBWOOFER({ ShooterSpeeds(2000.0, 5000.0) }),
         DASHBOARD_SPEEDS({ ShooterSpeeds(SmartDashboard.getNumber("Shooter/TopTargetSpeed", 0.0), SmartDashboard.getNumber("Shooter/BottomTargetSpeed", 0.0)) }),
         AMP({ ShooterSpeeds(1.0, 5.0) });
     }
@@ -48,8 +48,8 @@ object Shooter: Resource("Shooter") {
     init {
         RobotPeriodicManager.startPeriodic { trackState(); log() }
 
-        SmartDashboard.putNumber("Shooter/TopTargetSpeed", 500.0)
-        SmartDashboard.putNumber("Shooter/BottomTargetSpeed", 2500.0)
+        SmartDashboard.putNumber("Shooter/TopTargetSpeed", 2000.0)
+        SmartDashboard.putNumber("Shooter/BottomTargetSpeed", 5500.0)
         SmartDashboard.putNumber("Shooter/Tuning/ffV", 0.0)
 
         topMotor.inverted = false
@@ -62,10 +62,10 @@ object Shooter: Resource("Shooter") {
         bottomMotor.enableVoltageCompensation(10.0)
         bottomMotor.openLoopRampRate = 0.0
 
-        addMapValue(2.0.meters, ShooterSpeeds(top = 5500.0, bottom = 2200.0))
-        addMapValue(1.75.meters, ShooterSpeeds(top = 5000.0, bottom = 3000.0))
-        addMapValue(1.5.meters, ShooterSpeeds(top = 4500.0, bottom = 4000.0))
-        addMapValue(1.0.meters, ShooterSpeeds(top = 2000.0, bottom = 5000.0))
+        addMapValue(2.0.meters - 0.1.meters, ShooterSpeeds(top = 5500.0, bottom = 2200.0))
+        addMapValue(1.75.meters - 0.1.meters, ShooterSpeeds(top = 5000.0, bottom = 3000.0))
+        addMapValue(1.5.meters - 0.1.meters, ShooterSpeeds(top = 4500.0, bottom = 4000.0))
+        addMapValue(1.0.meters - 0.1.meters, ShooterSpeeds(top = 2000.0, bottom = 5000.0))
     }
 
     private var currentTargetSpeeds = ShooterSpeeds(0.0, 0.0)
@@ -82,14 +82,18 @@ object Shooter: Resource("Shooter") {
     }
 
     fun isReadyToShootSpeaker(): Boolean {
-        return if (Vision.isEnabled) {
-            distanceToSpeaker() < 2.0.meters &&
-                    Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 0.5, rotationsPerSecond = 0.25) &&
-                    isAimedAtSpeaker() &&
-                    (flywheelsAtSpeed() || Robot.isSimulated) // Ignore speed in sim as the flywheels aren't simulated yet
+        return if (Robot.isAutonomous) {
+            (flywheelsAtSpeed() || Robot.isSimulated)
         } else {
-            Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 0.5, rotationsPerSecond = 0.25) &&
-                    (flywheelsAtSpeed() || Robot.isSimulated)
+            if (Vision.isEnabled) {
+                distanceToSpeaker() < 2.0.meters &&
+                        Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 0.5, rotationsPerSecond = 0.25) &&
+                        isAimedAtSpeaker() &&
+                        (flywheelsAtSpeed() || Robot.isSimulated) // Ignore speed in sim as the flywheels aren't simulated yet
+            } else {
+                Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 0.5, rotationsPerSecond = 0.25) &&
+                        (flywheelsAtSpeed() || Robot.isSimulated)
+            }
         }
     }
 
