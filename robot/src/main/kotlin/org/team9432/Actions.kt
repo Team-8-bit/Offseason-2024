@@ -39,6 +39,21 @@ object Actions {
         if (spindown) Shooter.setState(Shooter.State.IDLE)
     }
 
+    suspend fun subwooferShoot() {
+        Shooter.setState(Shooter.State.SUBWOOFER)
+        await { Shooter.isReadyToShootSpeaker() }
+        Loader.setState(Loader.State.LOAD)
+        NoteVisualizer.animateShoot()
+
+        Beambreaks.upper.awaitClear(simDelay = 0.5.seconds)
+        Beambreaks.lower.setSimClear()
+
+        delay(0.25.seconds)
+
+        Loader.setState(Loader.State.IDLE)
+        Shooter.setState(Shooter.State.IDLE)
+    }
+
     suspend fun amp() {
         Shooter.setState(Shooter.State.DASHBOARD_SPEEDS)
         await { Shooter.flywheelsAtSpeed(rpmTolerance = 100) }

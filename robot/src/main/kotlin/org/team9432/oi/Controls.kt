@@ -7,10 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
-import org.team9432.Actions
-import org.team9432.Beambreaks
-import org.team9432.PositionConstants
-import org.team9432.RobotController
+import org.team9432.*
 import org.team9432.lib.input.XboxController
 import org.team9432.lib.unit.asRotation2d
 import org.team9432.lib.unit.meters
@@ -24,6 +21,9 @@ import kotlin.math.pow
 
 object Controls {
     val controller = XboxController(0)
+
+    var forceDisableVision = false
+        private set
 
     private val teleopRequest: SwerveRequest.FieldCentric = SwerveRequest.FieldCentric()
         .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
@@ -42,7 +42,8 @@ object Controls {
             getRotationalSpeed() == 0.0 &&
                     Shooter.state == Shooter.State.VISION_SHOOT &&
                     Shooter.distanceToSpeaker() < 5.0.meters &&
-                    Beambreaks.hasNote
+                    Beambreaks.hasNote &&
+                    Vision.isEnabled
 
     fun getTeleopSwerveRequest(): SwerveRequest {
         return when {
@@ -65,11 +66,22 @@ object Controls {
     init {
         controller.y.onTrue { RobotController.setAction { Actions.idle() } }
 
+        controller.x.onTrue { forceDisableVision = true }
+        controller.a.onTrue { forceDisableVision = false }
+
         controller.leftBumper
             .onTrue { RobotController.setAction { Actions.intake() } }
 
         controller.rightBumper.and { Beambreaks.hasNote }
-            .onTrue { RobotController.setAction { Actions.visionShoot() } }
+            .onTrue {
+                RobotController.setAction {
+                    if (Vision.isEnabled) {
+                        Actions.visionShoot()
+                    } else {
+                        Actions.subwooferShoot()
+                    }
+                }
+            }
 
         controller.b
             .onTrue { RobotController.setAction { Actions.amp() } }

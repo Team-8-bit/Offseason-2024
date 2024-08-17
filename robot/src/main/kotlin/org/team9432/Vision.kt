@@ -13,11 +13,14 @@ import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
 import org.team9432.lib.doglog.Logger
 import org.team9432.lib.unit.*
 import org.team9432.lib.util.distanceTo
+import org.team9432.oi.Controls
 import org.team9432.resources.swerve.Swerve
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
-object Vision{
+object Vision {
+    val isEnabled get() = !Controls.forceDisableVision && (camera.isConnected || Robot.isSimulated)
+
     private val camera = PhotonCamera("Limelight")
     private val robotToCamera = robotToCameraArducam
 
@@ -33,6 +36,7 @@ object Vision{
 
     private fun update() {
         Logger.log("Vision/Connected", camera.isConnected)
+        Logger.log("Vision/Enabled", isEnabled)
 
         val result = camera.latestResult
 

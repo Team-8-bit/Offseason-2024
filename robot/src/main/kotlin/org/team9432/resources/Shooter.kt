@@ -8,6 +8,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.team9432.PositionConstants
 import org.team9432.Robot
+import org.team9432.Vision
 import org.team9432.lib.KSysIdConfig
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.SysIdUtil
@@ -81,10 +82,15 @@ object Shooter: Resource("Shooter") {
     }
 
     fun isReadyToShootSpeaker(): Boolean {
-        return distanceToSpeaker() < 2.0.meters &&
-                Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 0.5, rotationsPerSecond = 0.25) &&
-                isAimedAtSpeaker() &&
-                (flywheelsAtSpeed() || Robot.isSimulated) // Ignore speed in sim as the flywheels aren't simulated yet
+        return if (Vision.isEnabled) {
+            distanceToSpeaker() < 2.0.meters &&
+                    Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 0.5, rotationsPerSecond = 0.25) &&
+                    isAimedAtSpeaker() &&
+                    (flywheelsAtSpeed() || Robot.isSimulated) // Ignore speed in sim as the flywheels aren't simulated yet
+        } else {
+            Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 0.5, rotationsPerSecond = 0.25) &&
+                    (flywheelsAtSpeed() || Robot.isSimulated)
+        }
     }
 
     private fun log() {
