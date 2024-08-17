@@ -71,7 +71,7 @@ object Controls {
         controller.rightBumper.and { Beambreaks.hasNote }
             .onTrue { RobotController.setAction { Actions.visionShoot() } }
 
-        controller.a
+        controller.b
             .onTrue { RobotController.setAction { Actions.amp() } }
 
         controller.back
