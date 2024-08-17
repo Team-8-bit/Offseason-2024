@@ -40,6 +40,11 @@ object TunerConstants {
     // Initial configs for the drive and steer motors and the CANcoder; these cannot be null.
     // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
     private val driveInitialConfigs = TalonFXConfiguration()
+        .withCurrentLimits(
+            CurrentLimitsConfigs()
+                .withStatorCurrentLimit(60.0)
+                .withStatorCurrentLimitEnable(true)
+        )
     private val steerInitialConfigs: TalonFXConfiguration = TalonFXConfiguration()
         .withCurrentLimits(
             CurrentLimitsConfigs() // Swerve azimuth does not require much torque output, so we can set a relatively low
