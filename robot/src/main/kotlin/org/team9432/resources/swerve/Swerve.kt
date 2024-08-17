@@ -146,6 +146,7 @@ object Swerve: Resource("Swerve") {
     fun seedFieldRelative() = swerve.seedFieldRelative()
     fun setVisionMeasurementStdDevs(visionMeasurementStdDevs: Matrix<N3, N1>) = swerve.setVisionMeasurementStdDevs(visionMeasurementStdDevs)
     fun addVisionMeasurement(visionRobotPoseMeters: Pose2d, timestampSeconds: Double) = swerve.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds)
+    fun addVisionMeasurement(visionRobotPoseMeters: Pose2d, timestampSeconds: Double, visionMeasurementStdDevs: Matrix<N3, N1>) = swerve.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs)
 
     fun getRobotPose(): Pose2d = currentState.Pose ?: Pose2d()
     fun getRobotTranslation(): Translation2d = getRobotPose().translation

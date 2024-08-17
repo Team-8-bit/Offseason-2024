@@ -1,148 +1,96 @@
 package org.team9432
 
+import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.VecBuilder
-import edu.wpi.first.math.geometry.Pose3d
-import edu.wpi.first.math.geometry.Rotation3d
-import edu.wpi.first.math.geometry.Transform3d
-import edu.wpi.first.math.geometry.Translation3d
+import edu.wpi.first.math.geometry.*
+import edu.wpi.first.math.numbers.N1
+import edu.wpi.first.math.numbers.N3
 import edu.wpi.first.math.util.Units
 import org.photonvision.PhotonCamera
-import org.photonvision.targeting.PhotonPipelineResult
+import org.photonvision.PhotonPoseEstimator
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
 import org.team9432.lib.doglog.Logger
-import org.team9432.lib.unit.*
-import org.team9432.lib.util.distanceTo
 import org.team9432.oi.Controls
 import org.team9432.resources.swerve.Swerve
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
+// https://github.com/PhotonVision/photonvision/blob/master/photonlib-java-examples/swervedriveposeestsim/
 object Vision {
     val isEnabled get() = !Controls.forceDisableVision && (camera.isConnected || Robot.isSimulated)
 
     private val camera = PhotonCamera("Limelight")
-    private val robotToCamera = robotToCameraArducam
-
-    private const val USE_MULTITAG = true
+    private val photonPoseEstimator = PhotonPoseEstimator(FieldConstants.aprilTagFieldLayout, PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, camera, robotToCameraArducam)
 
     init {
-        if (!Robot.isSimulated) {
+        photonPoseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY)
+
+//        if (!Robot.isSimulated) {
             RobotPeriodicManager.startPeriodic {
                 update()
             }
-        }
+//        }
     }
+
 
     private fun update() {
         Logger.log("Vision/Connected", camera.isConnected)
         Logger.log("Vision/Enabled", isEnabled)
 
-        val result = camera.latestResult
+        val estimatorResult = photonPoseEstimator.update().getOrNull()
 
-        // Record information
-        result.targets.forEach { target -> Logger.log("Vision/Tags/${target.fiducialId}/Area", target.area) }
-        result.targets.groupBy { it.fiducialId }.forEach { (id, targets) ->
-            targets.forEachIndexed { index, visionPose ->
-                Logger.log("Vision/Tags/$id/Ambiguity-$index", visionPose.poseAmbiguity)
+        photonPoseEstimator.setReferencePose(Swerve.getRobotPose())
+
+        if (estimatorResult != null) {
+            val pose = estimatorResult.estimatedPose
+
+            if (pose.isValid()) {
+                val pose2d = pose.toPose2d()
+                Swerve.addVisionMeasurement(pose2d, estimatorResult.timestampSeconds, getEstimationStdDevs(pose2d))
+            }
+
+            Logger.log("Vision/StrategyUsed", estimatorResult.strategy.name)
+
+            estimatorResult.targetsUsed.forEach { target ->
+                val baseKey = "Vision/Targets/${target.fiducialId}"
+                Logger.log("$baseKey/PoseAmbiguity", target.poseAmbiguity)
+                Logger.log("$baseKey/Area", target.area)
             }
         }
-
-        // Get the vision output
-        val output = getVisionOutput(result)
-
-        // Update the robot pose if the vision output isn't null
-        if (output != null) {
-            val (xyDeviation, pose, tagsUsed) = output
-            Swerve.setVisionMeasurementStdDevs(VecBuilder.fill(xyDeviation.inMeters, xyDeviation.inMeters, 20.0.degrees.inDegrees))
-            Swerve.addVisionMeasurement(pose.toPose2d(), result.timestampSeconds)
-            Logger.log("Vision/TrackedTags", tagsUsed.mapNotNull { FieldConstants.aprilTagFieldLayout.getTagPose(it).getOrNull() }.toTypedArray())
-            Logger.log("Vision/EstimatedPose", arrayOf(pose))
-        } else {
-            Logger.log("Vision/TrackedTags", emptyArray<Pose3d>())
-            Logger.log("Vision/EstimatedPose", emptyArray<Pose3d>())
-        }
     }
 
-    private fun getVisionOutput(result: PhotonPipelineResult): VisionOutput? {
-        if (!result.hasTargets()) return null // If the robot can't see any tags, don't bother
+    private val singleTagStdDevs: Matrix<N3, N1> = VecBuilder.fill(4.0, 4.0, 8.0)
+    private val multiTagStdDevs: Matrix<N3, N1> = VecBuilder.fill(0.5, 0.5, 1.0)
 
-        val (pose, tagArea, tagsUsed) = if (!USE_MULTITAG) {
-            updateNonMultitag(result)
-        } else {
-            // Attempt to run multitag, run non-multitag if it fails
-            updateMultitag(result) ?: updateNonMultitag(result)
-        } ?: return null
+    private fun getEstimationStdDevs(estimatedPose: Pose2d): Matrix<N3, N1> {
+        var estStdDevs = singleTagStdDevs
+        val targets = camera.latestResult.getTargets()
+        var numTags = 0
+        var avgDist = 0.0
 
-        val speed = Swerve.getRobotRelativeSpeeds()
-
-        // If the robot isn't really moving, and the tag is close, trust it a lot
-        val xyDeviation = if (speed.vxMetersPerSecond + speed.vyMetersPerSecond <= 0.2 && tagArea > 0.3) {
-            0.05.meters
-        } else if (tagArea < 0.15) {
-            2.0.meters
-        } else if (tagArea < 0.4) {
-            1.0.meters
-        } else {
-            return null // The tag is really far away
+        for (target in targets) {
+            val tagPose = photonPoseEstimator.fieldTags.getTagPose(target.fiducialId)
+            if (tagPose.isEmpty) continue
+            numTags++
+            avgDist += tagPose.get().toPose2d().translation.getDistance(estimatedPose.translation)
         }
 
-        return VisionOutput(xyDeviation, pose, tagsUsed)
-    }
+        if (numTags == 0) return estStdDevs
+        avgDist /= numTags.toDouble()
 
-    private fun updateMultitag(result: PhotonPipelineResult): VisionResult? {
-        // Get the multitag result if possible
-        val multiTagResult = result.multiTagResult
-        if (!multiTagResult.estimatedPose.isPresent) return null
+        // Decrease std devs if multiple targets are visible
+        if (numTags > 1) estStdDevs = multiTagStdDevs
 
-        // Calculate the robot position
-        val cameraToField = result.multiTagResult.estimatedPose.best
-        val pose = Pose3d().plus(cameraToField).relativeTo(FieldConstants.aprilTagFieldLayout.origin).plus(robotToCamera.inverse())
+        // Increase std devs based on (average) distance
+        estStdDevs = if (numTags == 1 && avgDist > 4) VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
+        else estStdDevs.times(1 + (avgDist * avgDist / 30))
 
-        // Check position validity
-        if (!isPositionValid(pose)) return null
-
-        // Return the vision result if everything worked
-        val tagsUsed = result.getTargets().filter { multiTagResult.fiducialIDsUsed.contains(it.fiducialId) }
-        val largestArea = tagsUsed.maxBy { it.area }.area
-
-        return VisionResult(pose, largestArea, tagsUsed.map { it.fiducialId })
-    }
-
-    private fun updateNonMultitag(result: PhotonPipelineResult): VisionResult? {
-        // Convert everything into visiontargets
-        val poses = mutableListOf<VisionTarget>()
-        for (target in result.targets) {
-            val targetFiducialId = target.fiducialId
-            val targetPosition = FieldConstants.aprilTagFieldLayout.getTagPose(targetFiducialId).getOrNull() ?: continue
-            val estimatedPose = targetPosition.transformBy(target.bestCameraToTarget.inverse()).transformBy(robotToCamera.inverse())
-            poses.add(VisionTarget(targetFiducialId, estimatedPose, target.poseAmbiguity, target.area))
-        }
-
-        // Filter out any bad estimations
-        val filteredTargets = poses.filter {
-            isPositionValid(it.pose) && it.ambiguity < 0.1
-        }
-
-        // Take the position closest to the current robot position from each tag
-        val finalTargets = mutableListOf<VisionTarget>()
-        filteredTargets.groupBy { it.id }.values.forEach { tagPoses -> finalTargets.add(tagPoses.minBy { Swerve.getRobotPose().distanceTo(it.pose.toPose2d()).inMeters }) }
-
-        // Record these final positions
-//        Logger.recordOutput("Vision/AllPoses", *finalTargets.map { it.pose }.toTypedArray())
-
-        // Return the one that's closest to where the robot already is
-        val target = finalTargets.minByOrNull { Swerve.getRobotPose().distanceTo(it.pose.toPose2d()).inMeters } ?: return null
-
-        return VisionResult(target.pose, target.area, listOf(target.id))
+        return estStdDevs
     }
 
     /** Check that the given position is close to the floor and within the field walls. */
-    private fun isPositionValid(pose: Pose3d) = abs(pose.z) < 0.25 && pose.toPose2d().isOnField()
-
-    data class VisionTarget(val id: Int, val pose: Pose3d, val ambiguity: Double, val area: Double)
-    data class VisionResult(val pose: Pose3d, val area: Double, val usedTags: List<Int>)
-    data class VisionOutput(val visionStandardDeviation: Length, val pose: Pose3d, val tagsUsed: List<Int>)
+    private fun Pose3d.isValid() = abs(z) < 0.25 && this.toPose2d().isOnField()
 
     private val robotToCameraArducam
         get() = Transform3d(
