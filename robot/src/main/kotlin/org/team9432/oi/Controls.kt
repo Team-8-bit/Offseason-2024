@@ -106,7 +106,7 @@ object Controls {
     private fun getTriggerRotationSpeed(): Double {
         val rightAxis = controller.rightTriggerAxis
         val leftAxis = controller.leftTriggerAxis
-        return ((rightAxis.pow(2) * -1) + leftAxis.pow(2)) * Math.toRadians(270.0)
+        return ((rightAxis.pow(2) * -1) + leftAxis.pow(2)) * Math.toRadians(360.0)
     }
 
     // https://github.com/Mechanical-Advantage/RobotCode2024/blob/a025615a52193b7709db7cf14c51c57be17826f2/src/main/java/org/littletonrobotics/frc2024/subsystems/drive/controllers/TeleopDriveController.java#L83
