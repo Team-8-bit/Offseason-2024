@@ -98,7 +98,6 @@ object Shooter: Resource("Shooter") {
     private fun log() {
         Logger.log("Shooter/TopMotor", topMotor)
         Logger.log("Shooter/BottomMotor", bottomMotor)
-        Logger.log("Shooter/State", state)
         Logger.log("Shooter/SpeakerDistance", distanceToSpeaker().inMeters)
         Logger.log("Shooter/isReadyToShoot", isReadyToShootSpeaker())
         Logger.log("Shooter/AimingError", getAimingErrorDegrees())
@@ -126,6 +125,8 @@ object Shooter: Resource("Shooter") {
 
     fun setState(state: State) {
         this.state = state
+        trackState()
+        Logger.log("Shooter/State", Shooter.state)
     }
 
     /** Return the distance from the robot to the speaker. */

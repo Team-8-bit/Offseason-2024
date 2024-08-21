@@ -36,7 +36,8 @@ object Loader: Resource("Loader") {
     }
 
     fun setState(state: State) {
-        Logger.log("Loader/State", state)
         this.state = state
+        trackState()
+        Logger.log("Loader/State", state)
     }
 }

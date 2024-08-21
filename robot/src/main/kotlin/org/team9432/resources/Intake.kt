@@ -41,11 +41,12 @@ object Intake: Resource("Intake") {
     private fun log() {
         Logger.log("Intake/Leader", leader)
         Logger.log("Intake/Follower", follower)
-        Logger.log("Intake/State", state)
     }
 
     fun setState(state: State) {
         this.state = state
+        trackState()
+        Logger.log("Intake/State", Intake.state)
     }
 
     fun isIntaking() = state == State.INTAKE
