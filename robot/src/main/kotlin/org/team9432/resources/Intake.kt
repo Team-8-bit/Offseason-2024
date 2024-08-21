@@ -49,5 +49,6 @@ object Intake: Resource("Intake") {
         Logger.log("Intake/State", Intake.state)
     }
 
-    fun isIntaking() = state == State.INTAKE
+    val isIntaking get() = state == State.INTAKE
+    val isIdle get() = state == State.IDLE
 }

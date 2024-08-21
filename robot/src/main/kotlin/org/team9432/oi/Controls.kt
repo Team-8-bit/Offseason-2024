@@ -14,6 +14,7 @@ import org.team9432.lib.unit.meters
 import org.team9432.lib.util.allianceSwitch
 import org.team9432.lib.util.angleTo
 import org.team9432.resources.Intake
+import org.team9432.resources.Loader
 import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
 import kotlin.math.hypot
@@ -73,7 +74,7 @@ object Controls {
         controller.leftBumper.and { Shooter.isIdle }
             .onTrue { RobotController.setAction { Actions.intake() } }
 
-        controller.rightBumper.and { Beambreaks.hasNote }
+        controller.rightBumper.and { Beambreaks.hasNote && Intake.isIdle && Loader.isIdle }
             .onTrue {
                 RobotController.setAction {
                     if (Vision.isEnabled) {

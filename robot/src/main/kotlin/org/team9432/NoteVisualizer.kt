@@ -75,7 +75,7 @@ object NoteVisualizer {
     private fun checkCollectedNotes() {
         val currentIntakePositions = intakeTranslations.map { Swerve.getRobotPose().transformBy(it).translation }
 
-        if (Intake.isIntaking() && Swerve.getRobotRelativeSpeeds().vxMetersPerSecond < -0.5) {
+        if (Intake.isIntaking && Swerve.getRobotRelativeSpeeds().vxMetersPerSecond < -0.5) {
             fieldNotes.toList().forEach { note ->
                 val isBeingCollected = currentIntakePositions.any { intake ->
                     note.getDistance(intake) < NOTE_RADIUS_METERS

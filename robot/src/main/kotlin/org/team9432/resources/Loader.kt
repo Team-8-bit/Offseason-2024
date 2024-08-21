@@ -40,4 +40,6 @@ object Loader: Resource("Loader") {
         trackState()
         Logger.log("Loader/State", state)
     }
+
+    val isIdle get() = state == State.IDLE
 }
