@@ -28,8 +28,7 @@ object Shooter: Resource("Shooter") {
     private val topMotor = CANSparkFlex(14, CANSparkLowLevel.MotorType.kBrushless)
     private val bottomMotor = CANSparkFlex(13, CANSparkLowLevel.MotorType.kBrushless)
 
-    var state = State.IDLE
-        private set
+    private var state = State.IDLE
 
     private val topShooterMap = InterpolatingDoubleTreeMap()
     private val bottomShooterMap = InterpolatingDoubleTreeMap()
@@ -38,7 +37,6 @@ object Shooter: Resource("Shooter") {
 
     enum class State(val getVoltages: () -> ShooterSpeeds) {
         IDLE({ ShooterSpeeds(0.0, 0.0) }),
-        SHOOT({ ShooterSpeeds(8.0, 8.0) }),
         VISION_SHOOT({ getMapValue(distanceToSpeaker()) }),
         SUBWOOFER({ ShooterSpeeds(2000.0, 5000.0) }),
         DASHBOARD_SPEEDS({ ShooterSpeeds(SmartDashboard.getNumber("Shooter/TopTargetSpeed", 0.0), SmartDashboard.getNumber("Shooter/BottomTargetSpeed", 0.0)) }),
@@ -122,6 +120,9 @@ object Shooter: Resource("Shooter") {
         val (topTarget, bottomTarget) = currentTargetSpeeds
         return abs(bottomMotor.encoder.velocity - bottomTarget) < rpmTolerance && abs(topMotor.encoder.velocity - topTarget) < rpmTolerance && !currentTargetSpeeds.isIdle
     }
+
+    val isIdle get() = state == State.IDLE
+    val isShootingSpeaker get() = state == State.VISION_SHOOT || state == State.SUBWOOFER
 
     fun setState(state: State) {
         this.state = state

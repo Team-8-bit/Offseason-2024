@@ -13,6 +13,7 @@ import org.team9432.lib.unit.asRotation2d
 import org.team9432.lib.unit.meters
 import org.team9432.lib.util.allianceSwitch
 import org.team9432.lib.util.angleTo
+import org.team9432.resources.Intake
 import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
 import kotlin.math.hypot
@@ -40,7 +41,7 @@ object Controls {
     private val shouldAimAtSpeaker
         get() =
             getRotationalSpeed() == 0.0 &&
-                    Shooter.state == Shooter.State.VISION_SHOOT &&
+                    Shooter.isShootingSpeaker &&
                     Shooter.distanceToSpeaker() < 5.0.meters &&
                     Beambreaks.hasNote &&
                     Vision.isEnabled
@@ -69,7 +70,7 @@ object Controls {
         controller.x.onTrue { forceDisableVision = true }
         controller.a.onTrue { forceDisableVision = false }
 
-        controller.leftBumper
+        controller.leftBumper.and { Shooter.isIdle }
             .onTrue { RobotController.setAction { Actions.intake() } }
 
         controller.rightBumper.and { Beambreaks.hasNote }
