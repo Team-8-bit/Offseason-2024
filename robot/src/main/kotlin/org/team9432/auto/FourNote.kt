@@ -87,7 +87,7 @@ object FourNote {
         Shooter.setState(Shooter.State.VISION_SHOOT)
 
         simDelay(1.seconds) // Fake flywheel spinup
-        shootNote()
+        Actions.visionShoot(spindown = false)
 
         scoreNotes(ampNote, note1, note2)
     }
@@ -118,7 +118,7 @@ object FourNote {
             { Swerve.followChoreo(firstPath) },
             { simDelay(1.seconds) }
         )
-        shootNote()
+        Actions.visionShoot(spindown = false)
 
         scoreNotes(firstNote, secondNote, thirdNote)
     }
@@ -132,7 +132,7 @@ object FourNote {
         Shooter.setState(Shooter.State.VISION_SHOOT)
 
         simDelay(1.seconds) // Fake flywheel spinup
-        shootNote()
+        Actions.visionShoot(spindown = false)
 
         scoreNotes(firstNote, secondNote)
     }
@@ -146,23 +146,8 @@ object FourNote {
         if (!Beambreaks.hasNote) {
             intakingJob.cancelAndJoin()
         } else if (Beambreaks.hasNote) {
-            val aimJob = launch { Swerve.aimAtSpeaker() }
             delay(0.25.seconds)
-            shootNote()
-            aimJob.cancelAndJoin()
+            Actions.visionShoot(spindown = false)
         }
-    }
-
-    private suspend fun shootNote() {
-        await { Shooter.isReadyToShootSpeaker() }
-        Loader.setState(Loader.State.LOAD)
-        NoteVisualizer.animateShoot()
-
-        Beambreaks.upper.awaitTripped()
-        Beambreaks.upper.awaitClear(simDelay = 0.5.seconds)
-        Beambreaks.lower.setSimClear()
-
-        delay(0.5.seconds)
-        Loader.setState(Loader.State.IDLE)
     }
 }

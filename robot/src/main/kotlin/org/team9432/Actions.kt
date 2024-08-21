@@ -30,8 +30,8 @@ object Actions {
         Loader.setState(Loader.State.LOAD)
         NoteVisualizer.animateShoot()
 
-        Beambreaks.upper.awaitTripped()
-        Beambreaks.upper.awaitClear(simDelay = 0.5.seconds)
+        Beambreaks.upper.awaitTripped(simDelay = 0.1.seconds) // Make sure the note is actually in the beambreak so the next step doesn't immediately return true
+        Beambreaks.upper.awaitClear(simDelay = 0.4.seconds)
         Beambreaks.lower.setSimClear()
 
         delay(0.25.seconds)
