@@ -60,11 +60,11 @@ object Shooter: Resource("Shooter") {
         bottomMotor.enableVoltageCompensation(10.0)
         bottomMotor.openLoopRampRate = 0.0
 
-        addMapValue(2.0.meters - 0.1.meters, ShooterSpeeds(top = 5500.0, bottom = 2200.0))
-        addMapValue(1.75.meters - 0.1.meters, ShooterSpeeds(top = 5000.0, bottom = 3000.0))
-        addMapValue(1.5.meters - 0.1.meters, ShooterSpeeds(top = 4500.0, bottom = 4000.0))
-        addMapValue(1.0.meters - 0.1.meters, ShooterSpeeds(top = 2000.0, bottom = 5000.0))
-    }
+        addMapValue(2.0.meters, ShooterSpeeds(top = 5000.0, bottom = 2750.0))
+        addMapValue(1.75.meters, ShooterSpeeds(top = 5000.0, bottom = 3000.0))
+        addMapValue(1.5.meters, ShooterSpeeds(top = 2500.0, bottom = 4000.0))
+        addMapValue(1.25.meters, ShooterSpeeds(top = 4000.0, bottom = 5000.0))
+     }
 
     private var currentTargetSpeeds = ShooterSpeeds(0.0, 0.0)
 

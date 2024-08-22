@@ -43,10 +43,13 @@ object Actions {
     suspend fun subwooferShoot() {
         Shooter.setState(Shooter.State.DASHBOARD_SPEEDS)
         await { Shooter.flywheelsAtSpeed() }
+        delay(0.5.seconds)
         Loader.setState(Loader.State.LOAD)
         NoteVisualizer.animateShoot()
 
-        delay(1.5.seconds)
+        Beambreaks.upper.awaitTripped(simDelay = 0.1.seconds) // Make sure the note is actually in the beambreak so the next step doesn't immediately return true
+        Beambreaks.upper.awaitClear(simDelay = 0.4.seconds)
+        Beambreaks.lower.setSimClear()
 
         Loader.setState(Loader.State.IDLE)
         Shooter.setState(Shooter.State.IDLE)
@@ -57,7 +60,7 @@ object Actions {
         await { Shooter.flywheelsAtSpeed(rpmTolerance = 100) }
         delay(0.4.seconds)
         Loader.setState(Loader.State.LOAD)
-        delay(1.seconds)
+        delay(3.seconds)
         Shooter.setState(Shooter.State.IDLE)
         Loader.setState(Loader.State.IDLE)
     }
@@ -83,11 +86,10 @@ object Actions {
         Intake.setState(Intake.State.IDLE)
 
         // Align Note
-        repeat(3) {
+        repeat(1) {
             NoteVisualizer.animateAlign()
             Loader.setState(Loader.State.REVERSE)
-            delay(0.15.seconds)
-            Beambreaks.upper.setSimClear()
+            Beambreaks.upper.awaitClear(simDelay = 0.2.seconds, period = 3.milliseconds)
 
             Loader.setState(Loader.State.LOAD)
             Beambreaks.upper.awaitTripped(simDelay = 0.2.seconds, period = 3.milliseconds)
