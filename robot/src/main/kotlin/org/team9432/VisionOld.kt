@@ -18,7 +18,7 @@ import org.team9432.resources.swerve.Swerve
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
-object VisionOld {
+object Vision {
     val isEnabled get() = !Controls.forceDisableVision && (camera.isConnected || Robot.isSimulated)
 
     private val camera = PhotonCamera("Limelight")

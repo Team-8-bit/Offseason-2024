@@ -17,7 +17,7 @@ import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
 // https://github.com/PhotonVision/photonvision/blob/master/photonlib-java-examples/swervedriveposeestsim/
-object Vision {
+object ExampleVision {
     val isEnabled get() = !Controls.forceDisableVision && (camera.isConnected || Robot.isSimulated)
 
     private val camera = PhotonCamera("Limelight")
@@ -47,6 +47,7 @@ object Vision {
 
             if (pose.isValid()) {
                 val pose2d = pose.toPose2d()
+                Logger.log("Vision/EstimatedPose", pose)
                 Swerve.addVisionMeasurement(pose2d, estimatorResult.timestampSeconds, getEstimationStdDevs(pose2d))
             }
 
