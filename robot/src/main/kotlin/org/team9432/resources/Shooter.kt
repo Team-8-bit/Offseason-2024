@@ -40,7 +40,7 @@ object Shooter: Resource("Shooter") {
         VISION_SHOOT({ getMapValue(distanceToSpeaker()) }),
         SUBWOOFER({ ShooterSpeeds(2000.0, 5000.0) }),
         DASHBOARD_SPEEDS({ ShooterSpeeds(SmartDashboard.getNumber("Shooter/TopTargetSpeed", 0.0), SmartDashboard.getNumber("Shooter/BottomTargetSpeed", 0.0)) }),
-        AMP({ ShooterSpeeds(1.0, 5.0) });
+        AMP({ ShooterSpeeds(100.0, 4000.0) });
     }
 
     init {
@@ -84,7 +84,7 @@ object Shooter: Resource("Shooter") {
             (flywheelsAtSpeed() || Robot.isSimulated)
         } else {
             if (Vision.isEnabled) {
-                distanceToSpeaker() < 2.0.meters &&
+                distanceToSpeaker() < 2.3.meters &&
                         Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 0.5, rotationsPerSecond = 0.25) &&
                         isAimedAtSpeaker() &&
                         (flywheelsAtSpeed() || Robot.isSimulated) // Ignore speed in sim as the flywheels aren't simulated yet

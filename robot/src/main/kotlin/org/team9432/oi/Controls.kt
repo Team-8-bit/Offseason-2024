@@ -80,7 +80,7 @@ object Controls {
                     if (Vision.isEnabled) {
                         Actions.visionShoot()
                     } else {
-                        Actions.subwooferShoot()
+                        Actions.dashboardShoot()
                     }
                 }
             }

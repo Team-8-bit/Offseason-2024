@@ -40,7 +40,7 @@ object Actions {
         if (spindown) Shooter.setState(Shooter.State.IDLE)
     }
 
-    suspend fun subwooferShoot() {
+    suspend fun dashboardShoot() {
         Shooter.setState(Shooter.State.DASHBOARD_SPEEDS)
         await { Shooter.flywheelsAtSpeed() }
         delay(0.5.seconds)
@@ -56,11 +56,16 @@ object Actions {
     }
 
     suspend fun amp() {
-        Shooter.setState(Shooter.State.DASHBOARD_SPEEDS)
+        Shooter.setState(Shooter.State.AMP)
         await { Shooter.flywheelsAtSpeed(rpmTolerance = 100) }
-        delay(0.4.seconds)
+        delay(0.2.seconds)
         Loader.setState(Loader.State.LOAD)
-        delay(3.seconds)
+
+        Beambreaks.upper.awaitTripped(simDelay = 0.1.seconds) // Make sure the note is actually in the beambreak so the next step doesn't immediately return true
+        Beambreaks.upper.awaitClear(simDelay = 0.4.seconds)
+        Beambreaks.lower.setSimClear()
+        delay(0.25.seconds)
+
         Shooter.setState(Shooter.State.IDLE)
         Loader.setState(Loader.State.IDLE)
     }
