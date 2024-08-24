@@ -5,6 +5,7 @@ import org.team9432.choreogenerator.json.ChoreoRobotConfiguration
 import org.team9432.lib.unit.inMeters
 import org.team9432.lib.unit.inches
 import java.io.File
+import kotlin.system.measureTimeMillis
 
 val OSR2024Config = ChoreoRobotConfiguration(
     mass = 74.08797700309194,
@@ -22,14 +23,13 @@ val OSR2024Config = ChoreoRobotConfiguration(
 )
 
 fun main() {
-    val rootDir = File("robot/")
-    val outputFile = File(rootDir, "output.chor")
+    val outputFile = File("output.chor")
 
-    println(outputFile.absolutePath)
+    val time = measureTimeMillis {
+        val file = GeneratorFile(OSR2024Config)
+        FourNote.getAllPossibilities().forEach { file.addPath(it) }
+        outputFile.writeText(file.export())
+    }
 
-    val file = GeneratorFile(OSR2024Config)
-
-    FourNote.getAllPossibilities().forEach { file.addPath(it) }
-
-    outputFile.writeText(file.export())
+    println("Generated file ${outputFile.absolutePath} in ${time}ms")
 }

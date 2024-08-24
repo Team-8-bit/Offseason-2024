@@ -37,6 +37,12 @@ deploy {
     }
 }
 
+tasks.register('generateTrajectories', JavaExec) {
+    dependsOn "classes"
+    mainClass = "org.team9432.auto.paths.MainKt"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
 repositories {
     mavenLocal()
     maven { url = "https://SleipnirGroup.github.io/ChoreoLib/dep" }
