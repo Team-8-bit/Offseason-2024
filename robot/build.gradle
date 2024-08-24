@@ -56,7 +56,9 @@ wpi.java.debugJni = false
 def includeDesktopSupport = false
 
 dependencies {
+    // Team libraries
     implementation("org.team9432.lib:robot-lib")
+    implementation("org.team9432.lib:choreo-generator")
 
     wpi.java.deps.wpilib().forEach { implementation(it) }
     wpi.java.vendor.java().forEach { implementation(it) }

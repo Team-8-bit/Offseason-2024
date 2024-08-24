@@ -1,3 +1,6 @@
 [submodule "lib"]
 	path = lib
 	url = https://github.com/Team-8-bit/robot-lib
+[submodule "choreo-generator"]
+	path = choreo-generator
+	url = https://github.com/Team-8-bit/choreo-generator.git
