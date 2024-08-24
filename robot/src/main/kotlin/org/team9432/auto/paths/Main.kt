@@ -1,8 +1,7 @@
 package org.team9432.auto.paths
 
-import org.team9432.choreogenerator.GeneratorFile
-import org.team9432.choreogenerator.json.ChoreoRobotConfiguration
-import org.team9432.lib.unit.inMeters
+import org.team9432.choreogenerator.ChoreoFile
+import org.team9432.choreogenerator.ChoreoRobotConfiguration
 import org.team9432.lib.unit.inches
 import java.io.File
 import kotlin.system.measureTimeMillis
@@ -13,22 +12,24 @@ val OSR2024Config = ChoreoRobotConfiguration(
     motorMaxTorque = 1.162295081967213,
     motorMaxVelocity = 4800,
     gearing = 5.9,
-//    wheelbase = 13.75.inches.inMeters,
-    wheelbase = 19.75.inches.inMeters,
-    trackWidth = 19.75.inches.inMeters,
-//    bumperLength = 25.75.inches.inMeters,
-    bumperLength = 32.inches.inMeters,
-    bumperWidth = 32.inches.inMeters,
-    wheelRadius = 1.92.inches.inMeters
+//    wheelbase = 13.75.inches,
+    wheelbase = 19.75.inches,
+    trackWidth = 19.75.inches,
+//    bumperLength = 25.75.inches,
+    bumperLength = 32.inches,
+    bumperWidth = 32.inches,
+    wheelRadius = 1.92.inches
 )
 
 fun main() {
-    val outputFile = File("output.chor")
+    val outputFile = File("output.chor") // This magically appears in the right place, but I don't know why
 
     val time = measureTimeMillis {
-        val file = GeneratorFile(OSR2024Config)
-        FourNote.getAllPossibilities().forEach { file.addPath(it) }
-        outputFile.writeText(file.export())
+        val choreFile = ChoreoFile(outputFile, OSR2024Config, splitTrajectoriesAtStopPoints = true)
+
+        FourNote.getAllPossibilities().forEach { choreFile.addPath(it) }
+
+        choreFile.outputToFile()
     }
 
     println("Generated file ${outputFile.absolutePath} in ${time}ms")

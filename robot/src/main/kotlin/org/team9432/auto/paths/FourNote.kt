@@ -3,10 +3,8 @@ package org.team9432.auto.paths
 import org.team9432.auto.paths.AutoFieldConstants.CenterNote
 import org.team9432.auto.paths.AutoFieldConstants.CenterNote.*
 import org.team9432.auto.paths.AutoFieldConstants.CloseNote.*
-import org.team9432.choreogenerator.ConstraintScope
-import org.team9432.choreogenerator.GeneratorPath
-import org.team9432.choreogenerator.Position
-import org.team9432.choreogenerator.StraightLine
+import org.team9432.choreogenerator.*
+import org.team9432.choreogenerator.ChoreoTrajectory.ChoreoTrajectoryBuilder
 import org.team9432.lib.unit.degrees
 import org.team9432.lib.unit.meters
 
@@ -24,8 +22,8 @@ object FourNote {
     private val FOUR_NOTE_THROUGH_STAGE_DRIVE_CLOSE = Position(4.4.meters, 5.meters, 180.0.degrees)
     private val FOUR_NOTE_THROUGH_STAGE_DRIVE_FAR = Position(6.meters, 4.meters, 180.0.degrees)
 
-    fun getAllPossibilities(): List<GeneratorPath> {
-        val trajectories = mutableListOf<GeneratorPath>()
+    fun getAllPossibilities(): List<ChoreoTrajectory> {
+        val trajectories = mutableListOf<ChoreoTrajectory>()
         val centerNoteOptions = listOf(null, ONE, TWO, THREE)
 
         for (centerNote in centerNoteOptions) {
@@ -42,7 +40,7 @@ object FourNote {
         return trajectories
     }
 
-    fun generateFourNote(name: String, reversed: Boolean, centerNote: CenterNote?) = GeneratorPath(name).apply {
+    fun generateFourNote(name: String, reversed: Boolean, centerNote: CenterNote?) = ChoreoTrajectory.new(name) {
         preload()
 
         val noteList = if (reversed) listOf(STAGE, SPEAKER, AMP) else listOf(AMP, SPEAKER, STAGE)
@@ -64,7 +62,7 @@ object FourNote {
         return notePose.copy().moveX(-.2.meters).pointAwayFrom(notePose)
     }
 
-    private fun GeneratorPath.centerNote(note: CenterNote) {
+    private fun ChoreoTrajectoryBuilder.centerNote(note: CenterNote) {
         if (note != ONE && note != TWO && note != THREE) throw UnsupportedOperationException("Note ${note.name} is not supported!")
 
         val travelPath: ((Boolean) -> Unit)? = when (note) {
@@ -94,12 +92,12 @@ object FourNote {
         addPoseWaypoint(FOUR_NOTE_SHOT, stopPoint = true)
     }
 
-    private fun GeneratorPath.preload() {
+    private fun ChoreoTrajectoryBuilder.preload() {
         addPoseWaypoint(FOUR_NOTE_START)
         addPoseWaypoint(FOUR_NOTE_SHOT, stopPoint = true)
     }
 
-    private fun GeneratorPath.closeNote(note: AutoFieldConstants.CloseNote) {
+    private fun ChoreoTrajectoryBuilder.closeNote(note: AutoFieldConstants.CloseNote) {
         when (note) {
             AMP -> {
                 addPoseWaypoint(FOUR_NOTE_AMP_ALIGN)

@@ -1,0 +1,1615 @@
+{
+    "version": "v0.4",
+    "robotConfiguration": {
+        "mass": 74.08797700309194,
+        "rotationalInertia": 6,
+        "motorMaxTorque": 1.162295081967213,
+        "motorMaxVelocity": 4800,
+        "gearing": 5.9,
+        "wheelbase": 0.5016499999999999,
+        "trackWidth": 0.5016499999999999,
+        "bumperLength": 0.8128,
+        "bumperWidth": 0.8128,
+        "wheelRadius": 0.048768
+    },
+    "paths": {
+        "4AndNothingReversed": {
+            "waypoints": [
+                {
+                    "x": 1.34,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.2956,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.6955999999999998,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.3956,
+                    "y": 4.605275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.88,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.418035952677913,
+                    "y": 6.422573538212681,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.8000871905355824,
+                    "y": 6.885214707642535,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                }
+            ],
+            "trajectory": [],
+            "trajectoryWaypoints": [],
+            "constraints": [
+                {
+                    "scope": [
+                        1
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        2,
+                        3
+                    ],
+                    "type": "StraightLine"
+                },
+                {
+                    "scope": [
+                        5
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        7
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        10
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "first"
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "last"
+                    ],
+                    "type": "StopPoint"
+                }
+            ],
+            "usesControlIntervalGuessing": true,
+            "defaultControlIntervalCount": 40,
+            "usesDefaultFieldObstacles": true,
+            "circleObstacles": [],
+            "eventMarkers": [],
+            "isTrajectoryStale": true
+        },
+        "4AndNothing": {
+            "waypoints": [
+                {
+                    "x": 1.34,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.418035952677913,
+                    "y": 6.422573538212681,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.8000871905355824,
+                    "y": 6.885214707642535,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.88,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.2956,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.6955999999999998,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.3956,
+                    "y": 4.605275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                }
+            ],
+            "trajectory": [],
+            "trajectoryWaypoints": [],
+            "constraints": [
+                {
+                    "scope": [
+                        1
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        4
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        6
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        7,
+                        8
+                    ],
+                    "type": "StraightLine"
+                },
+                {
+                    "scope": [
+                        10
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "first"
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "last"
+                    ],
+                    "type": "StopPoint"
+                }
+            ],
+            "usesControlIntervalGuessing": true,
+            "defaultControlIntervalCount": 40,
+            "usesDefaultFieldObstacles": true,
+            "circleObstacles": [],
+            "eventMarkers": [],
+            "isTrajectoryStale": true
+        },
+        "4AndOneReversed": {
+            "waypoints": [
+                {
+                    "x": 1.34,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.2956,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.6955999999999998,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.3956,
+                    "y": 4.605275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.88,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.418035952677913,
+                    "y": 6.422573538212681,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.8000871905355824,
+                    "y": 6.885214707642535,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 7.6708750000000006,
+                    "y": 7.458074999999999,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 8.070875000000001,
+                    "y": 7.458074999999999,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                }
+            ],
+            "trajectory": [],
+            "trajectoryWaypoints": [],
+            "constraints": [
+                {
+                    "scope": [
+                        1
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        2,
+                        3
+                    ],
+                    "type": "StraightLine"
+                },
+                {
+                    "scope": [
+                        5
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        7
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        10
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        11,
+                        12
+                    ],
+                    "type": "StraightLine"
+                },
+                {
+                    "scope": [
+                        13
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "first"
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "last"
+                    ],
+                    "type": "StopPoint"
+                }
+            ],
+            "usesControlIntervalGuessing": true,
+            "defaultControlIntervalCount": 40,
+            "usesDefaultFieldObstacles": true,
+            "circleObstacles": [],
+            "eventMarkers": [],
+            "isTrajectoryStale": true
+        },
+        "4AndOne": {
+            "waypoints": [
+                {
+                    "x": 1.34,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.418035952677913,
+                    "y": 6.422573538212681,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.8000871905355824,
+                    "y": 6.885214707642535,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.88,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.2956,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.6955999999999998,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.3956,
+                    "y": 4.605275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 7.6708750000000006,
+                    "y": 7.458074999999999,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 8.070875000000001,
+                    "y": 7.458074999999999,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                }
+            ],
+            "trajectory": [],
+            "trajectoryWaypoints": [],
+            "constraints": [
+                {
+                    "scope": [
+                        1
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        4
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        6
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        7,
+                        8
+                    ],
+                    "type": "StraightLine"
+                },
+                {
+                    "scope": [
+                        10
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        11,
+                        12
+                    ],
+                    "type": "StraightLine"
+                },
+                {
+                    "scope": [
+                        13
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "first"
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "last"
+                    ],
+                    "type": "StopPoint"
+                }
+            ],
+            "usesControlIntervalGuessing": true,
+            "defaultControlIntervalCount": 40,
+            "usesDefaultFieldObstacles": true,
+            "circleObstacles": [],
+            "eventMarkers": [],
+            "isTrajectoryStale": true
+        },
+        "4AndTwoReversed": {
+            "waypoints": [
+                {
+                    "x": 1.34,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.2956,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.6955999999999998,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.3956,
+                    "y": 4.605275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.88,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.418035952677913,
+                    "y": 6.422573538212681,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.8000871905355824,
+                    "y": 6.885214707642535,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 5.5,
+                    "y": 6.5,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 7.6708750000000006,
+                    "y": 5.781675,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 8.070875000000001,
+                    "y": 5.781675,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 5.5,
+                    "y": 6.5,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                }
+            ],
+            "trajectory": [],
+            "trajectoryWaypoints": [],
+            "constraints": [
+                {
+                    "scope": [
+                        1
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        2,
+                        3
+                    ],
+                    "type": "StraightLine"
+                },
+                {
+                    "scope": [
+                        5
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        7
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        10
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        12,
+                        13
+                    ],
+                    "type": "StraightLine"
+                },
+                {
+                    "scope": [
+                        15
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "first"
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "last"
+                    ],
+                    "type": "StopPoint"
+                }
+            ],
+            "usesControlIntervalGuessing": true,
+            "defaultControlIntervalCount": 40,
+            "usesDefaultFieldObstacles": true,
+            "circleObstacles": [],
+            "eventMarkers": [],
+            "isTrajectoryStale": true
+        },
+        "4AndTwo": {
+            "waypoints": [
+                {
+                    "x": 1.34,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.418035952677913,
+                    "y": 6.422573538212681,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.8000871905355824,
+                    "y": 6.885214707642535,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.88,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.2956,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.6955999999999998,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.3956,
+                    "y": 4.605275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 5.5,
+                    "y": 6.5,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 7.6708750000000006,
+                    "y": 5.781675,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 8.070875000000001,
+                    "y": 5.781675,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 5.5,
+                    "y": 6.5,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                }
+            ],
+            "trajectory": [],
+            "trajectoryWaypoints": [],
+            "constraints": [
+                {
+                    "scope": [
+                        1
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        4
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        6
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        7,
+                        8
+                    ],
+                    "type": "StraightLine"
+                },
+                {
+                    "scope": [
+                        10
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        12,
+                        13
+                    ],
+                    "type": "StraightLine"
+                },
+                {
+                    "scope": [
+                        15
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "first"
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "last"
+                    ],
+                    "type": "StopPoint"
+                }
+            ],
+            "usesControlIntervalGuessing": true,
+            "defaultControlIntervalCount": 40,
+            "usesDefaultFieldObstacles": true,
+            "circleObstacles": [],
+            "eventMarkers": [],
+            "isTrajectoryStale": true
+        },
+        "4AndThreeReversed": {
+            "waypoints": [
+                {
+                    "x": 1.34,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.2956,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.6955999999999998,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.3956,
+                    "y": 4.605275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.88,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.418035952677913,
+                    "y": 6.422573538212681,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.8000871905355824,
+                    "y": 6.885214707642535,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 4.4,
+                    "y": 5.0,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 6.0,
+                    "y": 4.0,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 7.6708750000000006,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 8.070875000000001,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 6.0,
+                    "y": 4.0,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 4.4,
+                    "y": 5.0,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                }
+            ],
+            "trajectory": [],
+            "trajectoryWaypoints": [],
+            "constraints": [
+                {
+                    "scope": [
+                        1
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        2,
+                        3
+                    ],
+                    "type": "StraightLine"
+                },
+                {
+                    "scope": [
+                        5
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        7
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        10
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        13,
+                        14
+                    ],
+                    "type": "StraightLine"
+                },
+                {
+                    "scope": [
+                        17
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "first"
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "last"
+                    ],
+                    "type": "StopPoint"
+                }
+            ],
+            "usesControlIntervalGuessing": true,
+            "defaultControlIntervalCount": 40,
+            "usesDefaultFieldObstacles": true,
+            "circleObstacles": [],
+            "eventMarkers": [],
+            "isTrajectoryStale": true
+        },
+        "4AndThree": {
+            "waypoints": [
+                {
+                    "x": 1.34,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.418035952677913,
+                    "y": 6.422573538212681,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.8000871905355824,
+                    "y": 6.885214707642535,
+                    "heading": 4.022110333124944,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.88,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.2956,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.6955999999999998,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.3956,
+                    "y": 4.605275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 4.4,
+                    "y": 5.0,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 6.0,
+                    "y": 4.0,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 7.6708750000000006,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 8.070875000000001,
+                    "y": 4.105275,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 6.0,
+                    "y": 4.0,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 4.4,
+                    "y": 5.0,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 1.7,
+                    "y": 5.553075,
+                    "heading": 3.141592653589793,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                }
+            ],
+            "trajectory": [],
+            "trajectoryWaypoints": [],
+            "constraints": [
+                {
+                    "scope": [
+                        1
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        4
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        6
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        7,
+                        8
+                    ],
+                    "type": "StraightLine"
+                },
+                {
+                    "scope": [
+                        10
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        13,
+                        14
+                    ],
+                    "type": "StraightLine"
+                },
+                {
+                    "scope": [
+                        17
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "first"
+                    ],
+                    "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        "last"
+                    ],
+                    "type": "StopPoint"
+                }
+            ],
+            "usesControlIntervalGuessing": true,
+            "defaultControlIntervalCount": 40,
+            "usesDefaultFieldObstacles": true,
+            "circleObstacles": [],
+            "eventMarkers": [],
+            "isTrajectoryStale": true
+        }
+    },
+    "splitTrajectoriesAtStopPoints": true,
+    "usesObstacles": false
+}
