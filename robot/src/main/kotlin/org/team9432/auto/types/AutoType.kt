@@ -1,8 +1,8 @@
 package org.team9432.auto.types
 
-import org.team9432.auto.AutoSelectorOptions
 import org.team9432.auto.paths.AutoFieldConstants.CenterNote
 import org.team9432.auto.paths.AutoFieldConstants.CenterNote.*
+import org.team9432.lib.dashboard.AutoSelector
 
 sealed interface Auto {
     val name: String
@@ -34,10 +34,15 @@ object AutoType {
                         add(FourNote(ampFirst, centerNote))
             }
 
-            fun AutoSelectorOptions.applyFourNoteSelectorOptions() {
+            fun AutoSelector.AutoSelectorQuestionScope.applyFourNoteSelectorOptions() {
                 addQuestion("Start Note") {
                     addOption("Amp")
-                    addOption("Stage")
+                    addOption("Stage") {
+                        addQuestion("Really?") {
+                            addOption("Yes")
+                            addOption("Not really")
+                        }
+                    }
                 }
 
                 addQuestion("End Action") {
