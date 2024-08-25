@@ -55,11 +55,11 @@ object FourNotePaths {
                 if (returning) {
                     val far = addTranslationWaypoint(FOUR_NOTE_THROUGH_STAGE_DRIVE_FAR)
                     val close = addTranslationWaypoint(FOUR_NOTE_THROUGH_STAGE_DRIVE_CLOSE)
-                    addConstraint(StraightLine(ConstraintScope.betweenWaypoints(far, close)))
+                    addConstraint(StraightLine(far, close))
                 } else {
                     val close = addTranslationWaypoint(FOUR_NOTE_THROUGH_STAGE_DRIVE_CLOSE)
                     val far = addTranslationWaypoint(FOUR_NOTE_THROUGH_STAGE_DRIVE_FAR)
-                    addConstraint(StraightLine(ConstraintScope.betweenWaypoints(close, far)))
+                    addConstraint(StraightLine(close, far))
                 }
             }
 
@@ -70,7 +70,7 @@ object FourNotePaths {
 
         val alignPose = addPoseWaypoint(getCenterNoteAlignPose(note))
         val intakePose = addPoseWaypoint(getCenterNoteIntakePose(note))
-        addConstraint(StraightLine(ConstraintScope.betweenWaypoints(alignPose, intakePose)))
+        addConstraint(StraightLine(alignPose, intakePose))
 
         travelPath?.invoke(/*returning =*/true)
 
@@ -98,7 +98,7 @@ object FourNotePaths {
             STAGE -> {
                 val straightLineStart = addPoseWaypoint(FOUR_NOTE_STAGE_ALIGN)
                 val straightLineEnd = addPoseWaypoint(FOUR_NOTE_STAGE_PICKUP)
-                addConstraint(StraightLine(ConstraintScope.betweenWaypoints(straightLineStart, straightLineEnd)))
+                addConstraint(StraightLine(straightLineStart, straightLineEnd))
                 addTranslationWaypoint(FOUR_NOTE_STAGE_EXIT)
                 addPoseWaypoint(FOUR_NOTE_SHOT, stopPoint = true)
             }
