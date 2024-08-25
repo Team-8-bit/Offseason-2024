@@ -25,7 +25,7 @@ object AutoType {
             }
 
         companion object {
-            val validCenterNotes = setOf(null, ONE, TWO, THREE)
+            val validCenterNotes = setOf(null, ONE, TWO, THREE, FOUR)
 
             val options = buildSet {
                 for (ampFirst in setOf(false, true))

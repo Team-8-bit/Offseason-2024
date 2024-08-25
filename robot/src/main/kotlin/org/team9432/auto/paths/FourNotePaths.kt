@@ -46,18 +46,20 @@ object FourNotePaths {
     }
 
     private fun ChoreoTrajectoryBuilder.centerNote(note: CenterNote) {
-        if (note != ONE && note != TWO && note != THREE) throw UnsupportedOperationException("Note ${note.name} is not supported!")
+        if (note !in AutoType.FourNote.validCenterNotes) throw UnsupportedOperationException("Note ${note.name} is not supported!")
 
         val travelPath: ((Boolean) -> Unit)? = when (note) {
             ONE -> null
             TWO -> { _ -> addTranslationWaypoint(FOUR_NOTE_ABOVE_STAGE_DRIVE) }
-            THREE -> { returning ->
+            THREE, FOUR -> { returning ->
                 if (returning) {
-                    addTranslationWaypoint(FOUR_NOTE_THROUGH_STAGE_DRIVE_FAR)
-                    addTranslationWaypoint(FOUR_NOTE_THROUGH_STAGE_DRIVE_CLOSE)
+                    val far = addTranslationWaypoint(FOUR_NOTE_THROUGH_STAGE_DRIVE_FAR)
+                    val close = addTranslationWaypoint(FOUR_NOTE_THROUGH_STAGE_DRIVE_CLOSE)
+                    addConstraint(StraightLine(ConstraintScope.betweenWaypoints(far, close)))
                 } else {
-                    addTranslationWaypoint(FOUR_NOTE_THROUGH_STAGE_DRIVE_CLOSE)
-                    addTranslationWaypoint(FOUR_NOTE_THROUGH_STAGE_DRIVE_FAR)
+                    val close = addTranslationWaypoint(FOUR_NOTE_THROUGH_STAGE_DRIVE_CLOSE)
+                    val far = addTranslationWaypoint(FOUR_NOTE_THROUGH_STAGE_DRIVE_FAR)
+                    addConstraint(StraightLine(ConstraintScope.betweenWaypoints(close, far)))
                 }
             }
 
