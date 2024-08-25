@@ -1,5 +1,6 @@
 package org.team9432.auto.paths
 
+import org.team9432.auto.types.AutoType
 import org.team9432.choreogenerator.ChoreoFile
 import org.team9432.choreogenerator.ChoreoRobotConfiguration
 import org.team9432.lib.unit.inches
@@ -25,11 +26,11 @@ fun main() {
     val outputFile = File("output.chor") // This magically appears in the right place, but I don't know why
 
     val time = measureTimeMillis {
-        val choreFile = ChoreoFile(outputFile, OSR2024Config, splitTrajectoriesAtStopPoints = true)
+        val choreoFile = ChoreoFile(outputFile, OSR2024Config, splitTrajectoriesAtStopPoints = true)
 
-        FourNote.getAllPossibilities().forEach { choreFile.addPath(it) }
+        AutoType.FourNote.options.forEach { choreoFile.addPath(FourNotePaths.generateFourNote(it)) }
 
-        choreFile.outputToFile()
+        choreoFile.outputToFile()
     }
 
     println("Generated file ${outputFile.absolutePath} in ${time}ms")

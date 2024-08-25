@@ -3,12 +3,13 @@ package org.team9432.auto.paths
 import org.team9432.auto.paths.AutoFieldConstants.CenterNote
 import org.team9432.auto.paths.AutoFieldConstants.CenterNote.*
 import org.team9432.auto.paths.AutoFieldConstants.CloseNote.*
+import org.team9432.auto.types.AutoType
 import org.team9432.choreogenerator.*
 import org.team9432.choreogenerator.ChoreoTrajectory.ChoreoTrajectoryBuilder
 import org.team9432.lib.unit.degrees
 import org.team9432.lib.unit.meters
 
-object FourNote {
+object FourNotePaths {
     private val FOUR_NOTE_START = Position(1.34.meters, AutoFieldConstants.speakerYCoordinate, 180.0.degrees)
     private val FOUR_NOTE_SHOT = Position(1.7.meters, AutoFieldConstants.speakerYCoordinate, 180.0.degrees)
     private val FOUR_NOTE_AMP_ALIGN = AutoFieldConstants.ampNote.copy().moveTowards(FOUR_NOTE_SHOT, 0.75.meters).pointAwayFrom(AutoFieldConstants.ampNote)
@@ -22,33 +23,15 @@ object FourNote {
     private val FOUR_NOTE_THROUGH_STAGE_DRIVE_CLOSE = Position(4.4.meters, 5.meters, 180.0.degrees)
     private val FOUR_NOTE_THROUGH_STAGE_DRIVE_FAR = Position(6.meters, 4.meters, 180.0.degrees)
 
-    fun getAllPossibilities(): List<ChoreoTrajectory> {
-        val trajectories = mutableListOf<ChoreoTrajectory>()
-        val centerNoteOptions = listOf(null, ONE, TWO, THREE)
-
-        for (centerNote in centerNoteOptions) {
-            for (reversed in listOf(true, false)) {
-                val centerNoteName = centerNote?.readableName ?: "Nothing"
-                val reversedName = if (reversed) "Reversed" else ""
-                val name = "4And$centerNoteName$reversedName"
-
-                val traj = generateFourNote(name, reversed, centerNote)
-                trajectories.add(traj)
-            }
-        }
-
-        return trajectories
-    }
-
-    fun generateFourNote(name: String, reversed: Boolean, centerNote: CenterNote?) = ChoreoTrajectory.new(name) {
+    fun generateFourNote(config: AutoType.FourNote) = ChoreoTrajectory.new(config.name) {
         preload()
 
-        val noteList = if (reversed) listOf(STAGE, SPEAKER, AMP) else listOf(AMP, SPEAKER, STAGE)
+        val noteList = if (config.ampFirst) listOf(AMP, SPEAKER, STAGE) else listOf(STAGE, SPEAKER, AMP)
 
         noteList.forEach { closeNote(it) }
 
-        if (centerNote != null) {
-            centerNote(centerNote)
+        if (config.centerNote != null) {
+            centerNote(config.centerNote)
         }
     }
 
