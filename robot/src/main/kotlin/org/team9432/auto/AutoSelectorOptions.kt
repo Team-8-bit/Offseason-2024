@@ -1,41 +1,46 @@
 package org.team9432.auto
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import java.util.*
 
-class AutoSelectorOptions private constructor(val buildQuestions: AutoSelectorOptions.() -> Unit) {
+
+/**
+ * Class for selecting different auto configurations.
+ *
+ */
+class AutoSelectorOptions private constructor() {
     companion object {
-        fun build(buildQuestions: AutoSelectorOptions.() -> Unit) = AutoSelectorOptions(buildQuestions)
+        fun build(buildQuestions: AutoSelectorOptions.() -> Unit) = AutoSelectorOptions().apply(buildQuestions)
     }
 
-    var questions = mutableListOf<AutoSelectorQuestion>()
+    private val questions = mutableListOf<AutoSelectorQuestion>()
 
     fun update(choosers: Queue<AutoChooser.ChooserPair>) {
-        questions.clear()
-        buildQuestions()
-
         questions.forEach { it.update(choosers) }
     }
 
     fun addQuestion(question: String, addOptions: AutoSelectorQuestion.() -> Unit) {
-        questions.add(AutoSelectorQuestion(question).apply { addOptions() })
+        questions.add(AutoSelectorQuestion(question).apply(addOptions))
     }
 
-    class AutoSelectorQuestion internal constructor(val question: String) {
-        val options = mutableMapOf<String, AutoSelectorOptions?>()
+    class AutoSelectorQuestion internal constructor(private val question: String) {
+        private val options = mutableMapOf<String, AutoSelectorOptions?>()
 
         internal fun update(choosers: Queue<AutoChooser.ChooserPair>) {
-            val targetChooser = choosers.poll()
-            val newAnswer = targetChooser.chooser.get()
-            SmartDashboard.putString(targetChooser.questionKey, question)
-            targetChooser.chooser.setOptions(options.keys.toTypedArray())
+            val targetChooser = choosers.poll() // Take the first chooser in the list
+            targetChooser.update(question, options.keys) // Display question
 
-            options.get(newAnswer)?.update(choosers)
+            // Update the nested questions
+            val answer = targetChooser.chooser.get()
+            options[answer]?.update(choosers)
         }
 
-        fun addOption(answer: String, buildQuestions: AutoSelectorOptions.() -> Unit) {
-            val update = AutoSelectorOptions(buildQuestions)
-            options.put(answer, update)
+        fun addOption(answer: String, buildQuestions: (AutoSelectorOptions.() -> Unit)? = null) {
+            if (buildQuestions != null) {
+                options[answer] = AutoSelectorOptions().apply(buildQuestions)
+            } else {
+                options[answer] = null
+            }
         }
     }
+
 }

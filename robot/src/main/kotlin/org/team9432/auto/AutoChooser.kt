@@ -10,21 +10,20 @@ import java.util.*
 import kotlin.time.Duration.Companion.seconds
 
 object AutoChooser {
-    val typeChooser = SwitchableChooser("Auto Type")
-
     data class ChooserPair(val chooser: SwitchableChooser, val questionKey: String) {
-        fun reset() {
-            SmartDashboard.putString(questionKey, "")
-            chooser.setOptions(emptyArray())
+        fun reset() = update("", emptySet())
+
+        fun update(question: String, options: Collection<String>) {
+            SmartDashboard.putString(questionKey, question)
+            chooser.setOptions(options.toTypedArray())
         }
     }
 
-    val chooserCount = 5
+    const val CHOOSER_COUNT = 5
 
-    val choosers = List(chooserCount) { ChooserPair(SwitchableChooser("Option $it Chooser"), "Option $it Question") }
+    private val choosers = List(CHOOSER_COUNT) { ChooserPair(SwitchableChooser("Option $it Chooser"), "Option $it Question") }
 
     init {
-        typeChooser.setOptions(arrayOf("<NA>", "Four Note"))
         RobotScope.launch {
             while (true) {
                 update()
@@ -35,9 +34,7 @@ object AutoChooser {
 
     val chooser = AutoSelectorOptions.build {
         addQuestion("Which Auto?") {
-            addOption("<NA>") {
-
-            }
+            addOption("<NA>")
 
             addOption("Four Note") {
                 applyFourNoteSelectorOptions()
@@ -49,37 +46,5 @@ object AutoChooser {
         val chooquoo: Queue<ChooserPair> = LinkedList(choosers)
         chooser.update(chooquoo)
         chooquoo.toList().forEach { it.reset() }
-
-
-//        when (typeChooser.get()) {
-//            null -> choosers.forEach { it.reset() }
-//
-//            "Four Note" -> {
-//                val chooquoo: Queue<ChooserPair> = LinkedList(choosers)
-//                AutoType.FourNote.selectorOptions.update(chooquoo)
-//                chooquoo.toList().forEach { it.reset() }
-//
-////                questions.questions.forEachIndexed { index, it ->
-////                    val (chooser, questionKey) = choosers[index]
-////
-////                    SmartDashboard.putString(questionKey, it.question)
-////                    chooser.setOptions(it.options.keys.toTypedArray())
-////                }
-//
-//
-////                AutoType.FourNote.getOptions().entries.forEachIndexed { index, entry ->
-////                    val (chooser, questionKey) = choosers[index]
-////
-////                    SmartDashboard.putString(questionKey, entry.key)
-////                    chooser.setOptions(entry.value.toTypedArray())
-////                }
-//            }
-//        }
-//        RobotScope.launch {
-//            delay(5.seconds)
-//
-//            typeChooser.setOptions(arrayOf("ooh", "look it works"))
-//            delay(4.seconds)
-//            typeChooser.setOptions(arrayOf("this is cool", "look it works", "three"))
     }
 }

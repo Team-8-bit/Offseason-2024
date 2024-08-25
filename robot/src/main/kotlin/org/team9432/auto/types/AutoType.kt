@@ -34,41 +34,27 @@ object AutoType {
                         add(FourNote(ampFirst, centerNote))
             }
 
-            enum class EndAction {
-                NOTHING, DRIVE_TO_CENTER, SCORE_CENTER
-            }
-
-            var ampFirst = true
-            var centerNote: CenterNote? = null
-            var endAction: EndAction = EndAction.NOTHING
-
             fun AutoSelectorOptions.applyFourNoteSelectorOptions() {
                 addQuestion("Start Note") {
-                    addOption("Amp") { ampFirst = true }
-                    addOption("Stage") { ampFirst = false }
+                    addOption("Amp")
+                    addOption("Stage")
                 }
 
                 addQuestion("End Action") {
-                    addOption("Nothing") { endAction = EndAction.NOTHING }
+                    addOption("Nothing")
 
                     addOption("Drive To Center") {
-                        endAction = EndAction.DRIVE_TO_CENTER
-
                         addQuestion("Center End Position") {
                             //examples
-                            addOption("Source") {}
-                            addOption("Center") {}
-                            addOption("Amp") {}
+                            addOption("Source")
+                            addOption("Center")
+                            addOption("Amp")
                         }
                     }
 
                     addOption("Score Centerline") {
-                        endAction = EndAction.SCORE_CENTER
-
                         addQuestion("Which Note") {
-                            validCenterNotes.filterNotNull().forEach {
-                                addOption(it.readableName) { centerNote = it }
-                            }
+                            validCenterNotes.filterNotNull().forEach { addOption(it.readableName) }
                         }
                     }
                 }

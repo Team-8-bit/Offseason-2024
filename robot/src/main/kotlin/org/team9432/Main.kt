@@ -2,6 +2,7 @@
 package org.team9432
 
 import edu.wpi.first.net.PortForwarder
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import org.team9432.auto.Auto
 import org.team9432.auto.AutoChooser
@@ -38,6 +39,8 @@ object Robot: CoroutineRobot(useActionManager = false) {
         `LEDs!`
 
         AutoChooser
+
+        DriverStation.silenceJoystickConnectionWarning(true)
     }
 
     override suspend fun teleop() {
