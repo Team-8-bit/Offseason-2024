@@ -28,7 +28,7 @@ fun main() {
     val time = measureTimeMillis {
         val choreoFile = ChoreoFile(outputFile, OSR2024Config, splitTrajectoriesAtStopPoints = true)
 
-        AutoType.FourNote.options.forEach { choreoFile.addPath(FourNotePaths.generateFourNote(it)) }
+        AutoType.FourNote.options.forEach { choreoFile.addPath(FourNotePaths.generate(it)) }
 
         choreoFile.outputToFile()
     }

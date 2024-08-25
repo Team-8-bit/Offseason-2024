@@ -23,7 +23,17 @@ object FourNotePaths {
     private val FOUR_NOTE_THROUGH_STAGE_DRIVE_CLOSE = Position(4.4.meters, 5.meters, 180.0.degrees)
     private val FOUR_NOTE_THROUGH_STAGE_DRIVE_FAR = Position(6.meters, 4.meters, 180.0.degrees)
 
-    fun generateFourNote(config: AutoType.FourNote) = ChoreoTrajectory.new(config.name) {
+    private fun getCenterNoteAlignPose(note: CenterNote): Position {
+        val notePose = AutoFieldConstants.getNotePose(note)
+        return notePose.copy().moveX(-.6.meters).pointAwayFrom(notePose)
+    }
+
+    private fun getCenterNoteIntakePose(note: CenterNote): Position {
+        val notePose = AutoFieldConstants.getNotePose(note)
+        return notePose.copy().moveX(-.2.meters).pointAwayFrom(notePose)
+    }
+
+    fun generate(config: AutoType.FourNote) = ChoreoTrajectory.new(config.name) {
         preload()
 
         val noteList = if (config.ampFirst) listOf(AMP, SPEAKER, STAGE) else listOf(STAGE, SPEAKER, AMP)
@@ -33,16 +43,6 @@ object FourNotePaths {
         if (config.centerNote != null) {
             centerNote(config.centerNote)
         }
-    }
-
-    private fun getCenterNoteAlignPose(note: CenterNote): Position {
-        val notePose = AutoFieldConstants.getNotePose(note)
-        return notePose.copy().moveX(-.6.meters).pointAwayFrom(notePose)
-    }
-
-    private fun getCenterNoteIntakePose(note: CenterNote): Position {
-        val notePose = AutoFieldConstants.getNotePose(note)
-        return notePose.copy().moveX(-.2.meters).pointAwayFrom(notePose)
     }
 
     private fun ChoreoTrajectoryBuilder.centerNote(note: CenterNote) {
