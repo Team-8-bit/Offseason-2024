@@ -3,10 +3,8 @@ package org.team9432
 import edu.wpi.first.math.geometry.*
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.Timer
-import kotlinx.coroutines.CancellableContinuation
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import kotlinx.coroutines.*
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.coroutines.RobotScope
 import org.team9432.lib.doglog.Logger
@@ -38,16 +36,27 @@ object NoteVisualizer {
         Transform2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(-8.0), Rotation2d())
     )
 
+    private val noteRegenJobs = mutableListOf<Job>()
+
     init {
         whenSimulated { // We don't want this running on the actual robot
             RobotScope.launch {
                 while (true) {
                     render()
+
+                    if (SmartDashboard.getBoolean("NoteVisualizer/ResetNotes", false)) {
+                        fieldNotes.addAll(FieldConstants.allNotes)
+                        noteRegenJobs.forEach { it.cancel() }
+                        SmartDashboard.putBoolean("NoteVisualizer/ResetNotes", false)
+                    }
+
                     delay(5.milliseconds)
                 }
             }
 
             RobotPeriodicManager.startPeriodic { checkCollectedNotes() }
+
+            SmartDashboard.putBoolean("NoteVisualizer/ResetNotes", false)
         }
     }
 
@@ -86,10 +95,11 @@ object NoteVisualizer {
                     awaitingContinuations.clear()
 
                     fieldNotes.remove(note)
-                    RobotScope.launch {
+                    val job = RobotScope.launch {
                         delay(30.seconds)
                         fieldNotes.add(note)
                     }
+                    noteRegenJobs.add(job)
                 }
             }
         }
