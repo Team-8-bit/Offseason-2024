@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import org.team9432.auto.AutoChooser
 import org.team9432.auto.FourNote
-import org.team9432.auto.paths.AutoFieldConstants
 import org.team9432.auto.types.AutoType
 import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.coroutines.robotPeriodic
@@ -52,7 +51,16 @@ object Robot: CoroutineRobot(useActionManager = false) {
 
     override suspend fun autonomous() {
         RobotController.setAction {
-            FourNote.run(AutoType.FourNote(ampFirst = false, centerNote = AutoFieldConstants.CenterNote.TWO))
+            val selectedAuto = AutoChooser.getAuto()
+
+            if (selectedAuto == null) {
+                println("[Error] Auto was null")
+                return@setAction
+            }
+
+            when (selectedAuto) {
+                is AutoType.FourNote -> FourNote.run(selectedAuto)
+            }
         }
     }
 

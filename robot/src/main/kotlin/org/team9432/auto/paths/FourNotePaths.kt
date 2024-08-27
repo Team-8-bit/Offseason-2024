@@ -4,6 +4,7 @@ import org.team9432.auto.paths.AutoFieldConstants.CenterNote
 import org.team9432.auto.paths.AutoFieldConstants.CenterNote.*
 import org.team9432.auto.paths.AutoFieldConstants.CloseNote.*
 import org.team9432.auto.types.AutoType
+import org.team9432.auto.types.AutoType.FourNote.EndAction.*
 import org.team9432.choreogenerator.ChoreoTrajectory
 import org.team9432.choreogenerator.MaxAngVelocity
 import org.team9432.choreogenerator.Position
@@ -43,15 +44,21 @@ object FourNotePaths {
     fun generate(config: AutoType.FourNote): List<ChoreoTrajectory> {
         val fourNote = basicFourNote(config.ampFirst)
 
-        val centerNote = config.centerNote?.let { centerNote(it) }
+        return when (config.endAction) {
+            DO_NOTHING -> fourNote
+            SCORE_CENTERLINE -> fourNote + centerNote(config.centerNote)
+            DRIVE_TO_CENTER -> fourNote + driveToCenterEnd()
+        }
+    }
 
-        if (centerNote == null) return fourNote
-        else return fourNote + centerNote
+    private fun driveToCenterEnd() = ChoreoTrajectory.new("${AUTO_KEY}DriveToCenterEnd") {
+        addPoseWaypoint(FOUR_NOTE_SHOT)
+        addTranslationWaypoint(getCenterNoteAlignPose(ONE))
     }
 
     private fun centerNote(note: CenterNote) = ChoreoTrajectory.new("${AUTO_KEY}Center${note.readableName}") {
         if (note !in AutoType.FourNote.validCenterNotes) throw UnsupportedOperationException("Note ${note.name} is not supported!")
-        addPoseWaypoint(FOUR_NOTE_SHOT, stopPoint = true)
+        addPoseWaypoint(FOUR_NOTE_SHOT)
 
         val travelPath: ((Boolean) -> Unit)? = when (note) {
             ONE -> null
@@ -79,12 +86,12 @@ object FourNotePaths {
 
         travelPath?.invoke(/*returning =*/true)
 
-        addPoseWaypoint(FOUR_NOTE_SHOT, stopPoint = true)
+        addPoseWaypoint(FOUR_NOTE_SHOT)
     }
 
     private fun preload() = ChoreoTrajectory.new("${AUTO_KEY}Preload") {
         addPoseWaypoint(FOUR_NOTE_START)
-        addPoseWaypoint(FOUR_NOTE_SHOT, stopPoint = true)
+        addPoseWaypoint(FOUR_NOTE_SHOT)
     }
 
     private fun basicFourNote(ampFirst: Boolean): List<ChoreoTrajectory> {
@@ -94,7 +101,7 @@ object FourNotePaths {
     }
 
     private fun closeNote(note: AutoFieldConstants.CloseNote) = ChoreoTrajectory.new("${AUTO_KEY}Close${note.readableName}") {
-        addPoseWaypoint(FOUR_NOTE_SHOT, stopPoint = true)
+        addPoseWaypoint(FOUR_NOTE_SHOT)
 
         when (note) {
             AMP -> {
@@ -102,12 +109,12 @@ object FourNotePaths {
                 val pickup = addPoseWaypoint(FOUR_NOTE_AMP_PICKUP)
                 addConstraint(StraightLine(align, pickup))
                 addTranslationWaypoint(FOUR_NOTE_AMP_EXIT)
-                addPoseWaypoint(FOUR_NOTE_SHOT, stopPoint = true)
+                addPoseWaypoint(FOUR_NOTE_SHOT)
             }
 
             SPEAKER -> {
                 addPoseWaypoint(FOUR_NOTE_SPEAKER_PICKUP)
-                addPoseWaypoint(FOUR_NOTE_SHOT, stopPoint = true)
+                addPoseWaypoint(FOUR_NOTE_SHOT)
             }
 
             STAGE -> {
@@ -115,7 +122,7 @@ object FourNotePaths {
                 val pickup = addPoseWaypoint(FOUR_NOTE_STAGE_PICKUP)
                 addConstraint(StraightLine(align, pickup))
                 addTranslationWaypoint(FOUR_NOTE_STAGE_EXIT)
-                addPoseWaypoint(FOUR_NOTE_SHOT, stopPoint = true)
+                addPoseWaypoint(FOUR_NOTE_SHOT)
             }
         }
     }

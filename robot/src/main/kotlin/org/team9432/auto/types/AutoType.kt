@@ -1,69 +1,62 @@
 package org.team9432.auto.types
 
 import org.team9432.auto.paths.AutoFieldConstants.CenterNote
-import org.team9432.auto.paths.AutoFieldConstants.CenterNote.*
+import org.team9432.auto.paths.AutoFieldConstants.CloseNote
 import org.team9432.lib.dashboard.AutoSelector
 
-sealed interface Auto {
-    val name: String
-}
+sealed interface Auto
 
 object AutoType {
     data class FourNote(
         val ampFirst: Boolean,
-        val centerNote: CenterNote?,
+        val endAction: EndAction,
+        val centerNote: CenterNote,
     ): Auto {
         init {
             assert(centerNote in validCenterNotes)
         }
 
-        override val name: String
-            get() {
-                val ampFirst = if (ampFirst) "AmpFirst" else ""
-                val centerNote = centerNote?.readableName?.let { "AndCenter$it" } ?: ""
-
-                return "${ampFirst}CloseFour$centerNote"
-            }
-
         companion object {
-            val validCenterNotes = setOf(null, ONE, TWO, THREE, FOUR)
+            val validCenterNotes = setOf(CenterNote.ONE, CenterNote.TWO, CenterNote.THREE, CenterNote.FOUR)
 
             val options = buildSet {
                 for (ampFirst in setOf(false, true))
                     for (centerNote in validCenterNotes)
-                        add(FourNote(ampFirst, centerNote))
+                        for (endAction in EndAction.entries)
+                            add(FourNote(ampFirst, endAction, centerNote))
             }
 
-            fun AutoSelector.AutoSelectorQuestionScope.applyFourNoteSelectorOptions() {
-                addQuestion("Start Note") {
-                    addOption("Amp")
-                    addOption("Stage") {
-                        addQuestion("Really?") {
-                            addOption("Yes")
-                            addOption("Not really")
-                        }
-                    }
-                }
 
-                addQuestion("End Action") {
-                    addOption("Nothing")
+            fun addOptionToSelector(selector: AutoSelector.AutoSelectorOptionScope<Auto>) = selector.apply {
+                var ampFirst: Boolean = false
+                var centerNote: CenterNote = CenterNote.ONE
+                var endAction: EndAction = EndAction.DO_NOTHING
+                val getAuto = { FourNote(ampFirst, endAction, centerNote) }
 
-                    addOption("Drive To Center") {
-                        addQuestion("Center End Position") {
-                            //examples
-                            addOption("Source")
-                            addOption("Center")
-                            addOption("Amp")
-                        }
+                addOption("FourNote", getAuto) {
+                    addQuestion("Start Note", { ampFirst = it == CloseNote.AMP }) {
+                        addOption("Amp", { CloseNote.AMP })
+                        addOption("Stage", { CloseNote.STAGE })
                     }
 
-                    addOption("Score Centerline") {
-                        addQuestion("Which Note") {
-                            validCenterNotes.filterNotNull().forEach { addOption(it.readableName) }
+                    addQuestion("End Action", { endAction = it }) {
+                        addOption("Nothing", { EndAction.DO_NOTHING })
+                        addOption("Drive To Center", { EndAction.DRIVE_TO_CENTER })
+
+                        addOption("Score Centerline", { EndAction.SCORE_CENTERLINE }) {
+                            addQuestion("Which Note", { centerNote = it }) {
+                                validCenterNotes.forEach {
+                                    addOption(it.readableName, { it })
+                                }
+                            }
                         }
                     }
                 }
             }
+        }
+
+        enum class EndAction {
+            DO_NOTHING, DRIVE_TO_CENTER, SCORE_CENTERLINE
         }
     }
 }
