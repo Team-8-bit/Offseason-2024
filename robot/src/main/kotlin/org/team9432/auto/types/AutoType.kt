@@ -2,9 +2,14 @@ package org.team9432.auto.types
 
 import org.team9432.auto.paths.AutoFieldConstants.CenterNote
 import org.team9432.auto.paths.AutoFieldConstants.CloseNote
+import org.team9432.choreogenerator.ChoreoTrajectory
 import org.team9432.lib.dashboard.AutoSelector
 
 sealed interface Auto
+
+class AutoSegment(val name: String, generateTrajectory: ChoreoTrajectory.ChoreoTrajectoryBuilder.() -> Unit) {
+    val builtTrajectory by lazy { ChoreoTrajectory.new(name, block = generateTrajectory) }
+}
 
 object AutoType {
     data class FourNote(
@@ -25,7 +30,6 @@ object AutoType {
                         for (endAction in EndAction.entries)
                             add(FourNote(ampFirst, endAction, centerNote))
             }
-
 
             fun addOptionToSelector(selector: AutoSelector.AutoSelectorOptionScope<Auto>) = selector.apply {
                 var ampFirst: Boolean = false

@@ -20,38 +20,45 @@ import kotlin.time.Duration.Companion.seconds
 
 object FourNote {
     suspend fun run(auto: AutoType.FourNote) {
-        val trajectories = FourNotePaths.generate(auto).map { it.name }.map { ChoreoUtil.getTrajectoryWithCache(it) }
+        val trajectories = FourNotePaths.getSegmentsFor(auto).map { ChoreoUtil.getTrajectoryWithCache(it.name) }
 
         when (auto.endAction) {
             DO_NOTHING -> {
-                val (firstPath, firstNote, secondNote, thirdNote) = trajectories
-
-                runFourNote(firstPath, firstNote, secondNote, thirdNote)
+                val (preload, firstNote, secondNote, thirdNote) = trajectories
+                preload(preload)
+                scoreNote(firstNote)
+                scoreNote(secondNote)
+                scoreNote(thirdNote)
             }
-            SCORE_CENTERLINE -> {
-                val (firstPath, firstNote, secondNote, thirdNote, centerNote) = trajectories
 
-                runFourNote(firstPath, firstNote, secondNote, thirdNote)
+            SCORE_CENTERLINE -> {
+                val (preload, firstNote, secondNote, thirdNote, centerNote) = trajectories
+                preload(preload)
+                scoreNote(firstNote)
+                scoreNote(secondNote)
+                scoreNote(thirdNote)
                 scoreNote(centerNote)
             }
-            DRIVE_TO_CENTER -> {
-                val (firstPath, firstNote, secondNote, thirdNote, driveToCenter) = trajectories
 
-                runFourNote(firstPath, firstNote, secondNote, thirdNote)
+            DRIVE_TO_CENTER -> {
+                val (preload, firstNote, secondNote, thirdNote, driveToCenter) = trajectories
+                preload(preload)
+                scoreNote(firstNote)
+                scoreNote(secondNote)
+                scoreNote(thirdNote)
                 Shooter.setState(Shooter.State.IDLE)
-                Swerve.followChoreo(driveToCenter)
+                driveToCenterEnd(driveToCenter)
             }
         }
 
         Shooter.setState(Shooter.State.IDLE)
     }
 
-    private suspend fun runFourNote(
-        firstPath: ChoreoTrajectory,
-        firstNote: ChoreoTrajectory,
-        secondNote: ChoreoTrajectory,
-        thirdNote: ChoreoTrajectory,
-    ) {
+    private suspend fun driveToCenterEnd(driveToCenter: ChoreoTrajectory) {
+        Swerve.followChoreo(driveToCenter)
+    }
+
+    private suspend fun preload(firstPath: ChoreoTrajectory) {
         Swerve.seedFieldRelative(firstPath.getAutoFlippedInitialPose())
 
         Shooter.setState(Shooter.State.VISION_SHOOT)
@@ -60,15 +67,11 @@ object FourNote {
             { simDelay(1.seconds) }
         )
         Actions.visionShoot(spindown = false)
-
-        scoreNotes(firstNote, secondNote, thirdNote)
     }
 
-    private suspend fun scoreNotes(vararg notes: ChoreoTrajectory) = notes.forEach { scoreNote(it) }
-
-    private suspend fun scoreNote(ampNote: ChoreoTrajectory) = coroutineScope {
+    private suspend fun scoreNote(note: ChoreoTrajectory) = coroutineScope {
         val intakingJob = launch { Actions.intake() }
-        Swerve.followChoreo(ampNote)
+        Swerve.followChoreo(note)
 
         if (!Beambreaks.hasNote) {
             intakingJob.cancelAndJoin()

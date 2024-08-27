@@ -3,10 +3,9 @@ package org.team9432.auto.paths
 import org.team9432.auto.paths.AutoFieldConstants.CenterNote
 import org.team9432.auto.paths.AutoFieldConstants.CenterNote.*
 import org.team9432.auto.paths.AutoFieldConstants.CloseNote.*
+import org.team9432.auto.types.AutoSegment
 import org.team9432.auto.types.AutoType
 import org.team9432.auto.types.AutoType.FourNote.EndAction.*
-import org.team9432.choreogenerator.ChoreoTrajectory
-import org.team9432.choreogenerator.MaxAngVelocity
 import org.team9432.choreogenerator.Position
 import org.team9432.choreogenerator.StraightLine
 import org.team9432.lib.unit.degrees
@@ -31,17 +30,7 @@ object FourNotePaths {
     private val FOUR_NOTE_THROUGH_STAGE_DRIVE_MIDDLE = Position(5.meters, 4.3.meters, 180.0.degrees)
     private val FOUR_NOTE_THROUGH_STAGE_DRIVE_FAR = Position(6.meters, 4.meters, 180.0.degrees)
 
-    private fun getCenterNoteAlignPose(note: CenterNote): Position {
-        val notePose = AutoFieldConstants.getNotePose(note)
-        return notePose.copy().moveX(-.6.meters).pointAwayFrom(notePose)
-    }
-
-    private fun getCenterNoteIntakePose(note: CenterNote): Position {
-        val notePose = AutoFieldConstants.getNotePose(note)
-        return notePose.copy().moveX(-.2.meters).pointAwayFrom(notePose)
-    }
-
-    fun generate(config: AutoType.FourNote): List<ChoreoTrajectory> {
+    fun getSegmentsFor(config: AutoType.FourNote): List<AutoSegment> {
         val fourNote = basicFourNote(config.ampFirst)
 
         return when (config.endAction) {
@@ -51,12 +40,12 @@ object FourNotePaths {
         }
     }
 
-    private fun driveToCenterEnd() = ChoreoTrajectory.new("${AUTO_KEY}DriveToCenterEnd") {
+    private fun driveToCenterEnd() = AutoSegment("${AUTO_KEY}DriveToCenterEnd") {
         addPoseWaypoint(FOUR_NOTE_SHOT)
         addTranslationWaypoint(getCenterNoteAlignPose(ONE))
     }
 
-    private fun centerNote(note: CenterNote) = ChoreoTrajectory.new("${AUTO_KEY}Center${note.readableName}") {
+    private fun centerNote(note: CenterNote) = AutoSegment("${AUTO_KEY}Center${note.readableName}") {
         if (note !in AutoType.FourNote.validCenterNotes) throw UnsupportedOperationException("Note ${note.name} is not supported!")
         addPoseWaypoint(FOUR_NOTE_SHOT)
 
@@ -89,18 +78,17 @@ object FourNotePaths {
         addPoseWaypoint(FOUR_NOTE_SHOT)
     }
 
-    private fun preload() = ChoreoTrajectory.new("${AUTO_KEY}Preload") {
+    private val preload = AutoSegment("4NotePreload") {
         addPoseWaypoint(FOUR_NOTE_START)
         addPoseWaypoint(FOUR_NOTE_SHOT)
     }
 
-    private fun basicFourNote(ampFirst: Boolean): List<ChoreoTrajectory> {
+    private fun basicFourNote(ampFirst: Boolean): List<AutoSegment> {
         val noteList = if (ampFirst) listOf(AMP, SPEAKER, STAGE) else listOf(STAGE, SPEAKER, AMP)
-
-        return listOf(preload()) + noteList.map { closeNote(it) }
+        return listOf(preload) + noteList.map { closeNote(it) }
     }
 
-    private fun closeNote(note: AutoFieldConstants.CloseNote) = ChoreoTrajectory.new("${AUTO_KEY}Close${note.readableName}") {
+    private fun closeNote(note: AutoFieldConstants.CloseNote) = AutoSegment("${AUTO_KEY}Close${note.readableName}") {
         addPoseWaypoint(FOUR_NOTE_SHOT)
 
         when (note) {
@@ -125,5 +113,15 @@ object FourNotePaths {
                 addPoseWaypoint(FOUR_NOTE_SHOT)
             }
         }
+    }
+
+    private fun getCenterNoteAlignPose(note: CenterNote): Position {
+        val notePose = AutoFieldConstants.getNotePose(note)
+        return notePose.copy().moveX(-.6.meters).pointAwayFrom(notePose)
+    }
+
+    private fun getCenterNoteIntakePose(note: CenterNote): Position {
+        val notePose = AutoFieldConstants.getNotePose(note)
+        return notePose.copy().moveX(-.2.meters).pointAwayFrom(notePose)
     }
 }
