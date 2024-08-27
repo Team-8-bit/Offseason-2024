@@ -8,6 +8,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.team9432.Actions
 import org.team9432.Beambreaks
+import org.team9432.auto.paths.FourNotePaths
 import org.team9432.auto.types.AutoType
 import org.team9432.lib.coroutines.parallel
 import org.team9432.lib.util.ChoreoUtil.getAutoFlippedInitialPose
@@ -18,7 +19,7 @@ import kotlin.time.Duration.Companion.seconds
 
 object FourNote {
     suspend fun run(auto: AutoType.FourNote) {
-        val trajectories = Choreo.getTrajectoryGroup(auto.name)
+        val trajectories = FourNotePaths.generate(auto).map { it.name }.map { Choreo.getTrajectory(it) }
 
         if (auto.centerNote == null) {
             val (firstPath, firstNote, secondNote, thirdNote) = trajectories

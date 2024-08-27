@@ -4,8 +4,10 @@ package org.team9432
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
-import org.team9432.auto.Auto
 import org.team9432.auto.AutoChooser
+import org.team9432.auto.FourNote
+import org.team9432.auto.paths.AutoFieldConstants
+import org.team9432.auto.types.AutoType
 import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.lib.doglog.Logger
@@ -17,7 +19,6 @@ import org.team9432.resources.swerve.Swerve
 import org.team9432.resources.swerve.wheelDiameterTest
 
 object Robot: CoroutineRobot(useActionManager = false) {
-    private var currentlySelectedAuto: Auto? = null
 
     override suspend fun init() {
         Logger.configureDevelopmentDefaults()
@@ -51,7 +52,7 @@ object Robot: CoroutineRobot(useActionManager = false) {
 
     override suspend fun autonomous() {
         RobotController.setAction {
-            currentlySelectedAuto?.auto?.invoke()
+            FourNote.run(AutoType.FourNote(ampFirst = false, centerNote = AutoFieldConstants.CenterNote.TWO))
         }
     }
 
