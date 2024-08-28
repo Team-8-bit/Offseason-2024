@@ -8,8 +8,8 @@ import kotlinx.coroutines.launch
 import org.team9432.Actions
 import org.team9432.Beambreaks
 import org.team9432.auto.paths.FourNotePaths
-import org.team9432.auto.types.AutoType
-import org.team9432.auto.types.AutoType.FourNote.EndAction.*
+import org.team9432.auto.types.FourNote
+import org.team9432.auto.types.FourNote.EndAction.*
 import org.team9432.lib.coroutines.parallel
 import org.team9432.lib.util.ChoreoUtil
 import org.team9432.lib.util.ChoreoUtil.getAutoFlippedInitialPose
@@ -18,8 +18,8 @@ import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
 import kotlin.time.Duration.Companion.seconds
 
-object FourNote {
-    suspend fun run(auto: AutoType.FourNote) {
+object RobotFourNote {
+    suspend fun run(auto: FourNote) {
         val trajectories = FourNotePaths.getSegmentsFor(auto).map { ChoreoUtil.getTrajectoryWithCache(it.name) }
 
         when (auto.endAction) {

@@ -4,8 +4,8 @@ import org.team9432.auto.paths.AutoFieldConstants.CenterNote
 import org.team9432.auto.paths.AutoFieldConstants.CenterNote.*
 import org.team9432.auto.paths.AutoFieldConstants.CloseNote.*
 import org.team9432.auto.types.AutoSegment
-import org.team9432.auto.types.AutoType
-import org.team9432.auto.types.AutoType.FourNote.EndAction.*
+import org.team9432.auto.types.FourNote
+import org.team9432.auto.types.FourNote.EndAction.*
 import org.team9432.choreogenerator.Position
 import org.team9432.choreogenerator.StraightLine
 import org.team9432.lib.unit.degrees
@@ -32,7 +32,7 @@ object FourNotePaths {
 
     private val SPEAKER_AIM_POSE = Position(0.35.meters, AutoFieldConstants.speakerYCoordinate)
 
-    fun getSegmentsFor(config: AutoType.FourNote): List<AutoSegment> {
+    fun getSegmentsFor(config: FourNote): List<AutoSegment> {
         val fourNote = basicFourNote(config.ampFirst)
 
         return when (config.endAction) {
@@ -48,7 +48,7 @@ object FourNotePaths {
     }
 
     private fun centerNote(note: CenterNote) = AutoSegment("${AUTO_KEY}Center${note.readableName}") {
-        if (note !in AutoType.FourNote.validCenterNotes) throw UnsupportedOperationException("Note ${note.name} is not supported!")
+        if (note !in FourNote.validCenterNotes) throw UnsupportedOperationException("Note ${note.name} is not supported!")
         addPoseWaypoint(FOUR_NOTE_SHOT)
 
         val travelPath: ((Boolean) -> Unit)? = when (note) {

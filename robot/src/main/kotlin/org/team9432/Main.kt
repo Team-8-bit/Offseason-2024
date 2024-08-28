@@ -5,8 +5,8 @@ import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import org.team9432.auto.AutoChooser
-import org.team9432.auto.FourNote
-import org.team9432.auto.types.AutoType
+import org.team9432.auto.RobotFourNote
+import org.team9432.auto.types.FourNote
 import org.team9432.lib.coroutines.CoroutineRobot
 import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.lib.doglog.Logger
@@ -58,7 +58,7 @@ object Robot: CoroutineRobot(useActionManager = false) {
             }
 
             when (selectedAuto) {
-                is AutoType.FourNote -> FourNote.run(selectedAuto)
+                is FourNote -> RobotFourNote.run(selectedAuto)
             }
         }
     }

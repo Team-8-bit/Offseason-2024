@@ -1,6 +1,6 @@
 package org.team9432.auto.paths
 
-import org.team9432.auto.types.AutoType
+import org.team9432.auto.types.FourNote
 import org.team9432.choreogenerator.ChoreoFile
 import org.team9432.choreogenerator.ChoreoRobotConfiguration
 import org.team9432.lib.unit.inches
@@ -28,7 +28,7 @@ fun main() {
     val time = measureTimeMillis {
         val choreoFile = ChoreoFile(outputFile, OSR2024Config, splitTrajectoriesAtStopPoints = true)
 
-        AutoType.FourNote.options.forEach { choreoFile.addPaths(FourNotePaths.getSegmentsFor(it).map { it.builtTrajectory }) }
+        FourNote.options.forEach { choreoFile.addPaths(FourNotePaths.getSegmentsFor(it).map { it.builtTrajectory }) }
 
         choreoFile.outputToFile()
     }
