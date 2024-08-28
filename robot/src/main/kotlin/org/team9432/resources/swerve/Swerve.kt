@@ -73,9 +73,9 @@ object Swerve: Resource("Swerve") {
         Logger.log("Swerve/Speeds", this.getRobotRelativeSpeeds())
     }
 
-    private val xPid = PIDController(1.0, 0.0, 0.0)
-    private val yPid = PIDController(1.0, 0.0, 0.0)
-    private val rPid = PIDController(1.0, 0.0, 0.0)
+    private val xPid = PIDController(5.0, 0.0, 0.0)
+    private val yPid = PIDController(5.0, 0.0, 0.0)
+    private val rPid = PIDController(5.0, 0.0, 0.0)
 
     suspend fun followChoreo(trajectory: ChoreoTrajectory) {
         val speedsRequest = SwerveRequest.ApplyChassisSpeeds()
