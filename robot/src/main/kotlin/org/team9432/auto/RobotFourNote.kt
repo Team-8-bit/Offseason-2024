@@ -7,6 +7,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.team9432.Actions
 import org.team9432.Beambreaks
+import org.team9432.auto.SharedRobotAuto.preload
+import org.team9432.auto.SharedRobotAuto.scoreNote
 import org.team9432.auto.paths.FourNotePaths
 import org.team9432.auto.types.FourNote
 import org.team9432.auto.types.FourNote.EndAction.*
@@ -56,28 +58,5 @@ object RobotFourNote {
 
     private suspend fun driveToCenterEnd(driveToCenter: ChoreoTrajectory) {
         Swerve.followChoreo(driveToCenter)
-    }
-
-    private suspend fun preload(firstPath: ChoreoTrajectory) {
-        Swerve.seedFieldRelative(firstPath.getAutoFlippedInitialPose())
-
-        Shooter.setState(Shooter.State.VISION_SHOOT)
-        parallel(
-            { Swerve.followChoreo(firstPath) },
-            { simDelay(1.seconds) }
-        )
-        Actions.visionShoot(spindown = false)
-    }
-
-    private suspend fun scoreNote(note: ChoreoTrajectory) = coroutineScope {
-        val intakingJob = launch { Actions.intake() }
-        Swerve.followChoreo(note)
-
-        if (!Beambreaks.hasNote) {
-            intakingJob.cancelAndJoin()
-        } else if (Beambreaks.hasNote) {
-            delay(0.1.seconds)
-            Actions.visionShoot(spindown = false)
-        }
     }
 }

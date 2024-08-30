@@ -1,5 +1,6 @@
 package org.team9432.auto.paths
 
+import org.team9432.auto.types.FarsideCenterline
 import org.team9432.auto.types.FourNote
 import org.team9432.choreogenerator.ChoreoFile
 import org.team9432.choreogenerator.ChoreoRobotConfiguration
@@ -29,6 +30,7 @@ fun main() {
         val choreoFile = ChoreoFile(outputFile, OSR2024Config, splitTrajectoriesAtStopPoints = false)
 
         FourNote.options.forEach { choreoFile.addPaths(FourNotePaths.getSegmentsFor(it).map { it.builtTrajectory }) }
+        FarsideCenterline.options.forEach { choreoFile.addPaths(FarsideCenterlinePaths.getSegmentsFor(it).map { it.builtTrajectory }) }
 
         choreoFile.outputToFile()
     }

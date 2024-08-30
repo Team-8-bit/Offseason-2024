@@ -4,6 +4,7 @@ import org.team9432.choreogenerator.Position
 import org.team9432.lib.constants.EvergreenFieldConstants
 import org.team9432.lib.unit.feet
 import org.team9432.lib.unit.inches
+import org.team9432.lib.unit.meters
 
 object AutoFieldConstants {
     /* -------- Note Positions -------- */
@@ -27,6 +28,8 @@ object AutoFieldConstants {
     val centerNoteFive = Position(EvergreenFieldConstants.centerX, EvergreenFieldConstants.centerY + (centerNoteYSpacing * -2))
 
     val speakerYCoordinate = EvergreenFieldConstants.centerY + spikeNoteYSpacing
+
+    val speakerAimPosition = Position(0.35.meters, speakerYCoordinate)
 
     fun getNotePose(note: CloseNote) = when (note) {
         CloseNote.AMP -> ampNote

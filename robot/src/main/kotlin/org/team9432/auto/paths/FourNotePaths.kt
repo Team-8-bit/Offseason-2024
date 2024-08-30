@@ -6,7 +6,7 @@ import org.team9432.auto.paths.AutoFieldConstants.CloseNote.*
 import org.team9432.auto.types.AutoSegment
 import org.team9432.auto.types.FourNote
 import org.team9432.auto.types.FourNote.EndAction.*
-import org.team9432.auto.types.FourNote.StartingPosition
+import org.team9432.auto.types.StartingPosition
 import org.team9432.choreogenerator.Position
 import org.team9432.choreogenerator.StraightLine
 import org.team9432.lib.unit.degrees
@@ -15,10 +15,6 @@ import org.team9432.lib.unit.meters
 
 object FourNotePaths {
     private const val AUTO_KEY = "4Note"
-
-    private val FOUR_NOTE_START = Position(1.34.meters, AutoFieldConstants.speakerYCoordinate, 180.0.degrees)
-    private val FOUR_NOTE_AMP_START = Position(0.75.meters, 6.63.meters, -120.degrees)
-    private val FOUR_NOTE_STAGE_START = Position(0.75.meters, 4.47.meters, 120.degrees)
 
     private val FOUR_NOTE_SHOT = Position(2.0.meters, AutoFieldConstants.speakerYCoordinate, 180.0.degrees)
     private val FOUR_NOTE_AMP_ALIGN = AutoFieldConstants.ampNote.copy().moveX(-0.6.meters).pointAwayFrom(AutoFieldConstants.ampNote)
@@ -46,7 +42,7 @@ object FourNotePaths {
 
     private fun driveToCenterEnd() = AutoSegment("${AUTO_KEY}DriveToCenterEnd") {
         addPoseWaypoint(FOUR_NOTE_SHOT)
-        addTranslationWaypoint(getCenterNoteAlignPose(ONE))
+        addTranslationWaypoint(SharedPositions.getCenterNoteAlignPose(ONE))
     }
 
     private fun centerNote(note: CenterNote) = AutoSegment("${AUTO_KEY}Center${note.readableName}") {
@@ -73,8 +69,8 @@ object FourNotePaths {
 
         travelPath?.invoke(/*returning =*/false)
 
-        val alignPose = addPoseWaypoint(getCenterNoteAlignPose(note))
-        val intakePose = addPoseWaypoint(getCenterNoteIntakePose(note))
+        val alignPose = addPoseWaypoint(SharedPositions.getCenterNoteAlignPose(note))
+        val intakePose = addPoseWaypoint(SharedPositions.getCenterNoteIntakePose(note))
         addConstraint(StraightLine(alignPose, intakePose))
 
         travelPath?.invoke(/*returning =*/true)
@@ -82,17 +78,19 @@ object FourNotePaths {
         addPoseWaypoint(FOUR_NOTE_SHOT)
     }
 
-    private fun preload(startingPosition: StartingPosition) = AutoSegment("4NotePreloadFrom${startingPosition.readableName}") {
+    private fun preload(startingPosition: StartingPosition) = AutoSegment("${AUTO_KEY}PreloadFrom${startingPosition.readableName}") {
         when (startingPosition) {
             StartingPosition.AMP -> {
-                addPoseWaypoint(FOUR_NOTE_AMP_START)
-                addTranslationWaypoint(FOUR_NOTE_AMP_START.copy().moveX(0.5.meters))
+                addPoseWaypoint(SharedPositions.AMP_START_POSITION)
+                addTranslationWaypoint(SharedPositions.AMP_START_POSITION.copy().moveX(0.5.meters))
             }
+
             StartingPosition.STAGE -> {
-                addPoseWaypoint(FOUR_NOTE_STAGE_START)
-                addTranslationWaypoint(FOUR_NOTE_STAGE_START.copy().moveX(0.5.meters))
+                addPoseWaypoint(SharedPositions.STAGE_START_POSITION)
+                addTranslationWaypoint(SharedPositions.STAGE_START_POSITION.copy().moveX(0.5.meters))
             }
-            StartingPosition.CENTER -> addPoseWaypoint(FOUR_NOTE_START)
+
+            StartingPosition.CENTER -> addPoseWaypoint(SharedPositions.CENTER_START_POSITION)
         }
         addPoseWaypoint(FOUR_NOTE_SHOT)
     }
@@ -127,15 +125,5 @@ object FourNotePaths {
                 addPoseWaypoint(FOUR_NOTE_SHOT)
             }
         }
-    }
-
-    private fun getCenterNoteAlignPose(note: CenterNote): Position {
-        val notePose = AutoFieldConstants.getNotePose(note)
-        return notePose.copy().moveX(-.6.meters).pointAwayFrom(notePose)
-    }
-
-    private fun getCenterNoteIntakePose(note: CenterNote): Position {
-        val notePose = AutoFieldConstants.getNotePose(note)
-        return notePose.copy().moveX(-.2.meters).pointAwayFrom(notePose)
     }
 }

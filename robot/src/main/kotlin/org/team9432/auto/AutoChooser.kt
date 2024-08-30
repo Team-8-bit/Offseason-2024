@@ -3,6 +3,7 @@ package org.team9432.auto
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.team9432.auto.types.Auto
+import org.team9432.auto.types.FarsideCenterline
 import org.team9432.auto.types.FourNote
 import org.team9432.lib.coroutines.RobotScope
 import org.team9432.lib.dashboard.AutoSelector
@@ -17,6 +18,7 @@ object AutoChooser {
     private val chooser = AutoSelector(choosers) {
         addQuestion("Which Auto?", { currentlySelectedAuto = it }) {
             FourNote.addOptionToSelector(this)
+            FarsideCenterline.addOptionToSelector(this)
         }
     }
 
