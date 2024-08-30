@@ -11,8 +11,8 @@ sealed interface Auto {
     fun getTrajectoryNames(): List<String>
 }
 
-class AutoSegment(val name: String, generateTrajectory: ChoreoTrajectory.ChoreoTrajectoryBuilder.() -> Unit) {
-    val builtTrajectory by lazy { ChoreoTrajectory.new(name, block = generateTrajectory) }
+class AutoSegment(val name: String, generateTrajectory: ChoreoTrajectory.() -> Unit) {
+    val builtTrajectory by lazy { ChoreoTrajectory(name).apply(generateTrajectory) }
 }
 
 enum class StartingPosition {

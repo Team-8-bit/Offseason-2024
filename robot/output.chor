@@ -1261,13 +1261,6 @@
             "constraints": [
                 {
                     "scope": [
-                        1,
-                        2
-                    ],
-                    "type": "StraightLine"
-                },
-                {
-                    "scope": [
                         "first"
                     ],
                     "type": "StopPoint"
@@ -1277,6 +1270,13 @@
                         "last"
                     ],
                     "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        1,
+                        2
+                    ],
+                    "type": "StraightLine"
                 }
             ],
             "usesControlIntervalGuessing": true,
@@ -2408,13 +2408,6 @@
             "constraints": [
                 {
                     "scope": [
-                        1,
-                        2
-                    ],
-                    "type": "StraightLine"
-                },
-                {
-                    "scope": [
                         "first"
                     ],
                     "type": "StopPoint"
@@ -2424,6 +2417,13 @@
                         "last"
                     ],
                     "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        1,
+                        2
+                    ],
+                    "type": "StraightLine"
                 }
             ],
             "usesControlIntervalGuessing": true,
@@ -4763,13 +4763,6 @@
             "constraints": [
                 {
                     "scope": [
-                        1,
-                        2
-                    ],
-                    "type": "StraightLine"
-                },
-                {
-                    "scope": [
                         "first"
                     ],
                     "type": "StopPoint"
@@ -4779,6 +4772,13 @@
                         "last"
                     ],
                     "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        1,
+                        2
+                    ],
+                    "type": "StraightLine"
                 }
             ],
             "usesControlIntervalGuessing": true,
@@ -6157,13 +6157,6 @@
             "constraints": [
                 {
                     "scope": [
-                        2,
-                        3
-                    ],
-                    "type": "StraightLine"
-                },
-                {
-                    "scope": [
                         "first"
                     ],
                     "type": "StopPoint"
@@ -6173,6 +6166,13 @@
                         "last"
                     ],
                     "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        2,
+                        3
+                    ],
+                    "type": "StraightLine"
                 }
             ],
             "usesControlIntervalGuessing": true,
@@ -8093,13 +8093,6 @@
             "constraints": [
                 {
                     "scope": [
-                        4,
-                        5
-                    ],
-                    "type": "StraightLine"
-                },
-                {
-                    "scope": [
                         "first"
                     ],
                     "type": "StopPoint"
@@ -8109,6 +8102,13 @@
                         "last"
                     ],
                     "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        4,
+                        5
+                    ],
+                    "type": "StraightLine"
                 }
             ],
             "usesControlIntervalGuessing": true,
@@ -10071,13 +10071,6 @@
             "constraints": [
                 {
                     "scope": [
-                        4,
-                        5
-                    ],
-                    "type": "StraightLine"
-                },
-                {
-                    "scope": [
                         "first"
                     ],
                     "type": "StopPoint"
@@ -10087,6 +10080,13 @@
                         "last"
                     ],
                     "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        4,
+                        5
+                    ],
+                    "type": "StraightLine"
                 }
             ],
             "usesControlIntervalGuessing": true,
@@ -12456,13 +12456,6 @@
             "constraints": [
                 {
                     "scope": [
-                        2,
-                        3
-                    ],
-                    "type": "StraightLine"
-                },
-                {
-                    "scope": [
                         "first"
                     ],
                     "type": "StopPoint"
@@ -12472,6 +12465,13 @@
                         "last"
                     ],
                     "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        2,
+                        3
+                    ],
+                    "type": "StraightLine"
                 }
             ],
             "usesControlIntervalGuessing": true,
@@ -14186,13 +14186,6 @@
             "constraints": [
                 {
                     "scope": [
-                        2,
-                        3
-                    ],
-                    "type": "StraightLine"
-                },
-                {
-                    "scope": [
                         "first"
                     ],
                     "type": "StopPoint"
@@ -14202,6 +14195,13 @@
                         "last"
                     ],
                     "type": "StopPoint"
+                },
+                {
+                    "scope": [
+                        2,
+                        3
+                    ],
+                    "type": "StraightLine"
                 }
             ],
             "usesControlIntervalGuessing": true,
