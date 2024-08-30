@@ -5,8 +5,10 @@ import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import org.team9432.auto.AutoChooser
+import org.team9432.auto.RobotAmpsideCenterline
 import org.team9432.auto.RobotFarsideCenterline
 import org.team9432.auto.RobotFourNote
+import org.team9432.auto.types.AmpsideCenterline
 import org.team9432.auto.types.FarsideCenterline
 import org.team9432.auto.types.FourNote
 import org.team9432.lib.coroutines.CoroutineRobot
@@ -62,6 +64,7 @@ object Robot: CoroutineRobot(useActionManager = false) {
             when (selectedAuto) {
                 is FourNote -> RobotFourNote.run(selectedAuto)
                 is FarsideCenterline -> RobotFarsideCenterline.run(selectedAuto)
+                is AmpsideCenterline -> RobotAmpsideCenterline.run(selectedAuto)
             }
         }
     }

@@ -1,5 +1,6 @@
 package org.team9432.auto.types
 
+import org.team9432.auto.paths.AmpsideCenterlinePaths
 import org.team9432.auto.paths.AutoFieldConstants.CenterNote
 import org.team9432.auto.paths.AutoFieldConstants.CloseNote
 import org.team9432.auto.paths.FarsideCenterlinePaths
@@ -19,6 +20,59 @@ enum class StartingPosition {
     AMP, STAGE, CENTER;
 
     val readableName = name.lowercase().replaceFirstChar { it.uppercase() }
+}
+
+data class AmpsideCenterline(
+    val startingPosition: StartingPosition,
+    val scoreCloseAmpNote: Boolean,
+    val notes: List<CenterNote>,
+): Auto {
+    init {
+        assert(notes.all { it in validCenterNotes })
+    }
+
+    override fun getTrajectoryNames() = AmpsideCenterlinePaths.getSegmentsFor(this).map { it.name }
+
+    companion object {
+        val validCenterNotes = setOf(CenterNote.ONE, CenterNote.TWO)
+
+        val options by lazy {
+            buildSet {
+                for (startPosition in StartingPosition.entries)
+                    for (notes in listOf(listOf(CenterNote.ONE, CenterNote.TWO), listOf(CenterNote.TWO, CenterNote.ONE), listOf(CenterNote.TWO), listOf(CenterNote.ONE)))
+                        for (scoreCloseAmpNote in listOf(true, false)) {
+                            add(AmpsideCenterline(startPosition, scoreCloseAmpNote, notes))
+                        }
+            }
+        }
+
+        fun addOptionToSelector(selector: AutoSelector.AutoSelectorOptionScope<Auto>) = selector.apply {
+            var startingPosition: StartingPosition = StartingPosition.CENTER
+            var notes: List<CenterNote> = emptyList()
+            var scoreCloseAmpNote: Boolean = false
+            val getAuto = { AmpsideCenterline(startingPosition, scoreCloseAmpNote, notes) }
+
+            addOption("Ampside Centerline", getAuto) {
+                addQuestion("Starting Position", { startingPosition = it }) {
+                    addOption("Center Subwoofer", { StartingPosition.CENTER })
+                    addOption("Amp Subwoofer", { StartingPosition.AMP })
+                    addOption("Stage Subwoofer", { StartingPosition.STAGE })
+                }
+
+                addQuestion("Score Amp Note?", { scoreCloseAmpNote = it }) {
+                    addOption("Yes", { true })
+                    addOption("No", { false })
+                }
+
+                addQuestion("Notes", { notes = it }) {
+                    addOption("One then Two", { listOf(CenterNote.ONE, CenterNote.TWO) })
+                    addOption("Two then One", { listOf(CenterNote.TWO, CenterNote.ONE) })
+                    addOption("Just One", { listOf(CenterNote.ONE) })
+                    addOption("Just Two", { listOf(CenterNote.TWO) })
+                }
+            }
+        }
+    }
 }
 
 data class FarsideCenterline(

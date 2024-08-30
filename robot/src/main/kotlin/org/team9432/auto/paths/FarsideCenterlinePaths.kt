@@ -29,25 +29,21 @@ object FarsideCenterlinePaths {
         if (note !in FarsideCenterline.validCenterNotes) throw UnsupportedOperationException("Note ${note.name} is not supported!")
         addPoseWaypoint(SHOOTING_POSITION)
 
-        val travelPath: ((Boolean) -> Unit)? = when (note) {
-            FOUR, FIVE -> { returning ->
-                if (returning) {
-                    addTranslationWaypoint(DRIVE_UNDER)
-                } else {
-                    addTranslationWaypoint(DRIVE_UNDER)
-                }
+        val travelPath: ((Boolean) -> Unit) = when (note) {
+            FOUR, FIVE -> { _ ->
+                addTranslationWaypoint(DRIVE_UNDER)
             }
 
             else -> throw UnsupportedOperationException()
         }
 
-        travelPath?.invoke(/*returning =*/false)
+        travelPath.invoke(/*returning =*/false)
 
         val alignPose = addPoseWaypoint(SharedPositions.getCenterNoteAlignPose(note))
         val intakePose = addPoseWaypoint(SharedPositions.getCenterNoteIntakePose(note))
         addConstraint(StraightLine(alignPose, intakePose))
 
-        travelPath?.invoke(/*returning =*/true)
+        travelPath.invoke(/*returning =*/true)
 
         addPoseWaypoint(SHOOTING_POSITION)
     }

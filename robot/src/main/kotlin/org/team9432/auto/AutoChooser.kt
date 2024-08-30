@@ -2,6 +2,7 @@ package org.team9432.auto
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.team9432.auto.types.AmpsideCenterline
 import org.team9432.auto.types.Auto
 import org.team9432.auto.types.FarsideCenterline
 import org.team9432.auto.types.FourNote
@@ -19,6 +20,7 @@ object AutoChooser {
         addQuestion("Which Auto?", { currentlySelectedAuto = it }) {
             FourNote.addOptionToSelector(this)
             FarsideCenterline.addOptionToSelector(this)
+            AmpsideCenterline.addOptionToSelector(this)
         }
     }
 

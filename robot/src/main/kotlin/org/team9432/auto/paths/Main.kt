@@ -1,6 +1,6 @@
 package org.team9432.auto.paths
 
-import org.team9432.auto.types.AutoSegment
+import org.team9432.auto.types.AmpsideCenterline
 import org.team9432.auto.types.FarsideCenterline
 import org.team9432.auto.types.FourNote
 import org.team9432.choreogenerator.ChoreoFile
@@ -36,6 +36,7 @@ fun main() {
 
         allPaths += FourNote.options.flatMap { FourNotePaths.getSegmentsFor(it).map { it.builtTrajectory } }
         allPaths += FarsideCenterline.options.flatMap { FarsideCenterlinePaths.getSegmentsFor(it).map { it.builtTrajectory } }
+        allPaths += AmpsideCenterline.options.flatMap { AmpsideCenterlinePaths.getSegmentsFor(it).map { it.builtTrajectory } }
 
         allPaths.forEach {
             it.addConstraint(WholePathMaxVeloticy(3.0))
