@@ -26,7 +26,7 @@ fun main() {
     val outputFile = File("output.chor") // This magically appears in the right place, but I don't know why
 
     val time = measureTimeMillis {
-        val choreoFile = ChoreoFile(outputFile, OSR2024Config, splitTrajectoriesAtStopPoints = true)
+        val choreoFile = ChoreoFile(outputFile, OSR2024Config, splitTrajectoriesAtStopPoints = false)
 
         FourNote.options.forEach { choreoFile.addPaths(FourNotePaths.getSegmentsFor(it).map { it.builtTrajectory }) }
 

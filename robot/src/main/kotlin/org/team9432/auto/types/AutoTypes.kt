@@ -15,6 +15,7 @@ class AutoSegment(val name: String, generateTrajectory: ChoreoTrajectory.ChoreoT
 }
 
 data class FourNote(
+    val startingPosition: StartingPosition,
     val ampFirst: Boolean,
     val endAction: EndAction,
     val centerNote: CenterNote,
@@ -32,16 +33,24 @@ data class FourNote(
             for (ampFirst in setOf(false, true))
                 for (centerNote in validCenterNotes)
                     for (endAction in EndAction.entries)
-                        add(FourNote(ampFirst, endAction, centerNote))
+                        for (startPosition in StartingPosition.entries)
+                            add(FourNote(startPosition, ampFirst, endAction, centerNote))
         }
 
         fun addOptionToSelector(selector: AutoSelector.AutoSelectorOptionScope<Auto>) = selector.apply {
+            var startingPosition: StartingPosition = StartingPosition.CENTER
             var ampFirst: Boolean = false
             var centerNote: CenterNote = CenterNote.ONE
             var endAction: EndAction = EndAction.DO_NOTHING
-            val getAuto = { FourNote(ampFirst, endAction, centerNote) }
+            val getAuto = { FourNote(startingPosition, ampFirst, endAction, centerNote) }
 
             addOption("FourNote", getAuto) {
+                addQuestion("Starting Position", { startingPosition = it }) {
+                    addOption("Center Subwoofer", { StartingPosition.CENTER })
+                    addOption("Amp Subwoofer", { StartingPosition.AMP })
+                    addOption("Stage Subwoofer", { StartingPosition.STAGE })
+                }
+
                 addQuestion("Start Note", { ampFirst = it == CloseNote.AMP }) {
                     addOption("Amp", { CloseNote.AMP })
                     addOption("Stage", { CloseNote.STAGE })
@@ -65,5 +74,11 @@ data class FourNote(
 
     enum class EndAction {
         DO_NOTHING, DRIVE_TO_CENTER, SCORE_CENTERLINE
+    }
+
+    enum class StartingPosition {
+        AMP, STAGE, CENTER;
+
+        val readableName = name.lowercase().replaceFirstChar { it.uppercase() }
     }
 }
