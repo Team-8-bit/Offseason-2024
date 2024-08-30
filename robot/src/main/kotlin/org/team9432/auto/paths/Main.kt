@@ -1,9 +1,12 @@
 package org.team9432.auto.paths
 
+import org.team9432.auto.types.AutoSegment
 import org.team9432.auto.types.FarsideCenterline
 import org.team9432.auto.types.FourNote
 import org.team9432.choreogenerator.ChoreoFile
 import org.team9432.choreogenerator.ChoreoRobotConfiguration
+import org.team9432.choreogenerator.ChoreoTrajectory
+import org.team9432.choreogenerator.WholePathMaxVeloticy
 import org.team9432.lib.unit.inches
 import java.io.File
 import kotlin.system.measureTimeMillis
@@ -29,8 +32,16 @@ fun main() {
     val time = measureTimeMillis {
         val choreoFile = ChoreoFile(outputFile, OSR2024Config, splitTrajectoriesAtStopPoints = false)
 
-        FourNote.options.forEach { choreoFile.addPaths(FourNotePaths.getSegmentsFor(it).map { it.builtTrajectory }) }
-        FarsideCenterline.options.forEach { choreoFile.addPaths(FarsideCenterlinePaths.getSegmentsFor(it).map { it.builtTrajectory }) }
+        val allPaths = mutableSetOf<ChoreoTrajectory>()
+
+        allPaths += FourNote.options.flatMap { FourNotePaths.getSegmentsFor(it).map { it.builtTrajectory } }
+        allPaths += FarsideCenterline.options.flatMap { FarsideCenterlinePaths.getSegmentsFor(it).map { it.builtTrajectory } }
+
+        allPaths.forEach {
+            it.addConstraint(WholePathMaxVeloticy(3.0))
+        }
+
+        choreoFile.addPaths(allPaths)
 
         choreoFile.outputToFile()
     }
