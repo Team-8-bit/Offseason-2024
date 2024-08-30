@@ -34,10 +34,12 @@ data class FarsideCenterline(
     companion object {
         val validCenterNotes = setOf(CenterNote.FOUR, CenterNote.FIVE)
 
-        val options = buildSet {
-            for (startPosition in StartingPosition.entries)
-                for (notes in listOf(listOf(CenterNote.FIVE, CenterNote.FOUR), listOf(CenterNote.FOUR, CenterNote.FIVE), listOf(CenterNote.FOUR), listOf(CenterNote.FIVE)))
-                    add(FarsideCenterline(startPosition, notes))
+        val options by lazy {
+            buildSet {
+                for (startPosition in StartingPosition.entries)
+                    for (notes in listOf(listOf(CenterNote.FIVE, CenterNote.FOUR), listOf(CenterNote.FOUR, CenterNote.FIVE), listOf(CenterNote.FOUR), listOf(CenterNote.FIVE)))
+                        add(FarsideCenterline(startPosition, notes))
+            }
         }
 
         fun addOptionToSelector(selector: AutoSelector.AutoSelectorOptionScope<Auto>) = selector.apply {
@@ -78,12 +80,14 @@ data class FourNote(
     companion object {
         val validCenterNotes = setOf(CenterNote.ONE, CenterNote.TWO, CenterNote.THREE, CenterNote.FOUR)
 
-        val options = buildSet {
-            for (ampFirst in setOf(false, true))
-                for (centerNote in validCenterNotes)
-                    for (endAction in EndAction.entries)
-                        for (startPosition in StartingPosition.entries)
-                            add(FourNote(startPosition, ampFirst, endAction, centerNote))
+        val options by lazy {
+            buildSet {
+                for (ampFirst in setOf(false, true))
+                    for (centerNote in validCenterNotes)
+                        for (endAction in EndAction.entries)
+                            for (startPosition in StartingPosition.entries)
+                                add(FourNote(startPosition, ampFirst, endAction, centerNote))
+            }
         }
 
         fun addOptionToSelector(selector: AutoSelector.AutoSelectorOptionScope<Auto>) = selector.apply {
