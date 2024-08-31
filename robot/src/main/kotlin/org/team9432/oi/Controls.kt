@@ -3,6 +3,7 @@ package org.team9432.oi
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest
 import edu.wpi.first.math.MathUtil
+import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
@@ -26,6 +27,9 @@ object Controls {
 
     var forceDisableVision = false
         private set
+
+    private val ratelimitX = SlewRateLimiter(20.0)
+    private val ratelimitY = SlewRateLimiter(20.0)
 
     private val teleopRequest: SwerveRequest.FieldCentric = SwerveRequest.FieldCentric()
         .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
@@ -51,15 +55,15 @@ object Controls {
         return when {
             shouldAimAtSpeaker -> teleSpeakerRequest.apply {
                 val speed = getTranslationalSpeed()
-                withVelocityX(speed.x * 5.0)
-                withVelocityY(speed.y * 5.0)
+                withVelocityX(ratelimitX.calculate(speed.x * 5.0))
+                withVelocityY(ratelimitY.calculate(speed.y * 5.0))
                 withTargetDirection(Swerve.getRobotTranslation().angleTo(PositionConstants.speakerAimPose).asRotation2d.let { allianceSwitch(blue = it, red = it.plus(Rotation2d.fromDegrees(180.0))) })
             }
 
             else -> teleopRequest.apply {
                 val speed = getTranslationalSpeed()
-                withVelocityX(speed.x * 5.0)
-                withVelocityY(speed.y * 5.0)
+                withVelocityX(ratelimitX.calculate(speed.x * 5.0))
+                withVelocityY(ratelimitY.calculate(speed.y * 5.0))
                 withRotationalRate(getRotationalSpeed())
             }
         }
@@ -94,6 +98,8 @@ object Controls {
         controller.start
             .onTrue { RobotController.setAction { Actions.outtake() } }
             .onFalse { RobotController.setAction { Actions.idle() } }
+
+        controller.povRight.onTrue { RobotController.setAction { Actions.feedNote() } }
     }
 
 
