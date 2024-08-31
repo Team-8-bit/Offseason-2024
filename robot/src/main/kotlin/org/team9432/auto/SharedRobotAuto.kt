@@ -32,6 +32,7 @@ object SharedRobotAuto {
 
         if (!Beambreaks.hasNote) {
             intakingJob.cancelAndJoin()
+            delay(0.5.seconds)
         } else if (Beambreaks.hasNote) {
             delay(0.1.seconds)
             Actions.visionShoot(spindown = false)
