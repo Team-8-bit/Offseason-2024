@@ -96,8 +96,8 @@ object ExampleVision {
     private val robotToCameraArducam
         get() = Transform3d(
             Translation3d(
-                Units.inchesToMeters(8.875),
-                -Units.inchesToMeters(5.875),
+                Units.inchesToMeters(5.875),
+                -Units.inchesToMeters(8.875),
                 Units.inchesToMeters(8.5)
             ),
             Rotation3d(
