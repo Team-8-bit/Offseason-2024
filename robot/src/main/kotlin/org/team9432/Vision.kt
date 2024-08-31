@@ -61,8 +61,8 @@ object ExampleVision {
         }
     }
 
-    private val singleTagStdDevs: Matrix<N3, N1> = VecBuilder.fill(4.0, 4.0, 8.0)
-    private val multiTagStdDevs: Matrix<N3, N1> = VecBuilder.fill(0.5, 0.5, 1.0)
+    private val singleTagStdDevs: Matrix<N3, N1> = VecBuilder.fill(0.25, 0.25, 999.0)
+    private val multiTagStdDevs: Matrix<N3, N1> = VecBuilder.fill(0.01, 0.01, 3.0)
 
     private fun getEstimationStdDevs(estimatedPose: Pose2d): Matrix<N3, N1> {
         var estStdDevs = singleTagStdDevs
