@@ -17,7 +17,7 @@ import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
 // https://github.com/PhotonVision/photonvision/blob/master/photonlib-java-examples/swervedriveposeestsim/
-object ExampleVision {
+object Vision {
     val isEnabled get() = !Controls.forceDisableVision && (camera.isConnected || Robot.isSimulated)
 
     private val camera = PhotonCamera("Limelight")
@@ -26,11 +26,9 @@ object ExampleVision {
     init {
         photonPoseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY)
 
-//        if (!Robot.isSimulated) {
-            RobotPeriodicManager.startPeriodic {
-                update()
-            }
-//        }
+        RobotPeriodicManager.startPeriodic {
+            update()
+        }
     }
 
 
