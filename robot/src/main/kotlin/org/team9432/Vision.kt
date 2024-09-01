@@ -51,7 +51,10 @@ object Vision {
 
             Logger.log("Vision/StrategyUsed", estimatorResult.strategy.name)
 
-            estimatorResult.targetsUsed.forEach { target ->
+
+            val targetsUsed = estimatorResult.targetsUsed
+            Logger.log("Vision/TrackedTags", targetsUsed.map { it.fiducialId }.toIntArray())
+            targetsUsed.forEach { target ->
                 val baseKey = "Vision/Targets/${target.fiducialId}"
                 Logger.log("$baseKey/PoseAmbiguity", target.poseAmbiguity)
                 Logger.log("$baseKey/Area", target.area)
