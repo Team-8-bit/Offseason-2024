@@ -132,6 +132,11 @@ object NoteVisualizer {
         animateFieldRelative(startPose, endPose, duration)
     }
 
+    fun clearNote() {
+        if (!Robot.isSimulated) return
+        robotNoteTransform = null
+    }
+
     fun animateAlign() {
         if (!Robot.isSimulated) return
         animateRobotRelative(loadedTransform, aligningTransform, 0.15)
