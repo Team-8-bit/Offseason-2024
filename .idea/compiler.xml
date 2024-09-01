@@ -2,6 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="1.6">
+      <module name="choreo-generator.lib.main" target="17" />
+      <module name="choreo-generator.lib.test" target="17" />
       <module name="dashboard" target="17" />
       <module name="dashboard.dashboard-app" target="17" />
       <module name="dashboard.dashboard-app.main" target="17" />
@@ -22,6 +24,14 @@
       <module name="lib.choreo-plugin.test" target="17" />
       <module name="lib.lib.main" target="11" />
       <module name="lib.lib.test" target="11" />
+      <module name="lib.main" target="17" />
+      <module name="lib.test" target="17" />
+      <module name="org.team9432.lib.lib.annotation" target="17" />
+      <module name="org.team9432.lib.lib.annotation.main" target="17" />
+      <module name="org.team9432.lib.lib.annotation.test" target="17" />
+      <module name="org.team9432.lib.lib.robot-lib" target="17" />
+      <module name="org.team9432.lib.lib.robot-lib.main" target="17" />
+      <module name="org.team9432.lib.lib.robot-lib.test" target="17" />
       <module name="robotbase.main" target="17" />
       <module name="robotbase.test" target="17" />
     </bytecodeTargetLevel>
