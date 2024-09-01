@@ -38,14 +38,14 @@ object Shooter: Resource("Shooter") {
         SUBWOOFER({ ShooterSpeeds(2000.0, 5000.0) }),
         FEED_SPEED({ ShooterSpeeds(4000.0, 4000.0) }),
         DASHBOARD_SPEEDS({ ShooterSpeeds(SmartDashboard.getNumber("Shooter/TopTargetSpeed", 0.0), SmartDashboard.getNumber("Shooter/BottomTargetSpeed", 0.0)) }),
-        AMP({ ShooterSpeeds(100.0, 4000.0) });
+        AMP({ ShooterSpeeds(100.0, 4500.0) });
     }
 
     init {
         RobotPeriodicManager.startPeriodic { trackState(); log() }
 
         SmartDashboard.putNumber("Shooter/TopTargetSpeed", 100.0)
-        SmartDashboard.putNumber("Shooter/BottomTargetSpeed", 4000.0)
+        SmartDashboard.putNumber("Shooter/BottomTargetSpeed", 4500.0)
         SmartDashboard.putNumber("Shooter/Tuning/ffV", 0.0)
         SmartDashboard.putNumber("Shooter/DistanceOffset", 0.0)
 
