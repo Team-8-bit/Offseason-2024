@@ -25,10 +25,12 @@ object Intake: Resource("Intake") {
 
         leader.inverted = true
         leader.enableVoltageCompensation(11.0)
+        leader.setSmartCurrentLimit(20)
         leader.idleMode = CANSparkBase.IdleMode.kBrake
 
         follower.inverted = true
         follower.enableVoltageCompensation(11.0)
+        follower.setSmartCurrentLimit(20)
         follower.idleMode = CANSparkBase.IdleMode.kBrake
 
         follower.follow(leader)

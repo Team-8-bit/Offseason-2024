@@ -53,11 +53,13 @@ object Shooter: Resource("Shooter") {
         topMotor.idleMode = CANSparkBase.IdleMode.kBrake
         topMotor.enableVoltageCompensation(10.0)
         topMotor.openLoopRampRate = 0.0
+        topMotor.setSmartCurrentLimit(25)
 
         bottomMotor.inverted = true
         bottomMotor.idleMode = CANSparkBase.IdleMode.kBrake
         bottomMotor.enableVoltageCompensation(10.0)
         bottomMotor.openLoopRampRate = 0.0
+        bottomMotor.setSmartCurrentLimit(25)
 
         addMapValue(2.0.meters, ShooterSpeeds(top = 5000.0, bottom = 2750.0))
         addMapValue(1.75.meters, ShooterSpeeds(top = 5000.0, bottom = 3000.0))
