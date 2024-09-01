@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Translation2d
 import org.team9432.*
 import org.team9432.lib.input.XboxController
 import org.team9432.lib.unit.asRotation2d
+import org.team9432.lib.unit.degrees
 import org.team9432.lib.unit.meters
 import org.team9432.lib.util.allianceSwitch
 import org.team9432.lib.util.angleTo
@@ -35,7 +36,7 @@ object Controls {
         .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
         .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
 
-    private val teleSpeakerRequest: SwerveRequest.FieldCentricFacingAngle = SwerveRequest.FieldCentricFacingAngle()
+    private val teleAimRequest: SwerveRequest.FieldCentricFacingAngle = SwerveRequest.FieldCentricFacingAngle()
         .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
         .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
         .apply {
@@ -51,13 +52,27 @@ object Controls {
                     Beambreaks.hasNote &&
                     Vision.isEnabled
 
+    private val shouldAimAtAmp
+        get() =
+            getRotationalSpeed() == 0.0 &&
+                    Shooter.isShootingAmp &&
+                    Beambreaks.hasNote &&
+                    Vision.isEnabled
+
     fun getTeleopSwerveRequest(): SwerveRequest {
         return when {
-            shouldAimAtSpeaker -> teleSpeakerRequest.apply {
+            shouldAimAtSpeaker -> teleAimRequest.apply {
                 val speed = getTranslationalSpeed()
                 withVelocityX(ratelimitX.calculate(speed.x * 5.0))
                 withVelocityY(ratelimitY.calculate(speed.y * 5.0))
                 withTargetDirection(Swerve.getRobotTranslation().angleTo(PositionConstants.speakerAimPose).asRotation2d.let { allianceSwitch(blue = it, red = it.plus(Rotation2d.fromDegrees(180.0))) })
+            }
+
+            shouldAimAtAmp -> teleAimRequest.apply {
+                val speed = getTranslationalSpeed()
+                withVelocityX(ratelimitX.calculate(speed.x * 5.0))
+                withVelocityY(ratelimitY.calculate(speed.y * 5.0))
+                withTargetDirection(90.degrees.asRotation2d.let { allianceSwitch(blue = it, red = it.plus(Rotation2d.fromDegrees(180.0))) })
             }
 
             else -> teleopRequest.apply {

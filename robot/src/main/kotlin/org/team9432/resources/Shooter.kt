@@ -121,6 +121,7 @@ object Shooter: Resource("Shooter") {
 
     val isIdle get() = state == State.IDLE
     val isShootingSpeaker get() = state == State.VISION_SHOOT || state == State.SUBWOOFER
+    val isShootingAmp get() = state == State.AMP
 
     fun setState(state: State) {
         this.state = state
