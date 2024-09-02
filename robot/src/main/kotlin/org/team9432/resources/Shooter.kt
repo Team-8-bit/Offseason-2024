@@ -14,10 +14,7 @@ import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.SysIdUtil
 import org.team9432.lib.doglog.Logger
 import org.team9432.lib.resource.Resource
-import org.team9432.lib.unit.Length
-import org.team9432.lib.unit.asRotation2d
-import org.team9432.lib.unit.inMeters
-import org.team9432.lib.unit.meters
+import org.team9432.lib.unit.*
 import org.team9432.lib.util.angleTo
 import org.team9432.lib.util.distanceTo
 import org.team9432.lib.util.velocityLessThan
@@ -37,34 +34,38 @@ object Shooter: Resource("Shooter") {
 
     enum class State(val getVoltages: () -> ShooterSpeeds) {
         IDLE({ ShooterSpeeds(0.0, 0.0) }),
-        VISION_SHOOT({ getMapValue(distanceToSpeaker()) }),
+        VISION_SHOOT({ getMapValue(distanceToSpeaker() + SmartDashboard.getNumber("Shooter/DistanceOffset", 0.0).inches) }),
         SUBWOOFER({ ShooterSpeeds(2000.0, 5000.0) }),
+        FEED_SPEED({ ShooterSpeeds(4000.0, 4000.0) }),
         DASHBOARD_SPEEDS({ ShooterSpeeds(SmartDashboard.getNumber("Shooter/TopTargetSpeed", 0.0), SmartDashboard.getNumber("Shooter/BottomTargetSpeed", 0.0)) }),
-        AMP({ ShooterSpeeds(100.0, 4000.0) });
+        AMP({ ShooterSpeeds(100.0, 4500.0) });
     }
 
     init {
         RobotPeriodicManager.startPeriodic { trackState(); log() }
 
-        SmartDashboard.putNumber("Shooter/TopTargetSpeed", 2000.0)
-        SmartDashboard.putNumber("Shooter/BottomTargetSpeed", 5500.0)
+        SmartDashboard.putNumber("Shooter/TopTargetSpeed", 100.0)
+        SmartDashboard.putNumber("Shooter/BottomTargetSpeed", 4500.0)
         SmartDashboard.putNumber("Shooter/Tuning/ffV", 0.0)
+        SmartDashboard.putNumber("Shooter/DistanceOffset", 0.0)
 
         topMotor.inverted = false
         topMotor.idleMode = CANSparkBase.IdleMode.kBrake
         topMotor.enableVoltageCompensation(10.0)
         topMotor.openLoopRampRate = 0.0
+        topMotor.setSmartCurrentLimit(25)
 
         bottomMotor.inverted = true
         bottomMotor.idleMode = CANSparkBase.IdleMode.kBrake
         bottomMotor.enableVoltageCompensation(10.0)
         bottomMotor.openLoopRampRate = 0.0
+        bottomMotor.setSmartCurrentLimit(25)
 
         addMapValue(2.0.meters, ShooterSpeeds(top = 5000.0, bottom = 2750.0))
         addMapValue(1.75.meters, ShooterSpeeds(top = 5000.0, bottom = 3000.0))
         addMapValue(1.5.meters, ShooterSpeeds(top = 2500.0, bottom = 4000.0))
         addMapValue(1.25.meters, ShooterSpeeds(top = 4000.0, bottom = 5000.0))
-     }
+    }
 
     private var currentTargetSpeeds = ShooterSpeeds(0.0, 0.0)
 
@@ -122,6 +123,7 @@ object Shooter: Resource("Shooter") {
 
     val isIdle get() = state == State.IDLE
     val isShootingSpeaker get() = state == State.VISION_SHOOT || state == State.SUBWOOFER
+    val isShootingAmp get() = state == State.AMP
 
     fun setState(state: State) {
         this.state = state

@@ -18,7 +18,7 @@ import org.team9432.resources.swerve.Swerve
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
-object Vision {
+object Vision2 {
     val isEnabled get() = !Controls.forceDisableVision && (camera.isConnected || Robot.isSimulated)
 
     private val camera = PhotonCamera("Limelight")
@@ -147,8 +147,8 @@ object Vision {
     private val robotToCameraArducam
         get() = Transform3d(
             Translation3d(
-                Units.inchesToMeters(8.875),
-                -Units.inchesToMeters(5.875),
+                Units.inchesToMeters(5.875),
+                -Units.inchesToMeters(8.875),
                 Units.inchesToMeters(8.5)
             ),
             Rotation3d(

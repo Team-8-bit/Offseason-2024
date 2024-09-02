@@ -24,6 +24,7 @@ object Loader: Resource("Loader") {
 
         motor.inverted = false
         motor.enableVoltageCompensation(11.0)
+        motor.setSmartCurrentLimit(20)
         motor.idleMode = CANSparkBase.IdleMode.kBrake
     }
 

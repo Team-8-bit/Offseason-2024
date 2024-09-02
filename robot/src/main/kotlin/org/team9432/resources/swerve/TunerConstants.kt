@@ -35,21 +35,21 @@ object TunerConstants {
 
     // The stator current at which the wheels start to slip;
     // This needs to be tuned to your individual robot
-    private const val kSlipCurrentA = 150.0
+    private const val kSlipCurrentA = 60.0
 
     // Initial configs for the drive and steer motors and the CANcoder; these cannot be null.
     // Some configs will be overwritten; check the `with*InitialConfigs()` API documentation.
     private val driveInitialConfigs = TalonFXConfiguration()
         .withCurrentLimits(
             CurrentLimitsConfigs()
-                .withStatorCurrentLimit(60.0)
-                .withStatorCurrentLimitEnable(true)
+//                .withStatorCurrentLimit(60.0)
+//                .withStatorCurrentLimitEnable(true)
         )
     private val steerInitialConfigs: TalonFXConfiguration = TalonFXConfiguration()
         .withCurrentLimits(
             CurrentLimitsConfigs() // Swerve azimuth does not require much torque output, so we can set a relatively low
                 // stator current limit to help avoid brownouts without impacting performance.
-                .withStatorCurrentLimit(60.0)
+                .withStatorCurrentLimit(50.0)
                 .withStatorCurrentLimitEnable(true)
         )
     private val cancoderInitialConfigs = CANcoderConfiguration()

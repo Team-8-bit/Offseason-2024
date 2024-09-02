@@ -17,7 +17,7 @@ import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
 // https://github.com/PhotonVision/photonvision/blob/master/photonlib-java-examples/swervedriveposeestsim/
-object ExampleVision {
+object Vision {
     val isEnabled get() = !Controls.forceDisableVision && (camera.isConnected || Robot.isSimulated)
 
     private val camera = PhotonCamera("Limelight")
@@ -26,11 +26,9 @@ object ExampleVision {
     init {
         photonPoseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY)
 
-//        if (!Robot.isSimulated) {
-            RobotPeriodicManager.startPeriodic {
-                update()
-            }
-//        }
+        RobotPeriodicManager.startPeriodic {
+            update()
+        }
     }
 
 
@@ -53,7 +51,10 @@ object ExampleVision {
 
             Logger.log("Vision/StrategyUsed", estimatorResult.strategy.name)
 
-            estimatorResult.targetsUsed.forEach { target ->
+
+            val targetsUsed = estimatorResult.targetsUsed
+            Logger.log("Vision/TrackedTags", targetsUsed.map { it.fiducialId }.toIntArray())
+            targetsUsed.forEach { target ->
                 val baseKey = "Vision/Targets/${target.fiducialId}"
                 Logger.log("$baseKey/PoseAmbiguity", target.poseAmbiguity)
                 Logger.log("$baseKey/Area", target.area)
@@ -61,8 +62,8 @@ object ExampleVision {
         }
     }
 
-    private val singleTagStdDevs: Matrix<N3, N1> = VecBuilder.fill(4.0, 4.0, 8.0)
-    private val multiTagStdDevs: Matrix<N3, N1> = VecBuilder.fill(0.5, 0.5, 1.0)
+    private val singleTagStdDevs: Matrix<N3, N1> = VecBuilder.fill(0.25, 0.25, 999.0)
+    private val multiTagStdDevs: Matrix<N3, N1> = VecBuilder.fill(0.01, 0.01, 3.0)
 
     private fun getEstimationStdDevs(estimatedPose: Pose2d): Matrix<N3, N1> {
         var estStdDevs = singleTagStdDevs
@@ -96,8 +97,8 @@ object ExampleVision {
     private val robotToCameraArducam
         get() = Transform3d(
             Translation3d(
-                Units.inchesToMeters(8.875),
-                -Units.inchesToMeters(5.875),
+                Units.inchesToMeters(5.875),
+                -Units.inchesToMeters(8.875),
                 Units.inchesToMeters(8.5)
             ),
             Rotation3d(

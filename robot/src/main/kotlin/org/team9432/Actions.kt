@@ -40,6 +40,20 @@ object Actions {
         if (spindown) Shooter.setState(Shooter.State.IDLE)
     }
 
+    suspend fun feedNote() {
+        Shooter.setState(Shooter.State.FEED_SPEED)
+        await { Shooter.flywheelsAtSpeed() }
+        Loader.setState(Loader.State.LOAD)
+        NoteVisualizer.animateShoot()
+
+        Beambreaks.upper.awaitTripped(simDelay = 0.1.seconds) // Make sure the note is actually in the beambreak so the next step doesn't immediately return true
+        Beambreaks.upper.awaitClear(simDelay = 0.4.seconds)
+        Beambreaks.lower.setSimClear()
+
+        Loader.setState(Loader.State.IDLE)
+        Shooter.setState(Shooter.State.IDLE)
+    }
+
     suspend fun dashboardShoot() {
         Shooter.setState(Shooter.State.DASHBOARD_SPEEDS)
         await { Shooter.flywheelsAtSpeed() }
@@ -57,14 +71,17 @@ object Actions {
 
     suspend fun amp() {
         Shooter.setState(Shooter.State.AMP)
-        await { Shooter.flywheelsAtSpeed(rpmTolerance = 100) }
+        await { Shooter.flywheelsAtSpeed(rpmTolerance = 100) || Robot.isSimulated }
         delay(0.2.seconds)
+        await { !Controls.controller.b.invoke() }
         Loader.setState(Loader.State.LOAD)
 
         Beambreaks.upper.awaitTripped(simDelay = 0.1.seconds) // Make sure the note is actually in the beambreak so the next step doesn't immediately return true
         Beambreaks.upper.awaitClear(simDelay = 0.4.seconds)
         Beambreaks.lower.setSimClear()
         delay(0.25.seconds)
+
+        NoteVisualizer.clearNote()
 
         Shooter.setState(Shooter.State.IDLE)
         Loader.setState(Loader.State.IDLE)
