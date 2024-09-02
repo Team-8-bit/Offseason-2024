@@ -23,7 +23,7 @@ import org.team9432.resources.swerve.wheelDiameterTest
 
 object Robot: CoroutineRobot(useActionManager = false) {
     override suspend fun init() {
-        Logger.configureDevelopmentDefaults()
+        Logger.configure(ntPublish = true, logExtras = false)
 
         Intake
         Shooter
