@@ -2,6 +2,9 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="1.6">
+      <module name="choreo-generator" target="17" />
+      <module name="choreo-generator.main" target="17" />
+      <module name="choreo-generator.test" target="17" />
       <module name="dashboard" target="17" />
       <module name="dashboard.dashboard-app" target="17" />
       <module name="dashboard.dashboard-app.main" target="17" />
@@ -14,9 +17,6 @@
       <module name="dashboard.dashboard-shared.test" target="17" />
       <module name="dashboard.main" target="17" />
       <module name="dashboard.test" target="17" />
-      <module name="lib.choreo-generator" target="17" />
-      <module name="lib.choreo-generator.main" target="17" />
-      <module name="lib.choreo-generator.test" target="17" />
       <module name="lib.choreo-plugin" target="17" />
       <module name="lib.choreo-plugin.main" target="17" />
       <module name="lib.choreo-plugin.test" target="17" />
