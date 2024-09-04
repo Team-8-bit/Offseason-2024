@@ -4,9 +4,10 @@ package org.team9432.resources.loader
 import org.littletonrobotics.junction.Logger
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.resource.Resource
+import org.team9432.lib.util.simSwitch
 
 object Loader: Resource("Loader") {
-    private val io = LoaderIONeo
+    private val io = simSwitch(real = LoaderIONeo, sim = LoaderIOSim)
     private val inputs = LoggedLoaderIOInputs()
 
     private var state = State.IDLE

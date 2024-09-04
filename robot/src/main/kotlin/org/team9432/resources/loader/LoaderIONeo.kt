@@ -3,9 +3,12 @@ package org.team9432.resources.loader
 import com.revrobotics.CANSparkBase
 import com.revrobotics.CANSparkLowLevel
 import com.revrobotics.CANSparkMax
+import org.team9432.lib.util.temperatureFahrenheit
 
 object LoaderIONeo: LoaderIO {
     private val motor = CANSparkMax(12, CANSparkLowLevel.MotorType.kBrushless)
+    private val encoder = motor.encoder
+    private const val reduction = 50.0 / 12.0
 
     init {
         motor.inverted = false
@@ -19,6 +22,10 @@ object LoaderIONeo: LoaderIO {
     }
 
     override fun updateInputs(inputs: LoaderIO.LoaderIOInputs) {
-        inputs.motorSpeed = 2.0
+        inputs.positionRotations = encoder.position / reduction
+        inputs.velocityRPM = encoder.velocity / reduction
+        inputs.appliedVoltage = motor.appliedOutput * motor.busVoltage
+        inputs.supplyCurrentAmps = motor.outputCurrent
+        inputs.tempFahrenheit = motor.temperatureFahrenheit
     }
 }

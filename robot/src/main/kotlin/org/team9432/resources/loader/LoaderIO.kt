@@ -3,12 +3,16 @@ package org.team9432.resources.loader
 import org.team9432.annotation.Logged
 
 interface LoaderIO {
-    fun setVoltage(volts: Double)
+    @Logged
+    open class LoaderIOInputs {
+        var positionRotations: Double = 0.0
+        var velocityRPM: Double = 0.0
+        var appliedVoltage: Double = 0.0
+        var supplyCurrentAmps: Double = 0.0
+        var tempFahrenheit: Double = 0.0
+    }
 
     fun updateInputs(inputs: LoaderIOInputs)
 
-    @Logged
-    open class LoaderIOInputs {
-        var motorSpeed: Double = 0.0
-    }
+    fun setVoltage(volts: Double)
 }
