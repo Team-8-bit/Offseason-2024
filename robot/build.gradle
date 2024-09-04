@@ -5,6 +5,7 @@ plugins {
     id("edu.wpi.first.GradleRIO").version("2024.3.2")
     id("org.jetbrains.kotlin.jvm").version("1.9.21")
     id("com.google.devtools.ksp").version("1.9.21-1.0.15")
+    id("com.peterabeles.gversion").version("1.10.3")
 }
 
 def ROBOT_MAIN_CLASS = "org.team9432.Main"
@@ -43,6 +44,16 @@ tasks.register('generateTrajectories', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
+project.compileKotlin.dependsOn(createVersionFile)
+gversion {
+    srcDir       = "src/main/kotlin/"
+    classPackage = "org.team9432"
+    className    = "BuildConstants"
+    dateFormat   = "yyyy-MM-dd '@' h:mm:ss a z"
+    timeZone     = "MST"
+    language     = "kotlin"
+}
+
 repositories {
     mavenLocal()
     maven { url = "https://SleipnirGroup.github.io/ChoreoLib/dep" }
@@ -79,6 +90,8 @@ dependencies {
     // Team libraries
     implementation("org.team9432.lib:robot-lib")
     implementation("org.team9432.lib:choreo-generator")
+    implementation("org.team9432.lib:annotation")
+    ksp("org.team9432.lib:annotation")
 
     wpi.java.deps.wpilib().forEach { implementation(it) }
     wpi.java.vendor.java().forEach { implementation(it) }
@@ -104,7 +117,8 @@ dependencies {
     implementation("org.littletonrobotics.akit.junction:junction-core:3.2.0")
     implementation("org.littletonrobotics.akit.junction:wpilib-shim:3.2.0")
     implementation("org.littletonrobotics.akit.conduit:conduit-api:3.2.0")
-    implementation("org.littletonrobotics.akit.conduit:conduit-wpilibio:3.2.0")
+    nativeDebug("org.littletonrobotics.akit.conduit:conduit-wpilibio:3.2.0")
+    nativeRelease("org.littletonrobotics.akit.conduit:conduit-wpilibio:3.2.0")
 
     // Choreolib
     implementation("com.choreo.lib:ChoreoLib-java:2024.2.3")
