@@ -2,7 +2,6 @@ package org.team9432
 
 import org.team9432.lib.Beambreak
 import org.team9432.lib.RobotPeriodicManager
-import org.team9432.lib.doglog.Logger
 
 object Beambreaks {
     val upper = Beambreak(7)
@@ -15,7 +14,7 @@ object Beambreaks {
     }
 
     private fun log() {
-        Logger.log("Beambreaks/Upper", upper)
-        Logger.log("Beambreaks/Lower", lower)
+//        Logger.recordOutput("Beambreaks/Upper", upper)
+//        Logger.recordOutput("Beambreaks/Lower", lower)
     }
 }

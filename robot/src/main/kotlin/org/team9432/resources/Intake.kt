@@ -3,8 +3,8 @@ package org.team9432.resources
 import com.revrobotics.CANSparkBase
 import com.revrobotics.CANSparkLowLevel
 import com.revrobotics.CANSparkMax
+import org.littletonrobotics.junction.Logger
 import org.team9432.lib.RobotPeriodicManager
-import org.team9432.lib.doglog.Logger
 import org.team9432.lib.resource.Resource
 
 object Intake: Resource("Intake") {
@@ -41,14 +41,14 @@ object Intake: Resource("Intake") {
     }
 
     private fun log() {
-        Logger.log("Intake/Leader", leader)
-        Logger.log("Intake/Follower", follower)
+//        Logger.recordOutput("Intake/Leader", leader)
+//        Logger.recordOutput("Intake/Follower", follower)
     }
 
     fun setState(state: State) {
         this.state = state
         trackState()
-        Logger.log("Intake/State", Intake.state)
+        Logger.recordOutput("Intake/State", Intake.state)
     }
 
     val isIntaking get() = state == State.INTAKE

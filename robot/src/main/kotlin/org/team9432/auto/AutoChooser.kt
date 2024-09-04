@@ -7,7 +7,6 @@ import org.team9432.auto.types.AmpsideCenterline
 import org.team9432.auto.types.Auto
 import org.team9432.auto.types.FarsideCenterline
 import org.team9432.auto.types.FourNote
-import org.team9432.lib.coroutines.RobotScope
 import org.team9432.lib.dashboard.AutoSelector
 import org.team9432.lib.util.ChoreoUtil
 import kotlin.time.Duration.Companion.seconds
@@ -29,7 +28,7 @@ object AutoChooser {
     fun getAuto() = currentlySelectedAuto
 
     init {
-        RobotScope.launch {
+        Robot.coroutineScope.launch {
             while (true) {
                 chooser.update()
 

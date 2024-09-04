@@ -5,9 +5,8 @@ import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import kotlinx.coroutines.*
+import org.littletonrobotics.junction.Logger
 import org.team9432.lib.RobotPeriodicManager
-import org.team9432.lib.coroutines.RobotScope
-import org.team9432.lib.doglog.Logger
 import org.team9432.lib.unit.inMeters
 import org.team9432.lib.util.allianceSwitch
 import org.team9432.lib.util.whenSimulated
@@ -40,7 +39,7 @@ object NoteVisualizer {
 
     init {
         whenSimulated { // We don't want this running on the actual robot
-            RobotScope.launch {
+            Robot.coroutineScope.launch {
                 while (true) {
                     render()
 
@@ -73,7 +72,7 @@ object NoteVisualizer {
         // Field notes
         notes.addAll(fieldNotes.map { Pose3d(Pose2d(it.x, it.y, Rotation2d())) })
 
-        Logger.log("NoteVisualizer", notes.toTypedArray())
+        Logger.recordOutput("NoteVisualizer", *notes.toTypedArray())
     }
 
 
@@ -95,7 +94,7 @@ object NoteVisualizer {
                     awaitingContinuations.clear()
 
                     fieldNotes.remove(note)
-                    val job = RobotScope.launch {
+                    val job = Robot.coroutineScope.launch {
                         delay(30.seconds)
                         fieldNotes.add(note)
                     }
@@ -158,7 +157,7 @@ object NoteVisualizer {
 
     private fun genericAnimation(durationSeconds: Double, onEnd: (() -> Unit)? = null, onLoop: (Double) -> Unit) {
         val timer = Timer()
-        RobotScope.launch {
+        Robot.coroutineScope.launch {
             timer.restart()
 
             while (!timer.hasElapsed(durationSeconds)) {

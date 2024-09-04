@@ -1,8 +1,8 @@
 package org.team9432.resources.swerve
 
 import edu.wpi.first.math.util.Units
+import org.littletonrobotics.junction.Logger
 import org.team9432.lib.coroutines.robotPeriodic
-import org.team9432.lib.doglog.Logger
 import org.team9432.lib.unit.inRadians
 import kotlin.math.abs
 import kotlin.math.hypot
@@ -26,6 +26,6 @@ suspend fun wheelDiameterTest(rotationsPerSecond: Double) {
 
         val effectiveRadius = abs((accumulatedHeading * drivetrainRadiusMeters) / avgAccumulatedWheelPosition)
 
-        Logger.log("Swerve/EffectiveWheelDiameter", Units.metersToInches(effectiveRadius * 2))
+        Logger.recordOutput("Swerve/EffectiveWheelDiameter", Units.metersToInches(effectiveRadius * 2))
     }
 }

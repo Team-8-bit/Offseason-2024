@@ -6,13 +6,13 @@ import com.revrobotics.CANSparkLowLevel
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import org.littletonrobotics.junction.Logger
 import org.team9432.PositionConstants
 import org.team9432.Robot
 import org.team9432.Vision
 import org.team9432.lib.KSysIdConfig
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.SysIdUtil
-import org.team9432.lib.doglog.Logger
 import org.team9432.lib.resource.Resource
 import org.team9432.lib.unit.*
 import org.team9432.lib.util.angleTo
@@ -73,8 +73,8 @@ object Shooter: Resource("Shooter") {
         currentTargetSpeeds = state.getVoltages()
         val (topRPM, bottomRPM) = currentTargetSpeeds
 
-        Logger.log("Shooter/TopAtSpeed", (topMotor.encoder.velocity - topRPM) < 300)
-        Logger.log("Shooter/BottomAtSpeed", (bottomMotor.encoder.velocity - bottomRPM) < 300)
+        Logger.recordOutput("Shooter/TopAtSpeed", (topMotor.encoder.velocity - topRPM) < 300)
+        Logger.recordOutput("Shooter/BottomAtSpeed", (bottomMotor.encoder.velocity - bottomRPM) < 300)
 
         topMotor.setVoltage(ff.calculate(topRPM))
         bottomMotor.setVoltage(ff.calculate(bottomRPM))
@@ -97,11 +97,9 @@ object Shooter: Resource("Shooter") {
     }
 
     private fun log() {
-        Logger.log("Shooter/TopMotor", topMotor)
-        Logger.log("Shooter/BottomMotor", bottomMotor)
-        Logger.log("Shooter/SpeakerDistance", distanceToSpeaker().inMeters)
-        Logger.log("Shooter/isReadyToShoot", isReadyToShootSpeaker())
-        Logger.log("Shooter/AimingError", getAimingErrorDegrees())
+        Logger.recordOutput("Shooter/SpeakerDistance", distanceToSpeaker().inMeters)
+        Logger.recordOutput("Shooter/isReadyToShoot", isReadyToShootSpeaker())
+        Logger.recordOutput("Shooter/AimingError", getAimingErrorDegrees())
     }
 
     private fun isAimedAtSpeaker(): Boolean {
@@ -128,7 +126,7 @@ object Shooter: Resource("Shooter") {
     fun setState(state: State) {
         this.state = state
         trackState()
-        Logger.log("Shooter/State", Shooter.state)
+        Logger.recordOutput("Shooter/State", Shooter.state)
     }
 
     /** Return the distance from the robot to the speaker. */

@@ -17,10 +17,9 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotController
 import kotlinx.coroutines.launch
+import org.littletonrobotics.junction.Logger
 import org.team9432.Robot
 import org.team9432.lib.RobotPeriodicManager
-import org.team9432.lib.coroutines.RobotScope
-import org.team9432.lib.doglog.Logger
 import org.team9432.lib.resource.Resource
 import org.team9432.lib.resource.use
 import org.team9432.lib.unit.degrees
@@ -41,7 +40,7 @@ object Swerve: Resource("Swerve") {
 
         whenSimulated { startSimThread() }
 
-        RobotScope.launch {
+        Robot.coroutineScope.launch {
             use(Swerve, name = "DefaultSetter") { } // make it so the default command runs, to be fixed later
         }
 
@@ -67,10 +66,10 @@ object Swerve: Resource("Swerve") {
     }
 
     private fun log() {
-        Logger.log("Swerve/Pose", getRobotPose())
-        Logger.log("Swerve/ModuleStates", currentState.ModuleStates)
-        Logger.log("Swerve/ModuleTargets", currentState.ModuleTargets)
-        Logger.log("Swerve/Speeds", this.getRobotRelativeSpeeds())
+        Logger.recordOutput("Swerve/Pose", getRobotPose())
+        Logger.recordOutput("Swerve/ModuleStates", *currentState.ModuleStates)
+        Logger.recordOutput("Swerve/ModuleTargets", *currentState.ModuleTargets)
+        Logger.recordOutput("Swerve/Speeds", this.getRobotRelativeSpeeds())
     }
 
     private val xPid = PIDController(5.0, 0.0, 0.0)
@@ -82,7 +81,7 @@ object Swerve: Resource("Swerve") {
 
         val controlFunction = ChoreoUtil.choreoSwerveController(xPid, yPid, rPid, ::getRobotPose)
 
-        Logger.log("Swerve/CurrentTrajectory", allianceSwitch(blue = trajectory.poses, red = trajectory.flipped().poses))
+        Logger.recordOutput("Swerve/CurrentTrajectory", *allianceSwitch(blue = trajectory.poses, red = trajectory.flipped().poses))
 
         ChoreoUtil.choreoSwerveAction(trajectory, controlFunction) { chassisSpeedsToApply ->
             swerve.setControl(speedsRequest.withSpeeds(chassisSpeedsToApply))

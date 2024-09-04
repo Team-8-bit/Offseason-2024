@@ -6,11 +6,11 @@ import edu.wpi.first.math.geometry.*
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
 import edu.wpi.first.math.util.Units
+import org.littletonrobotics.junction.Logger
 import org.photonvision.PhotonCamera
 import org.photonvision.PhotonPoseEstimator
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
-import org.team9432.lib.doglog.Logger
 import org.team9432.oi.Controls
 import org.team9432.resources.swerve.Swerve
 import kotlin.jvm.optionals.getOrNull
@@ -33,8 +33,8 @@ object Vision {
 
 
     private fun update() {
-        Logger.log("Vision/Connected", camera.isConnected)
-        Logger.log("Vision/Enabled", isEnabled)
+        Logger.recordOutput("Vision/Connected", camera.isConnected)
+        Logger.recordOutput("Vision/Enabled", isEnabled)
 
         val estimatorResult = photonPoseEstimator.update().getOrNull()
 
@@ -45,19 +45,19 @@ object Vision {
 
             if (pose.isValid()) {
                 val pose2d = pose.toPose2d()
-                Logger.log("Vision/EstimatedPose", pose)
+                Logger.recordOutput("Vision/EstimatedPose", pose)
                 Swerve.addVisionMeasurement(pose2d, estimatorResult.timestampSeconds, getEstimationStdDevs(pose2d))
             }
 
-            Logger.log("Vision/StrategyUsed", estimatorResult.strategy.name)
+            Logger.recordOutput("Vision/StrategyUsed", estimatorResult.strategy.name)
 
 
             val targetsUsed = estimatorResult.targetsUsed
-            Logger.log("Vision/TrackedTags", targetsUsed.map { it.fiducialId }.toIntArray())
+            Logger.recordOutput("Vision/TrackedTags", targetsUsed.map { it.fiducialId }.toIntArray())
             targetsUsed.forEach { target ->
                 val baseKey = "Vision/Targets/${target.fiducialId}"
-                Logger.log("$baseKey/PoseAmbiguity", target.poseAmbiguity)
-                Logger.log("$baseKey/Area", target.area)
+                Logger.recordOutput("$baseKey/PoseAmbiguity", target.poseAmbiguity)
+                Logger.recordOutput("$baseKey/Area", target.area)
             }
         }
     }

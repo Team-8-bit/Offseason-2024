@@ -114,11 +114,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1-Beta")
 
     // AdvantageKit
-    implementation("org.littletonrobotics.akit.junction:junction-core:3.2.0")
-    implementation("org.littletonrobotics.akit.junction:wpilib-shim:3.2.0")
-    implementation("org.littletonrobotics.akit.conduit:conduit-api:3.2.0")
-    nativeDebug("org.littletonrobotics.akit.conduit:conduit-wpilibio:3.2.0")
-    nativeRelease("org.littletonrobotics.akit.conduit:conduit-wpilibio:3.2.0")
+    implementation("org.littletonrobotics.akit.junction:junction-core:3.2.1")
+    implementation("org.littletonrobotics.akit.junction:wpilib-shim:3.2.1")
+    implementation("org.littletonrobotics.akit.conduit:conduit-api:3.2.1")
+    nativeDebug("org.littletonrobotics.akit.conduit:conduit-wpilibio:3.2.1")
+    nativeRelease("org.littletonrobotics.akit.conduit:conduit-wpilibio:3.2.1")
 
     // Choreolib
     implementation("com.choreo.lib:ChoreoLib-java:2024.2.3")

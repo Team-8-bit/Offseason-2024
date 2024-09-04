@@ -6,11 +6,11 @@ import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.geometry.Transform3d
 import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.math.util.Units
+import org.littletonrobotics.junction.Logger
 import org.photonvision.PhotonCamera
 import org.photonvision.targeting.PhotonPipelineResult
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
-import org.team9432.lib.doglog.Logger
 import org.team9432.lib.unit.*
 import org.team9432.lib.util.distanceTo
 import org.team9432.oi.Controls
@@ -35,16 +35,16 @@ object Vision2 {
     }
 
     private fun update() {
-        Logger.log("Vision/Connected", camera.isConnected)
-        Logger.log("Vision/Enabled", isEnabled)
+        Logger.recordOutput("Vision/Connected", camera.isConnected)
+        Logger.recordOutput("Vision/Enabled", isEnabled)
 
         val result = camera.latestResult
 
         // Record information
-        result.targets.forEach { target -> Logger.log("Vision/Tags/${target.fiducialId}/Area", target.area) }
+        result.targets.forEach { target -> Logger.recordOutput("Vision/Tags/${target.fiducialId}/Area", target.area) }
         result.targets.groupBy { it.fiducialId }.forEach { (id, targets) ->
             targets.forEachIndexed { index, visionPose ->
-                Logger.log("Vision/Tags/$id/Ambiguity-$index", visionPose.poseAmbiguity)
+                Logger.recordOutput("Vision/Tags/$id/Ambiguity-$index", visionPose.poseAmbiguity)
             }
         }
 
@@ -56,11 +56,11 @@ object Vision2 {
             val (xyDeviation, pose, tagsUsed) = output
             Swerve.setVisionMeasurementStdDevs(VecBuilder.fill(xyDeviation.inMeters, xyDeviation.inMeters, 20.0.degrees.inDegrees))
             Swerve.addVisionMeasurement(pose.toPose2d(), result.timestampSeconds)
-            Logger.log("Vision/TrackedTags", tagsUsed.mapNotNull { FieldConstants.aprilTagFieldLayout.getTagPose(it).getOrNull() }.toTypedArray())
-            Logger.log("Vision/EstimatedPose", arrayOf(pose))
+            Logger.recordOutput("Vision/TrackedTags", *tagsUsed.mapNotNull { FieldConstants.aprilTagFieldLayout.getTagPose(it).getOrNull() }.toTypedArray())
+            Logger.recordOutput("Vision/EstimatedPose", *arrayOf(pose))
         } else {
-            Logger.log("Vision/TrackedTags", emptyArray<Pose3d>())
-            Logger.log("Vision/EstimatedPose", emptyArray<Pose3d>())
+            Logger.recordOutput("Vision/TrackedTags", *emptyArray<Pose3d>())
+            Logger.recordOutput("Vision/EstimatedPose", *emptyArray<Pose3d>())
         }
     }
 

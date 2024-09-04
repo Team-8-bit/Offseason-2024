@@ -3,7 +3,13 @@ package org.team9432
 
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.RobotBase
+import org.littletonrobotics.junction.LogFileUtil
+import org.littletonrobotics.junction.Logger
+import org.littletonrobotics.junction.networktables.NT4Publisher
+import org.littletonrobotics.junction.wpilog.WPILOGReader
+import org.littletonrobotics.junction.wpilog.WPILOGWriter
 import org.team9432.auto.AutoChooser
 import org.team9432.auto.RobotAmpsideCenterline
 import org.team9432.auto.RobotFarsideCenterline
@@ -11,19 +17,44 @@ import org.team9432.auto.RobotFourNote
 import org.team9432.auto.types.AmpsideCenterline
 import org.team9432.auto.types.FarsideCenterline
 import org.team9432.auto.types.FourNote
-import org.team9432.lib.coroutines.CoroutineRobot
+import org.team9432.lib.Library
+import org.team9432.lib.coroutines.LoggedCoroutineRobot
 import org.team9432.lib.coroutines.robotPeriodic
-import org.team9432.lib.doglog.Logger
 import org.team9432.oi.Controls
 import org.team9432.resources.Intake
-import org.team9432.resources.Loader
 import org.team9432.resources.Shooter
+import org.team9432.resources.loader.Loader
 import org.team9432.resources.swerve.Swerve
 import org.team9432.resources.swerve.wheelDiameterTest
 
-object Robot: CoroutineRobot(useActionManager = false) {
+
+object Robot: LoggedCoroutineRobot() {
+    private const val IS_REPLAY = false
+
     override suspend fun init() {
-        Logger.configure(ntPublish = true, logExtras = false)
+        Logger.recordMetadata("ProjectName", "2024-Offseason") // Set a metadata value
+        Logger.recordMetadata("GIT_SHA", GIT_SHA)
+        Logger.recordMetadata("GIT_DATE", GIT_DATE)
+        Logger.recordMetadata("GIT_BRANCH", GIT_BRANCH)
+        Logger.recordMetadata("BUILD_DATE", BUILD_DATE)
+        Logger.recordMetadata("DIRTY", if (DIRTY == 1) "true" else "false")
+
+        if (Robot.isNotSimulated || (Robot.isSimulated && !IS_REPLAY)) {
+            Logger.addDataReceiver(WPILOGWriter()) // Log to a USB stick ("/U/logs")
+            Logger.addDataReceiver(NT4Publisher()) // Publish data to NetworkTables
+            PowerDistribution(1, PowerDistribution.ModuleType.kRev) // Enables power distribution logging
+        } else { // Replay
+            setUseTiming(false) // Run as fast as possible
+            val logPath = LogFileUtil.findReplayLog() // Pull the replay log from AdvantageScope (or prompt the user)
+            Logger.setReplaySource(WPILOGReader(logPath)) // Read replay log
+            Logger.addDataReceiver(WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_replay"))) // Save outputs to a new log
+        }
+
+        Logger.start() // Start logging! No more data receivers, replay sources, or metadata values may be added.
+
+        Library.initialize(this)
+
+        //Logger.configure(ntPublish = true, logExtras = false)
 
         Intake
         Shooter
@@ -45,6 +76,7 @@ object Robot: CoroutineRobot(useActionManager = false) {
 
         DriverStation.silenceJoystickConnectionWarning(true)
     }
+
 
     override suspend fun teleop() {
         robotPeriodic(isFinished = { !Robot.isTeleopEnabled }) {
