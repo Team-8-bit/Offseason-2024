@@ -11,7 +11,7 @@ import org.team9432.lib.unit.inMeters
 import org.team9432.lib.util.allianceSwitch
 import org.team9432.lib.util.whenSimulated
 import org.team9432.resources.intake.Intake
-import org.team9432.resources.Shooter
+import org.team9432.resources.shooter.Shooter
 import org.team9432.resources.swerve.Swerve
 import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds

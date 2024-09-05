@@ -10,7 +10,7 @@ import org.team9432.Beambreaks
 import org.team9432.lib.coroutines.parallel
 import org.team9432.lib.util.ChoreoUtil.getAutoFlippedInitialPose
 import org.team9432.lib.util.simDelay
-import org.team9432.resources.Shooter
+import org.team9432.resources.shooter.Shooter
 import org.team9432.resources.swerve.Swerve
 import kotlin.time.Duration.Companion.seconds
 

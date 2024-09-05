@@ -8,7 +8,6 @@ import org.team9432.lib.util.temperatureFahrenheit
 object LoaderIONeo: LoaderIO {
     private val motor = CANSparkMax(12, CANSparkLowLevel.MotorType.kBrushless)
     private val encoder = motor.encoder
-    private const val reduction = 50.0 / 12.0
 
     init {
         motor.inverted = false

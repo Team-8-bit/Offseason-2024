@@ -22,7 +22,7 @@ import org.team9432.lib.coroutines.LoggedCoroutineRobot
 import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.oi.Controls
 import org.team9432.resources.intake.Intake
-import org.team9432.resources.Shooter
+import org.team9432.resources.shooter.Shooter
 import org.team9432.resources.loader.Loader
 import org.team9432.resources.swerve.Swerve
 import org.team9432.resources.swerve.wheelDiameterTest

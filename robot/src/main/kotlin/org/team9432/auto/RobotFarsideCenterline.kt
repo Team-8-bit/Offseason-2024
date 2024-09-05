@@ -5,7 +5,7 @@ import org.team9432.auto.SharedRobotAuto.scoreNote
 import org.team9432.auto.paths.FarsideCenterlinePaths
 import org.team9432.auto.types.FarsideCenterline
 import org.team9432.lib.util.ChoreoUtil
-import org.team9432.resources.Shooter
+import org.team9432.resources.shooter.Shooter
 
 object RobotFarsideCenterline {
     suspend fun run(auto: FarsideCenterline) {

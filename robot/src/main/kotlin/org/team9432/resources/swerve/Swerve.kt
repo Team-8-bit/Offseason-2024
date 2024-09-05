@@ -67,8 +67,8 @@ object Swerve: Resource("Swerve") {
 
     private fun log() {
         Logger.recordOutput("Swerve/Pose", getRobotPose())
-        Logger.recordOutput("Swerve/ModuleStates", *currentState.ModuleStates)
-        Logger.recordOutput("Swerve/ModuleTargets", *currentState.ModuleTargets)
+        Logger.recordOutput("Swerve/ModuleStates", *currentState.ModuleStates ?: emptyArray())
+        Logger.recordOutput("Swerve/ModuleTargets", *currentState.ModuleTargets ?: emptyArray())
         Logger.recordOutput("Swerve/Speeds", this.getRobotRelativeSpeeds())
     }
 

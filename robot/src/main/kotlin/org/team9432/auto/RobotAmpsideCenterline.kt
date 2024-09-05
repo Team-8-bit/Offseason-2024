@@ -6,7 +6,7 @@ import org.team9432.auto.SharedRobotAuto.scoreNote
 import org.team9432.auto.paths.AmpsideCenterlinePaths
 import org.team9432.auto.types.AmpsideCenterline
 import org.team9432.lib.util.ChoreoUtil
-import org.team9432.resources.Shooter
+import org.team9432.resources.shooter.Shooter
 import java.util.*
 
 object RobotAmpsideCenterline {

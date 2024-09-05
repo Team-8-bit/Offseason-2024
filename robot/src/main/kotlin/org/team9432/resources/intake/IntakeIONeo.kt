@@ -6,41 +6,40 @@ import com.revrobotics.CANSparkMax
 import org.team9432.lib.util.temperatureFahrenheit
 
 object IntakeIONeo: IntakeIO {
-    private val leader = CANSparkMax(10, CANSparkLowLevel.MotorType.kBrushless)
-    private val follower = CANSparkMax(11, CANSparkLowLevel.MotorType.kBrushless)
-    private val leaderEncoder = leader.encoder
-    private val followerEncoder = follower.encoder
-    private val reduction = 30.0 / 12.0
+    private val leaderMotor = CANSparkMax(10, CANSparkLowLevel.MotorType.kBrushless)
+    private val followerMotor = CANSparkMax(11, CANSparkLowLevel.MotorType.kBrushless)
+    private val leaderEncoder = leaderMotor.encoder
+    private val followerEncoder = followerMotor.encoder
 
     init {
-        leader.inverted = true
-        leader.enableVoltageCompensation(11.0)
-        leader.setSmartCurrentLimit(20)
-        leader.idleMode = CANSparkBase.IdleMode.kBrake
+        leaderMotor.inverted = true
+        leaderMotor.enableVoltageCompensation(11.0)
+        leaderMotor.setSmartCurrentLimit(20)
+        leaderMotor.idleMode = CANSparkBase.IdleMode.kBrake
 
-        follower.inverted = true
-        follower.enableVoltageCompensation(11.0)
-        follower.setSmartCurrentLimit(20)
-        follower.idleMode = CANSparkBase.IdleMode.kBrake
+        followerMotor.inverted = true
+        followerMotor.enableVoltageCompensation(11.0)
+        followerMotor.setSmartCurrentLimit(20)
+        followerMotor.idleMode = CANSparkBase.IdleMode.kBrake
 
-        follower.follow(leader)
+        followerMotor.follow(leaderMotor)
+    }
+
+    override fun setVoltage(volts: Double) {
+        leaderMotor.setVoltage(volts)
     }
 
     override fun updateInputs(inputs: IntakeIO.IntakeIOInputs) {
         inputs.leaderPositionRotations = leaderEncoder.position / reduction
         inputs.leaderVelocityRPM = leaderEncoder.velocity / reduction
-        inputs.leaderAppliedVoltage = leader.appliedOutput * leader.busVoltage
-        inputs.leaderSupplyCurrentAmps = leader.outputCurrent
-        inputs.leaderTempFahrenheit = leader.temperatureFahrenheit
+        inputs.leaderAppliedVoltage = leaderMotor.appliedOutput * leaderMotor.busVoltage
+        inputs.leaderSupplyCurrentAmps = leaderMotor.outputCurrent
+        inputs.leaderTempFahrenheit = leaderMotor.temperatureFahrenheit
 
         inputs.followerPositionRotations = followerEncoder.position / reduction
         inputs.followerVelocityRPM = followerEncoder.velocity / reduction
-        inputs.followerAppliedVoltage = follower.appliedOutput * follower.busVoltage
-        inputs.followerSupplyCurrentAmps = follower.outputCurrent
-        inputs.followerTempFahrenheit = follower.temperatureFahrenheit
-    }
-
-    override fun setVoltage(volts: Double) {
-        leader.setVoltage(volts)
+        inputs.followerAppliedVoltage = followerMotor.appliedOutput * followerMotor.busVoltage
+        inputs.followerSupplyCurrentAmps = followerMotor.outputCurrent
+        inputs.followerTempFahrenheit = followerMotor.temperatureFahrenheit
     }
 }

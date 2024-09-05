@@ -12,7 +12,9 @@ interface LoaderIO {
         var tempFahrenheit: Double = 0.0
     }
 
-    fun updateInputs(inputs: LoaderIOInputs)
+    val reduction get() = 50.0 / 12.0
 
     fun setVoltage(volts: Double)
+
+    fun updateInputs(inputs: LoaderIOInputs)
 }

@@ -17,7 +17,9 @@ interface IntakeIO {
         var followerTempFahrenheit: Double = 0.0
     }
 
-    fun updateInputs(inputs: IntakeIOInputs)
+    val reduction get() = 30.0 / 12.0
 
     fun setVoltage(volts: Double)
+
+    fun updateInputs(inputs: IntakeIOInputs)
 }

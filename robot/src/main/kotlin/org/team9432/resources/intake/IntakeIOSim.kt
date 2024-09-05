@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim
 import org.team9432.Robot
 
 object IntakeIOSim: IntakeIO {
-    private const val reduction = 30.0 / 12.0
     private val sim = DCMotorSim(DCMotor.getNEO(2), reduction, 0.002)
     private var appliedVoltage = 0.0
 
@@ -21,6 +20,7 @@ object IntakeIOSim: IntakeIO {
         inputs.leaderVelocityRPM = sim.angularVelocityRPM
         inputs.leaderAppliedVoltage = appliedVoltage
         inputs.leaderSupplyCurrentAmps = sim.currentDrawAmps
+
         inputs.followerPositionRotations = sim.angularPositionRotations
         inputs.followerVelocityRPM = sim.angularVelocityRPM
         inputs.followerAppliedVoltage = appliedVoltage

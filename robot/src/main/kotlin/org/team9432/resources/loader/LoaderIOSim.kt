@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim
 import org.team9432.Robot
 
 object LoaderIOSim: LoaderIO {
-    private const val reduction = 50.0 / 12.0
     private val sim = DCMotorSim(DCMotor.getNEO(1), reduction, 0.001)
     private var appliedVoltage = 0.0
 
