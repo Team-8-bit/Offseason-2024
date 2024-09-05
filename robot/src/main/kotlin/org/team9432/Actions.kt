@@ -4,7 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.team9432.lib.coroutines.await
 import org.team9432.oi.Controls
-import org.team9432.resources.Intake
+import org.team9432.resources.intake.Intake
 import org.team9432.resources.Shooter
 import org.team9432.resources.loader.Loader
 import kotlin.time.Duration.Companion.milliseconds

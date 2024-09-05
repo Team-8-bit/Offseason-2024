@@ -21,7 +21,7 @@ import org.team9432.lib.Library
 import org.team9432.lib.coroutines.LoggedCoroutineRobot
 import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.oi.Controls
-import org.team9432.resources.Intake
+import org.team9432.resources.intake.Intake
 import org.team9432.resources.Shooter
 import org.team9432.resources.loader.Loader
 import org.team9432.resources.swerve.Swerve
@@ -52,7 +52,7 @@ object Robot: LoggedCoroutineRobot() {
 
         Logger.start() // Start logging! No more data receivers, replay sources, or metadata values may be added.
 
-        Library.initialize(this)
+        Library.initialize(this, IS_REPLAY)
 
         //Logger.configure(ntPublish = true, logExtras = false)
 

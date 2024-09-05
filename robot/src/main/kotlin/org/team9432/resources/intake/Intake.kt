@@ -1,21 +1,20 @@
-package org.team9432.resources.loader
-
+package org.team9432.resources.intake
 
 import org.littletonrobotics.junction.Logger
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.resource.Resource
 import org.team9432.lib.util.simSwitch
 
-object Loader: Resource("Loader") {
-    private val io = simSwitch(real = LoaderIONeo, sim = LoaderIOSim)
-    private val inputs = LoggedLoaderIOInputs()
+object Intake: Resource("Intake") {
+    private val io = simSwitch(real = IntakeIONeo, sim = IntakeIOSim)
+    private val inputs = LoggedIntakeIOInputs()
 
     private var state = State.IDLE
 
     enum class State(val getVoltage: () -> Double) {
-        INTAKE({ 8.0 }),
+        INTAKE({ 10.0 }),
         LOAD({ 2.0 }),
-        REVERSE({ -8.0 }),
+        OUTTAKE({ -5.0 }),
         IDLE({ 0.0 });
     }
 
@@ -28,15 +27,16 @@ object Loader: Resource("Loader") {
     }
 
     fun setState(state: State) {
-        Loader.state = state
+        Intake.state = state
         trackState()
-        Logger.recordOutput("Loader/State", state)
+        Logger.recordOutput("Intake/State", Intake.state)
     }
 
+    val isIntaking get() = state == State.INTAKE
     val isIdle get() = state == State.IDLE
 
     override fun akitUpdate() {
         io.updateInputs(inputs)
-        Logger.processInputs("Loader", inputs)
+        Logger.processInputs("Intake", inputs)
     }
 }

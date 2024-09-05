@@ -15,7 +15,7 @@ import org.team9432.lib.unit.degrees
 import org.team9432.lib.unit.meters
 import org.team9432.lib.util.allianceSwitch
 import org.team9432.lib.util.angleTo
-import org.team9432.resources.Intake
+import org.team9432.resources.intake.Intake
 import org.team9432.resources.loader.Loader
 import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
