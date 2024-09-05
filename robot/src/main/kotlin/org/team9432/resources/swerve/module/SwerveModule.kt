@@ -10,8 +10,8 @@ import org.team9432.resources.swerve.DriveControlLoops.DRIVE_CLOSE_LOOP
 import org.team9432.resources.swerve.DriveControlLoops.DRIVE_OPEN_LOOP
 import org.team9432.resources.swerve.DriveControlLoops.STEER_CLOSE_LOOP
 import org.team9432.resources.swerve.DriveTrainConstants
-import org.team9432.resources.swerve.mapleswerve.utils1.MaplePIDController
-import org.team9432.resources.swerve.mapleswerve.utils1.SwerveStateProjection
+import org.team9432.resources.swerve.mapleswerve.utils.CustomPIDs.MaplePIDController
+import org.team9432.resources.swerve.mapleswerve.utils.CustomMaths.SwerveStateProjection
 
 class SwerveModule(io: ModuleIO, private val name: String) {
     private val io: ModuleIO = io
