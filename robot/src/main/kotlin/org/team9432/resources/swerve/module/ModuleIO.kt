@@ -27,8 +27,6 @@ interface ModuleIO {
      */
     fun updateInputs(inputs: ModuleIOInputs)
 
-    fun calibrate() {}
-
     /**
      * Run the drive motor at the specified percent speed.
      * @param speedPercent from -1 to 1, where 1 is the forward direction of the wheel

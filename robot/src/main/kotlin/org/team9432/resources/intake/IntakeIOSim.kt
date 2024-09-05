@@ -5,7 +5,7 @@ import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.simulation.DCMotorSim
 import org.team9432.Robot
 
-object IntakeIOSim: IntakeIO {
+class IntakeIOSim: IntakeIO {
     private val sim = DCMotorSim(DCMotor.getNEO(2), reduction, 0.002)
     private var appliedVoltage = 0.0
 

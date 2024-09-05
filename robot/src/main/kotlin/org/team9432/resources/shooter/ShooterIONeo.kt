@@ -6,7 +6,7 @@ import com.revrobotics.CANSparkLowLevel
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import org.team9432.lib.util.temperatureFahrenheit
 
-object ShooterIONeo: ShooterIO {
+class ShooterIONeo: ShooterIO {
     private val upperMotor = CANSparkFlex(14, CANSparkLowLevel.MotorType.kBrushless)
     private val lowerMotor = CANSparkFlex(13, CANSparkLowLevel.MotorType.kBrushless)
     private val upperEncoder = upperMotor.encoder

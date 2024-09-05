@@ -6,7 +6,7 @@ import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.simulation.DCMotorSim
 import org.team9432.Robot
 
-object ShooterIOSim: ShooterIO {
+class ShooterIOSim: ShooterIO {
     private val upperSim = DCMotorSim(DCMotor.getNeoVortex(1), reduction, 0.001)
     private val lowerSim = DCMotorSim(DCMotor.getNeoVortex(1), reduction, 0.001)
 

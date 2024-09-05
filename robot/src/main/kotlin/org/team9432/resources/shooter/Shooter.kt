@@ -6,22 +6,18 @@ import org.littletonrobotics.junction.Logger
 import org.team9432.PositionConstants
 import org.team9432.Robot
 import org.team9432.Vision
-import org.team9432.lib.KSysIdConfig
 import org.team9432.lib.RobotPeriodicManager
-import org.team9432.lib.SysIdUtil
 import org.team9432.lib.resource.Resource
 import org.team9432.lib.unit.*
 import org.team9432.lib.util.angleTo
 import org.team9432.lib.util.distanceTo
 import org.team9432.lib.util.simSwitch
 import org.team9432.lib.util.velocityLessThan
-import org.team9432.resources.intake.IntakeIONeo
-import org.team9432.resources.intake.IntakeIOSim
 import org.team9432.resources.swerve.Swerve
 import kotlin.math.abs
 
 object Shooter: Resource("Shooter") {
-    private val io = simSwitch(real = ShooterIONeo, sim = ShooterIOSim)
+    private val io = simSwitch(real = ShooterIONeo(), sim = ShooterIOSim())
     private val inputs = LoggedShooterIOInputs()
 
     private val topShooterMap = InterpolatingDoubleTreeMap()

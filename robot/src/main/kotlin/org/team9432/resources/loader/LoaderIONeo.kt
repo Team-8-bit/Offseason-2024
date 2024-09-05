@@ -5,7 +5,7 @@ import com.revrobotics.CANSparkLowLevel
 import com.revrobotics.CANSparkMax
 import org.team9432.lib.util.temperatureFahrenheit
 
-object LoaderIONeo: LoaderIO {
+class LoaderIONeo: LoaderIO {
     private val motor = CANSparkMax(12, CANSparkLowLevel.MotorType.kBrushless)
     private val encoder = motor.encoder
 
