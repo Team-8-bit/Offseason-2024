@@ -16,11 +16,11 @@ import kotlin.time.Duration.Companion.seconds
 
 object SharedRobotAuto {
     suspend fun preload(firstPath: ChoreoTrajectory) {
-        Swerve.seedFieldRelative(firstPath.getAutoFlippedInitialPose())
+//        Swerve.seedFieldRelative(firstPath.getAutoFlippedInitialPose())
 
         Shooter.setState(Shooter.State.VISION_SHOOT)
         parallel(
-            { Swerve.followChoreo(firstPath) },
+//            { Swerve.followChoreo(firstPath) },
             { simDelay(1.seconds) }
         )
         Actions.visionShoot(spindown = false)
@@ -28,7 +28,7 @@ object SharedRobotAuto {
 
     suspend fun scoreNote(note: ChoreoTrajectory) = coroutineScope {
         val intakingJob = launch { Actions.intake() }
-        Swerve.followChoreo(note)
+//        Swerve.followChoreo(note)
 
         if (!Beambreaks.hasNote) {
             intakingJob.cancelAndJoin()

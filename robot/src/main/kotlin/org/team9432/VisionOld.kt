@@ -54,8 +54,8 @@ object Vision2 {
         // Update the robot pose if the vision output isn't null
         if (output != null) {
             val (xyDeviation, pose, tagsUsed) = output
-            Swerve.setVisionMeasurementStdDevs(VecBuilder.fill(xyDeviation.inMeters, xyDeviation.inMeters, 20.0.degrees.inDegrees))
-            Swerve.addVisionMeasurement(pose.toPose2d(), result.timestampSeconds)
+//            Swerve.setVisionMeasurementStdDevs(VecBuilder.fill(xyDeviation.inMeters, xyDeviation.inMeters, 20.0.degrees.inDegrees))
+//            Swerve.addVisionMeasurement(pose.toPose2d(), result.timestampSeconds)
             Logger.recordOutput("Vision/TrackedTags", *tagsUsed.mapNotNull { FieldConstants.aprilTagFieldLayout.getTagPose(it).getOrNull() }.toTypedArray())
             Logger.recordOutput("Vision/EstimatedPose", *arrayOf(pose))
         } else {

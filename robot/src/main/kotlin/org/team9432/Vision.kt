@@ -46,7 +46,7 @@ object Vision {
             if (pose.isValid()) {
                 val pose2d = pose.toPose2d()
                 Logger.recordOutput("Vision/EstimatedPose", pose)
-                Swerve.addVisionMeasurement(pose2d, estimatorResult.timestampSeconds, getEstimationStdDevs(pose2d))
+//                Swerve.addVisionMeasurement(pose2d, estimatorResult.timestampSeconds, getEstimationStdDevs(pose2d))
             }
 
             Logger.recordOutput("Vision/StrategyUsed", estimatorResult.strategy.name)

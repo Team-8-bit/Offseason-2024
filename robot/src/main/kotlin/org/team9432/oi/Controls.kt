@@ -8,17 +8,15 @@ import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
-import org.team9432.*
+import org.team9432.Actions
+import org.team9432.Beambreaks
+import org.team9432.RobotController
+import org.team9432.Vision
 import org.team9432.lib.input.XboxController
-import org.team9432.lib.unit.asRotation2d
-import org.team9432.lib.unit.degrees
 import org.team9432.lib.unit.meters
-import org.team9432.lib.util.allianceSwitch
-import org.team9432.lib.util.angleTo
 import org.team9432.resources.intake.Intake
 import org.team9432.resources.loader.Loader
 import org.team9432.resources.shooter.Shooter
-import org.team9432.resources.swerve.Swerve
 import kotlin.math.hypot
 import kotlin.math.pow
 
@@ -59,21 +57,21 @@ object Controls {
                     Beambreaks.hasNote &&
                     Vision.isEnabled
 
-    fun getTeleopSwerveRequest(): SwerveRequest {
+    fun getTeleopSwerveRequest(): SwerveRequest.FieldCentric {
         return when {
-            shouldAimAtSpeaker -> teleAimRequest.apply {
-                val speed = getTranslationalSpeed()
-                withVelocityX(ratelimitX.calculate(speed.x * 5.0))
-                withVelocityY(ratelimitY.calculate(speed.y * 5.0))
-                withTargetDirection(Swerve.getRobotTranslation().angleTo(PositionConstants.speakerAimPose).asRotation2d.let { allianceSwitch(blue = it, red = it.plus(Rotation2d.fromDegrees(180.0))) })
-            }
-
-            shouldAimAtAmp -> teleAimRequest.apply {
-                val speed = getTranslationalSpeed()
-                withVelocityX(ratelimitX.calculate(speed.x * 5.0))
-                withVelocityY(ratelimitY.calculate(speed.y * 5.0))
-                withTargetDirection(90.degrees.asRotation2d.let { allianceSwitch(blue = it, red = it.plus(Rotation2d.fromDegrees(180.0))) })
-            }
+//            shouldAimAtSpeaker -> teleAimRequest.apply {
+//                val speed = getTranslationalSpeed()
+//                withVelocityX(ratelimitX.calculate(speed.x * 5.0))
+//                withVelocityY(ratelimitY.calculate(speed.y * 5.0))
+//                withTargetDirection(Swerve.getRobotTranslation().angleTo(PositionConstants.speakerAimPose).asRotation2d.let { allianceSwitch(blue = it, red = it.plus(Rotation2d.fromDegrees(180.0))) })
+//            }
+//
+//            shouldAimAtAmp -> teleAimRequest.apply {
+//                val speed = getTranslationalSpeed()
+//                withVelocityX(ratelimitX.calculate(speed.x * 5.0))
+//                withVelocityY(ratelimitY.calculate(speed.y * 5.0))
+//                withTargetDirection(90.degrees.asRotation2d.let { allianceSwitch(blue = it, red = it.plus(Rotation2d.fromDegrees(180.0))) })
+//            }
 
             else -> teleopRequest.apply {
                 val speed = getTranslationalSpeed()
@@ -108,7 +106,7 @@ object Controls {
             .onTrue { RobotController.setAction { Actions.amp() } }
 
         controller.back
-            .onTrue { Swerve.seedFieldRelative() }
+//            .onTrue { Swerve.seedFieldRelative() }
 
         controller.start
             .onTrue { RobotController.setAction { Actions.outtake() } }

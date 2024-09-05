@@ -7,7 +7,7 @@ object Orchestra {
     private val orchestra = Orchestra()
 
     init {
-        Swerve.getTalons().forEach { orchestra.addInstrument(it) }
+//        Swerve.getTalons().forEach { orchestra.addInstrument(it) }
     }
 
     fun loadAndPlay(track: String) {

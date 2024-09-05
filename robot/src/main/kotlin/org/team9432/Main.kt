@@ -1,6 +1,9 @@
 @file:JvmName("Main") // set the compiled Java class name to "Main" rather than "MainKt"
 package org.team9432
 
+import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.PowerDistribution
@@ -18,18 +21,25 @@ import org.team9432.auto.types.AmpsideCenterline
 import org.team9432.auto.types.FarsideCenterline
 import org.team9432.auto.types.FourNote
 import org.team9432.lib.Library
+import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.coroutines.LoggedCoroutineRobot
 import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.oi.Controls
 import org.team9432.resources.intake.Intake
-import org.team9432.resources.shooter.Shooter
 import org.team9432.resources.loader.Loader
-import org.team9432.resources.swerve.Swerve
-import org.team9432.resources.swerve.wheelDiameterTest
+import org.team9432.resources.shooter.Shooter
+import org.team9432.resources.swerve.SwerveDrive
+import org.team9432.resources.swerve.gyro.GyroIOSim
+import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.CompetitionFieldSimulation
+import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.Crescendo2024FieldSimulation
+import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.SwerveDriveSimulation
+import org.team9432.resources.swerve.module.ModuleIOSim
 
 
 object Robot: LoggedCoroutineRobot() {
-    private const val IS_REPLAY = false
+    const val IS_REPLAY = false
+
+    lateinit var drive: SwerveDrive
 
     override suspend fun init() {
         Logger.recordMetadata("ProjectName", "2024-Offseason") // Set a metadata value
@@ -59,7 +69,6 @@ object Robot: LoggedCoroutineRobot() {
         Intake
         Shooter
         Loader
-        Swerve
 
         Controls
         Vision
@@ -72,6 +81,36 @@ object Robot: LoggedCoroutineRobot() {
 
         `LEDs!`
 
+        if (isSimulated) {
+            // Sim robot, instantiate physics sim IO implementations
+            val frontLeft = ModuleIOSim()
+            val frontRight = ModuleIOSim()
+            val backLeft = ModuleIOSim()
+            val backRight = ModuleIOSim()
+            val gyroIOSim = GyroIOSim()
+
+            drive = SwerveDrive(
+                SwerveDrive.DriveType.GENERIC,
+                gyroIOSim,
+                frontLeft, frontRight, backLeft, backRight
+            )
+
+            val swerveSim = SwerveDriveSimulation(
+                gyroIOSim, frontLeft, frontRight, backLeft, backRight,
+                Pose2d(3.0, 2.0, Rotation2d()),
+                drive::setPose
+            )
+
+            val fieldSimulation: CompetitionFieldSimulation = Crescendo2024FieldSimulation(swerveSim)
+            val competitionFieldVisualizer = fieldSimulation.competitionField
+            fieldSimulation.placeGamePiecesOnField()
+
+            RobotPeriodicManager.startPeriodic {
+                fieldSimulation.updateSimulationWorld()
+                competitionFieldVisualizer.updateObjectsToDashboardAndTelemetry()
+            }
+        }
+
         AutoChooser
 
         DriverStation.silenceJoystickConnectionWarning(true)
@@ -80,7 +119,9 @@ object Robot: LoggedCoroutineRobot() {
 
     override suspend fun teleop() {
         robotPeriodic(isFinished = { !Robot.isTeleopEnabled }) {
-            Swerve.setTeleDriveControl()
+//            Swerve.setTeleDriveControl()\
+            val req = Controls.getTeleopSwerveRequest()
+            drive.runRawChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(req.VelocityX, req.VelocityY, req.RotationalRate, drive.rawGyroYaw))
         }
     }
 
@@ -106,9 +147,9 @@ object Robot: LoggedCoroutineRobot() {
     }
 
     override suspend fun test() {
-        RobotController.setAction {
-            wheelDiameterTest(rotationsPerSecond = 0.125)
-        }
+//        RobotController.setAction {
+//            wheelDiameterTest(rotationsPerSecond = 0.125)
+//        }
     }
 }
 
