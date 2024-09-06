@@ -105,7 +105,7 @@ class SwerveModule(private val io: ModuleIO, private val name: String) {
         /**
          * Returns the current drive velocity of the module in meters per second.
          */
-        get() = driveWheelRotationsToMeters(inputs.driveVelocityRadPerSecond)
+        get() = driveWheelRotationsToMeters(Units.radiansToRotations(inputs.driveVelocityRadPerSecond))
 
     val latestPosition: SwerveModulePosition
         /**
