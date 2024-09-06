@@ -2,22 +2,24 @@
 package org.team9432.resources.swerve
 
 import com.ctre.phoenix6.BaseStatusSignal
+import com.ctre.phoenix6.StatusSignal
+import org.littletonrobotics.junction.Logger
 import org.team9432.resources.swerve.DriveTrainConstants.ODOMETRY_CACHE_CAPACITY
-import org.team9432.resources.swerve.DriveTrainConstants.ODOMETRY_WAIT_TIMEOUT_SECONDS
-import org.team9432.resources.swerve.OdometryThread.OdometryDoubleInput
+import org.team9432.resources.swerve.DriveTrainConstants.ODOMETRY_FREQUENCY
 import org.team9432.resources.swerve.OdometryThread.OdometryThreadInputs
-import org.team9432.resources.swerve.mapleswerve.MapleTimeUtils
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
-class OdometryThreadReal(
-    private val odometryDoubleInputs: Array<OdometryDoubleInput>,
-    private val statusSignals: Array<BaseStatusSignal>,
-): Thread(), OdometryThread {
+
+object OdometryThreadReal: Thread(), OdometryThread {
     private val timeStampsQueue: Queue<Double> = ArrayBlockingQueue(ODOMETRY_CACHE_CAPACITY)
-    private val lock: Lock = ReentrantLock()
+    private val signalsLock: Lock = ReentrantLock()
+
+    private val queues = mutableListOf<Queue<Double>>()
+    private val timestampQueues = mutableListOf<Queue<Double>>()
+    private var signals: Array<BaseStatusSignal> = emptyArray()
 
     init {
         name = "OdometryThread"
@@ -25,51 +27,65 @@ class OdometryThreadReal(
     }
 
     @Synchronized override fun start() {
-        if (odometryDoubleInputs.isNotEmpty()) super<Thread>.start()
+        if (timestampQueues.isNotEmpty()) super<Thread>.start()
     }
 
+    fun registerSignal(signal: StatusSignal<Double>): Queue<Double> {
+        val queue = ArrayBlockingQueue<Double>(20)
+        signalsLock.lock()
+        SwerveDrive.odometryLock.lock()
+        try {
+            signals += signal
+            queues.add(queue)
+        } finally {
+            signalsLock.unlock()
+            SwerveDrive.odometryLock.unlock()
+        }
+
+        return queue
+    }
 
     override fun run() {
-        while (true) odometryPeriodic()
-    }
+        while (true) {
+            // Wait for signal updates
+            signalsLock.lock()
+            try {
+                BaseStatusSignal.waitForAll(2.0 / ODOMETRY_FREQUENCY, *signals)
+            } finally {
+                signalsLock.unlock()
+            }
 
-    private fun odometryPeriodic() {
-        refreshSignalsAndBlockThread()
+            // Save data
+            SwerveDrive.odometryLock.lock()
+            try {
+                var timestamp = Logger.getRealTimestamp() / 1e6
+                var totalLatency = 0.0
 
-        lock.lock()
-        timeStampsQueue.offer(estimateAverageTimeStamps())
-        for (odometryDoubleInput in odometryDoubleInputs) odometryDoubleInput.cacheInputToQueue()
-        lock.unlock()
-    }
+                for (signal in signals) {
+                    totalLatency += signal.timestamp.latency
+                }
 
-    private fun refreshSignalsAndBlockThread() {
-        BaseStatusSignal.waitForAll(ODOMETRY_WAIT_TIMEOUT_SECONDS, *statusSignals)
-    }
+                if (signals.isNotEmpty()) {
+                    // Subtract average latency from the timestamp
+                    timestamp -= totalLatency / signals.size
+                }
 
-    private fun estimateAverageTimeStamps(): Double {
-        val currentTime: Double = MapleTimeUtils.realTimeSeconds
-        var totalLatency = 0.0
-        for (signal in statusSignals) totalLatency += signal.timestamp.latency
-
-        if (statusSignals.isEmpty()) return currentTime
-        return currentTime - totalLatency / statusSignals.size
-    }
-
-
-    override fun updateInputs(inputs: OdometryThreadInputs) {
-        inputs.measurementTimeStamps = DoubleArray(timeStampsQueue.size)
-        var i = 0
-        while (i < inputs.measurementTimeStamps.size && !timeStampsQueue.isEmpty()) {
-            inputs.measurementTimeStamps[i] = timeStampsQueue.poll()
-            i++
+                // Add each new value to it's respective queue
+                for (i in signals.indices) {
+                    queues[i].offer(signals[i].valueAsDouble)
+                }
+                // Add the timestamp to the queue
+                for (i in timestampQueues.indices) {
+                    timestampQueues[i].offer(timestamp)
+                }
+            } finally {
+                SwerveDrive.odometryLock.unlock()
+            }
         }
     }
 
-    override fun lockOdometry() {
-        lock.lock()
-    }
-
-    override fun unlockOdometry() {
-        lock.unlock()
+    override fun updateInputs(inputs: OdometryThreadInputs) {
+        inputs.measurementTimestamps = timeStampsQueue.toDoubleArray()
+        timeStampsQueue.clear()
     }
 }

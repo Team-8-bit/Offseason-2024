@@ -7,7 +7,10 @@ import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.led.animations.*
 import org.team9432.lib.led.color.Color
 import org.team9432.lib.led.color.fromRGBString
-import org.team9432.lib.led.color.predefined.*
+import org.team9432.lib.led.color.predefined.Blue
+import org.team9432.lib.led.color.predefined.RainbowColors
+import org.team9432.lib.led.color.predefined.RainbowStripesColors
+import org.team9432.lib.led.color.predefined.Red
 import org.team9432.lib.led.management.AnimationBindScope
 import org.team9432.lib.led.management.AnimationManager
 import org.team9432.lib.led.management.Section

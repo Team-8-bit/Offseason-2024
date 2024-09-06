@@ -6,7 +6,7 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration
 import com.ctre.phoenix6.hardware.Pigeon2
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.util.Units
-import org.team9432.resources.swerve.OdometryThread
+import org.team9432.resources.swerve.OdometryThreadReal
 import org.team9432.resources.swerve.TunerConstants
 import java.util.*
 
@@ -23,7 +23,7 @@ class GyroIOPigeon2: GyroIO {
 
         yawVelocity.setUpdateFrequency(100.0)
 
-        yawPositionQueue = OdometryThread.registerSignalInput(yaw)
+        yawPositionQueue = OdometryThreadReal.registerSignal(yaw)
 
         pigeon.optimizeBusUtilization()
     }

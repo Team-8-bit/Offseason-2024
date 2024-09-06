@@ -5,8 +5,8 @@ import kotlinx.coroutines.launch
 import org.team9432.lib.coroutines.await
 import org.team9432.oi.Controls
 import org.team9432.resources.intake.Intake
-import org.team9432.resources.shooter.Shooter
 import org.team9432.resources.loader.Loader
+import org.team9432.resources.shooter.Shooter
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 

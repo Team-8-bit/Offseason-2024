@@ -23,6 +23,7 @@ import org.team9432.auto.types.FourNote
 import org.team9432.lib.Library
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.coroutines.LoggedCoroutineRobot
+import org.team9432.lib.coroutines.Team8BitRobot.Runtime.*
 import org.team9432.lib.coroutines.robotPeriodic
 import org.team9432.oi.Controls
 import org.team9432.resources.intake.Intake
@@ -37,7 +38,7 @@ import org.team9432.resources.swerve.module.ModuleIOSim
 
 
 object Robot: LoggedCoroutineRobot() {
-    const val IS_REPLAY = false
+    val runtime = if (RobotBase.isReal()) REAL else SIM
 
     lateinit var drive: SwerveDrive
 
@@ -49,20 +50,29 @@ object Robot: LoggedCoroutineRobot() {
         Logger.recordMetadata("BUILD_DATE", BUILD_DATE)
         Logger.recordMetadata("DIRTY", if (DIRTY == 1) "true" else "false")
 
-        if (Robot.isNotSimulated || (Robot.isSimulated && !IS_REPLAY)) {
-            Logger.addDataReceiver(WPILOGWriter()) // Log to a USB stick ("/U/logs")
-            Logger.addDataReceiver(NT4Publisher()) // Publish data to NetworkTables
-            PowerDistribution(1, PowerDistribution.ModuleType.kRev) // Enables power distribution logging
-        } else { // Replay
-            setUseTiming(false) // Run as fast as possible
-            val logPath = LogFileUtil.findReplayLog() // Pull the replay log from AdvantageScope (or prompt the user)
-            Logger.setReplaySource(WPILOGReader(logPath)) // Read replay log
-            Logger.addDataReceiver(WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_replay"))) // Save outputs to a new log
+        when (runtime) {
+            REAL -> {
+                Logger.addDataReceiver(WPILOGWriter()) // Log to a USB stick ("/U/logs")
+                Logger.addDataReceiver(NT4Publisher()) // Publish data to NetworkTables
+                PowerDistribution(1, PowerDistribution.ModuleType.kRev) // Enables power distribution logging
+            }
+
+            SIM -> {
+                Logger.addDataReceiver(NT4Publisher())
+                PowerDistribution(1, PowerDistribution.ModuleType.kRev) // Enables power distribution logging
+            }
+
+            REPLAY -> {
+                setUseTiming(false) // Run as fast as possible
+                val logPath = LogFileUtil.findReplayLog() // Pull the replay log from AdvantageScope (or prompt the user)
+                Logger.setReplaySource(WPILOGReader(logPath)) // Read replay log
+                Logger.addDataReceiver(WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_replay"))) // Save outputs to a new log
+            }
         }
 
         Logger.start() // Start logging! No more data receivers, replay sources, or metadata values may be added.
 
-        Library.initialize(this, IS_REPLAY)
+        Library.initialize(this, runtime)
 
         //Logger.configure(ntPublish = true, logExtras = false)
 
@@ -90,9 +100,9 @@ object Robot: LoggedCoroutineRobot() {
             val gyroIOSim = GyroIOSim()
 
             drive = SwerveDrive(
-                SwerveDrive.DriveType.GENERIC,
                 gyroIOSim,
-                frontLeft, frontRight, backLeft, backRight
+                frontLeft,
+                frontRight, backLeft, backRight
             )
 
             val swerveSim = SwerveDriveSimulation(
@@ -118,10 +128,9 @@ object Robot: LoggedCoroutineRobot() {
 
 
     override suspend fun teleop() {
-        robotPeriodic(isFinished = { !Robot.isTeleopEnabled }) {
-//            Swerve.setTeleDriveControl()\
+        robotPeriodic(isFinished = { !Robot.mode.isTeleop }) {
             val req = Controls.getTeleopSwerveRequest()
-            drive.runRawChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(req.VelocityX, req.VelocityY, req.RotationalRate, drive.rawGyroYaw))
+            drive.runFieldCentricChassisSpeeds(ChassisSpeeds(req.VelocityX, req.VelocityY, req.RotationalRate))
         }
     }
 

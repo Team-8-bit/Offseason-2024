@@ -167,10 +167,10 @@ class SwerveDriveSimulation(
 
     class OdometryThreadSim: OdometryThread {
         override fun updateInputs(inputs: OdometryThread.OdometryThreadInputs) {
-            inputs.measurementTimeStamps = DoubleArray(SIMULATION_TICKS_IN_1_PERIOD)
+            inputs.measurementTimestamps = DoubleArray(SIMULATION_TICKS_IN_1_PERIOD)
             val robotStartingTimeStamps: Double = MapleTimeUtils.logTimeSeconds
             val iterationPeriodSeconds: Double = Robot.period / SIMULATION_TICKS_IN_1_PERIOD
-            for (i in 0 until SIMULATION_TICKS_IN_1_PERIOD) inputs.measurementTimeStamps[i] = robotStartingTimeStamps + i * iterationPeriodSeconds
+            for (i in 0 until SIMULATION_TICKS_IN_1_PERIOD) inputs.measurementTimestamps[i] = robotStartingTimeStamps + i * iterationPeriodSeconds
         }
     }
 }

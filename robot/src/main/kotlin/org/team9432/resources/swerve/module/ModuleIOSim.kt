@@ -1,8 +1,8 @@
 package org.team9432.resources.swerve.module
 
+import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.simulation.DCMotorSim
 import org.team9432.resources.swerve.DriveTrainConstants.CHASSIS_MAX_VELOCITY
 import org.team9432.resources.swerve.DriveTrainConstants.DRIVE_GEAR_RATIO
@@ -25,47 +25,41 @@ import kotlin.math.abs
  * approximation for the behavior of the module.
  */
 class ModuleIOSim: ModuleIO {
-    val physicsSimulationResults: SwerveModulePhysicsSimulationResults
-    private val steerSim: DCMotorSim
-    var appliedVolts: Double = 0.0
-        private set
+    val physicsSimulationResults = SwerveModulePhysicsSimulationResults()
+    private val steerSim: DCMotorSim = DCMotorSim(STEER_MOTOR, STEER_GEAR_RATIO, STEER_INERTIA)
+
+    private var driveAppliedVolts: Double = 0.0
     private var steerAppliedVolts: Double = 0.0
 
-    init {
-        this.steerSim = DCMotorSim(STEER_MOTOR, STEER_GEAR_RATIO, STEER_INERTIA)
-
-        this.physicsSimulationResults = SwerveModulePhysicsSimulationResults()
-    }
-
     override fun updateInputs(inputs: ModuleIOInputs) {
-        inputs.driveWheelFinalRevolutions = physicsSimulationResults.driveWheelFinalRevolutions
-        inputs.driveWheelFinalVelocityRevolutionsPerSec = Units.radiansToRotations(physicsSimulationResults.driveWheelFinalVelocityRadPerSec)
-        inputs.driveMotorAppliedVolts = appliedVolts
-        inputs.driveMotorCurrentAmps = abs(
+        inputs.hardwareConnected = true
+
+        inputs.drivePositionRotations = physicsSimulationResults.driveWheelFinalRevolutions
+        inputs.driveVelocityRadPerSecond = physicsSimulationResults.driveWheelFinalVelocityRadPerSec
+        inputs.driveAppliedVolts = driveAppliedVolts
+        inputs.driveCurrentAmps = abs(
             DRIVE_MOTOR.getCurrent(
                 physicsSimulationResults.driveWheelFinalVelocityRadPerSec,
-                appliedVolts
+                driveAppliedVolts
             )
         )
 
-        inputs.steerFacing = Rotation2d.fromRadians(steerSim.angularPositionRad)
+        inputs.steerAbsolutePosition = Rotation2d.fromRadians(steerSim.angularPositionRad)
+        inputs.steerPosition = Rotation2d.fromRadians(steerSim.angularPositionRad)
         inputs.steerVelocityRadPerSec = steerSim.angularVelocityRadPerSec
-        inputs.steerMotorAppliedVolts = steerAppliedVolts
-        inputs.steerMotorCurrentAmps = abs(steerSim.currentDrawAmps)
+        inputs.steerAppliedVolts = steerAppliedVolts
+        inputs.steerCurrentAmps = abs(steerSim.currentDrawAmps)
 
-        inputs.odometryDriveWheelRevolutions = physicsSimulationResults.odometryDriveWheelRevolutions.copyOf()
+        inputs.odometryDrivePositionsRotations = physicsSimulationResults.odometryDriveWheelRevolutions.copyOf()
         inputs.odometrySteerPositions = physicsSimulationResults.odometrySteerPositions.copyOf()
-
-        inputs.hardwareConnected = true
     }
-
 
     override fun setDriveVoltage(volts: Double) {
-        appliedVolts = volts
+        driveAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0)
     }
 
-    override fun setSteerPowerPercent(powerPercent: Double) {
-        steerAppliedVolts = (powerPercent * 12)
+    override fun setSteerVoltage(volts: Double) {
+        steerAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0)
         steerSim.setInputVoltage(if (abs(steerAppliedVolts) > STEER_FRICTION_VOLTAGE) steerAppliedVolts else 0.0)
     }
 
@@ -77,36 +71,29 @@ class ModuleIOSim: ModuleIO {
         get() = DRIVE_MOTOR.getTorque(
             DRIVE_MOTOR.getCurrent(
                 physicsSimulationResults.driveWheelFinalVelocityRadPerSec * DRIVE_GEAR_RATIO,
-                appliedVolts
+                driveAppliedVolts
             )
         )
 
     val simulationSteerFacing: Rotation2d
-        get() {
-            return Rotation2d.fromRadians(steerSim.angularPositionRad)
-        }
+        get() = Rotation2d.fromRadians(steerSim.angularPositionRad)
 
     val simulationSwerveState: SwerveModuleState
-        get() {
-            return SwerveModuleState(
-                physicsSimulationResults.driveWheelFinalVelocityRadPerSec * WHEEL_RADIUS_METERS,
-                simulationSteerFacing
-            )
-        }
+        get() = SwerveModuleState(
+            physicsSimulationResults.driveWheelFinalVelocityRadPerSec * WHEEL_RADIUS_METERS,
+            simulationSteerFacing
+        )
 
     val desiredSwerveState: SwerveModuleState
-        get() {
-            return SwerveModuleState(
-                appliedVolts * CHASSIS_MAX_VELOCITY,
-                simulationSteerFacing
-            )
-        }
+        get() = SwerveModuleState(
+            driveAppliedVolts * CHASSIS_MAX_VELOCITY,
+            simulationSteerFacing
+        )
 
     /**
      * this replaces DC Motor Sim for drive wheels
      */
     class SwerveModulePhysicsSimulationResults {
-        @JvmField
         var driveWheelFinalRevolutions: Double = 0.0
         var driveWheelFinalVelocityRadPerSec: Double = 0.0
 
