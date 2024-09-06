@@ -30,10 +30,13 @@ import org.team9432.resources.intake.Intake
 import org.team9432.resources.loader.Loader
 import org.team9432.resources.shooter.Shooter
 import org.team9432.resources.swerve.SwerveDrive
+import org.team9432.resources.swerve.TunerConstants
+import org.team9432.resources.swerve.gyro.GyroIOPigeon2
 import org.team9432.resources.swerve.gyro.GyroIOSim
 import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.CompetitionFieldSimulation
 import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.Crescendo2024FieldSimulation
 import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.SwerveDriveSimulation
+import org.team9432.resources.swerve.module.ModuleIOKraken
 import org.team9432.resources.swerve.module.ModuleIOSim
 
 
@@ -119,6 +122,13 @@ object Robot: LoggedCoroutineRobot() {
                 fieldSimulation.updateSimulationWorld()
                 competitionFieldVisualizer.updateObjectsToDashboardAndTelemetry()
             }
+        } else {
+            val frontLeft = ModuleIOKraken(TunerConstants.FrontLeft, TunerConstants.kCANbusName)
+            val frontRight = ModuleIOKraken(TunerConstants.FrontRight, TunerConstants.kCANbusName)
+            val backLeft = ModuleIOKraken(TunerConstants.BackLeft, TunerConstants.kCANbusName)
+            val backRight = ModuleIOKraken(TunerConstants.BackRight, TunerConstants.kCANbusName)
+            val gyroIO = GyroIOPigeon2()
+            drive = SwerveDrive(gyroIO, frontLeft, frontRight, backLeft, backRight)
         }
 
         AutoChooser
