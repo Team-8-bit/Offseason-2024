@@ -17,7 +17,6 @@ class SwerveModule(private val io: ModuleIO, private val name: String) {
 
     private var angleSetpoint: Rotation2d? = null
     private var speedSetpoint: Double? = null
-    private var turnRelativeOffset: Rotation2d? = null
 
     private val driveFeedforward = SimpleMotorFeedforward(0.1, 0.13)
 
@@ -33,12 +32,6 @@ class SwerveModule(private val io: ModuleIO, private val name: String) {
 
     fun periodic() {
         Logger.processInputs("Drive/Module-$name", inputs)
-
-        // On first cycle, reset relative turn encoder
-        // Wait until absolute angle is nonzero in case it wasn't initialized yet
-        if (turnRelativeOffset == null && inputs.steerAbsolutePosition.radians != 0.0) {
-            turnRelativeOffset = inputs.steerAbsolutePosition.minus(inputs.steerPosition);
-        }
 
         trackClosedLoopStates()
 
