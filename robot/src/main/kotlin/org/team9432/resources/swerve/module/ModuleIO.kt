@@ -9,18 +9,22 @@ interface ModuleIO {
         var drivePositionRotations: Double = 0.0
         var driveVelocityRadPerSecond: Double = 0.0
         var driveAppliedVolts: Double = 0.0
-        var driveCurrentAmps: Double = 0.0
+        var driveSupplyCurrentAmps: Double = 0.0
+        var driveTorqueCurrentAmps: Double = 0.0
 
         var steerAbsolutePosition: Rotation2d = Rotation2d()
         var steerPosition: Rotation2d = Rotation2d()
         var steerVelocityRadPerSec: Double = 0.0
         var steerAppliedVolts: Double = 0.0
-        var steerCurrentAmps: Double = 0.0
+        var steerSupplyCurrentAmps: Double = 0.0
+        var steerTorqueCurrentAmps: Double = 0.0
 
         var odometryDrivePositionsRotations: DoubleArray = doubleArrayOf()
         var odometrySteerPositions: Array<Rotation2d> = arrayOf()
 
-        var hardwareConnected: Boolean = false
+        var driveConnected: Boolean = false
+        var steerConnected: Boolean = false
+        var cancoderConnected: Boolean = false
     }
 
     /**
@@ -28,17 +32,23 @@ interface ModuleIO {
      */
     fun updateInputs(inputs: ModuleIOInputs)
 
-    fun setDriveVoltage(volts: Double) {}
+    fun runDriveVoltage(volts: Double) {}
 
-    fun setSteerVoltage(volts: Double) {}
+    fun runSteerVoltage(volts: Double) {}
 
-    /**
-     * Enable or disable brake mode on the drive motor.
-     */
+    fun runDriveVelocity(metersPerSecond: Double, feedforwardVolts: Double) {}
+
+    fun runSteerPosition(angle: Rotation2d) {}
+
+    fun setDrivePID(p: Double, i: Double, d: Double) {}
+
+    fun setSteerPID(p: Double, i: Double, d: Double) {}
+
+    /** Enable or disable brake mode on the drive motor. */
     fun setDriveBrake(enable: Boolean) {}
 
-    /**
-     * Enable or disable brake mode on the turn motor.
-     */
+    /** Enable or disable brake mode on the steer motor. */
     fun setSteerBrake(enable: Boolean) {}
+
+    fun stop() {}
 }
