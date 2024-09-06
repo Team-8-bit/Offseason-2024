@@ -6,7 +6,6 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage
 import com.ctre.phoenix6.controls.NeutralOut
-import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.CANcoder
 import com.ctre.phoenix6.hardware.TalonFX
@@ -27,7 +26,7 @@ import org.team9432.resources.swerve.module.ModuleIO.ModuleIOInputs
 import java.util.*
 
 
-class ModuleIOKraken(moduleConstants: SwerveModuleConstants, canbusName: String): ModuleIO {
+class ModuleIOKraken(private val moduleConstants: SwerveModuleConstants, canbusName: String): ModuleIO {
     private val driveMotor = TalonFX(moduleConstants.DriveMotorId, canbusName)
     private val steerMotor = TalonFX(moduleConstants.SteerMotorId, canbusName)
     private val cancoder = CANcoder(moduleConstants.CANcoderId, canbusName)
@@ -57,7 +56,7 @@ class ModuleIOKraken(moduleConstants: SwerveModuleConstants, canbusName: String)
     private val highFrequencySignals = arrayOf(drivePosition, steerPosition)
 
     private val voltageControl = VoltageOut(0.0).withUpdateFreqHz(0.0)
-    private val driveVelocityVoltageControl = VelocityVoltage(0.0).withUpdateFreqHz(0.0)
+    private val driveVoltageOpenLoopControl = VoltageOut(0.0).withUpdateFreqHz(0.0)
     private val steerVoltageMotionMagicControl = MotionMagicExpoVoltage(0.0).withUpdateFreqHz(0.0)
     private val neutralControl = NeutralOut().withUpdateFreqHz(0.0)
 
@@ -119,7 +118,7 @@ class ModuleIOKraken(moduleConstants: SwerveModuleConstants, canbusName: String)
     }
 
     override fun runDriveVelocity(metersPerSecond: Double, feedforwardVolts: Double) {
-        driveMotor.setControl(driveVelocityVoltageControl.withVelocity(metersPerSecond * driveRotationsPerMeter))
+        driveMotor.setControl(driveVoltageOpenLoopControl.withOutput(metersPerSecond / moduleConstants.SpeedAt12VoltsMps * 12.0))
     }
 
     override fun setDrivePID(p: Double, i: Double, d: Double) {
