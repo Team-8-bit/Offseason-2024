@@ -23,7 +23,7 @@ import org.team9432.resources.swerve.module.ModuleIO.ModuleIOInputs
 import java.util.*
 
 
-class ModuleIOTalon(drivetrainConstants: SwerveDrivetrainConstants, moduleConstants: SwerveModuleConstants): ModuleIO {
+class ModuleIOKraken(drivetrainConstants: SwerveDrivetrainConstants, moduleConstants: SwerveModuleConstants): ModuleIO {
     private val driveTalon = TalonFX(moduleConstants.DriveMotorId, drivetrainConstants.CANbusName)
     private val steerTalon = TalonFX(moduleConstants.SteerMotorId, drivetrainConstants.CANbusName)
     private val cancoder = CANcoder(moduleConstants.CANcoderId, drivetrainConstants.CANbusName)
