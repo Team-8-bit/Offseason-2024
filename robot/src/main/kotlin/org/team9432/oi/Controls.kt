@@ -75,8 +75,8 @@ object Controls {
 
             else -> teleopRequest.apply {
                 val speed = getTranslationalSpeed()
-                withVelocityX(ratelimitX.calculate(speed.x * 5.0))
-                withVelocityY(ratelimitY.calculate(speed.y * 5.0))
+                withVelocityX(ratelimitX.calculate(speed.x * 5.0 * allianceSwitch(blue = 1, red = -1)))
+                withVelocityY(ratelimitY.calculate(speed.y * 5.0 * allianceSwitch(blue = 1, red = -1)))
                 withRotationalRate(getRotationalSpeed())
             }
         }
