@@ -16,11 +16,13 @@ class IntakeIONeo: IntakeIO {
         leaderMotor.enableVoltageCompensation(11.0)
         leaderMotor.setSmartCurrentLimit(20)
         leaderMotor.idleMode = CANSparkBase.IdleMode.kBrake
+        leaderMotor.burnFlash()
 
         followerMotor.inverted = true
         followerMotor.enableVoltageCompensation(11.0)
         followerMotor.setSmartCurrentLimit(20)
         followerMotor.idleMode = CANSparkBase.IdleMode.kBrake
+        followerMotor.burnFlash()
 
         followerMotor.follow(leaderMotor)
     }

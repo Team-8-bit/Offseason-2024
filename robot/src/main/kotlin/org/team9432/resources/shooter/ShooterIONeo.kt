@@ -20,12 +20,14 @@ class ShooterIONeo: ShooterIO {
         upperMotor.enableVoltageCompensation(10.0)
         upperMotor.openLoopRampRate = 0.0
         upperMotor.setSmartCurrentLimit(25)
+        upperMotor.burnFlash()
 
         lowerMotor.inverted = true
         lowerMotor.idleMode = CANSparkBase.IdleMode.kBrake
         lowerMotor.enableVoltageCompensation(10.0)
         lowerMotor.openLoopRampRate = 0.0
         lowerMotor.setSmartCurrentLimit(25)
+        lowerMotor.burnFlash()
     }
 
     override fun runVoltage(upperVoltage: Double, lowerVoltage: Double) {
