@@ -8,6 +8,7 @@ object Beambreaks {
     val lower = Beambreak(6)
 
     val hasNote get() = upper.isTripped() || lower.isTripped()
+    val hasNoNote get() = upper.isClear() && lower.isClear()
 
     init {
         RobotPeriodicManager.startPeriodic { log() }

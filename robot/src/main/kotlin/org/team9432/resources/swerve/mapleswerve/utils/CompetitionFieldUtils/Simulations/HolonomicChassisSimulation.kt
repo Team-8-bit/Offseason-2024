@@ -1,6 +1,7 @@
 package org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations
 
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import org.dyn4j.dynamics.Body
 import org.dyn4j.dynamics.Force
@@ -108,7 +109,7 @@ abstract class HolonomicChassisSimulation(val profile: RobotSimulationProfile, s
 
     override val objectOnFieldPose2d: Pose2d
         get() {
-            return GeometryConvertor.toWpilibPose2d(getTransform())
+            return GeometryConvertor.toWpilibPose2d(getTransform()).transformBy(profile.robotBumperToCenterOffset)
         }
 
     open val measuredChassisSpeedsRobotRelative: ChassisSpeeds
@@ -131,6 +132,7 @@ abstract class HolonomicChassisSimulation(val profile: RobotSimulationProfile, s
         val robotMass: Double = DriveTrainConstants.ROBOT_MASS_KG,
         val width: Double = DriveTrainConstants.BUMPER_WIDTH_METERS,
         val height: Double = DriveTrainConstants.BUMPER_LENGTH_METERS,
+        val robotBumperToCenterOffset: Transform2d = DriveTrainConstants.ROBOT_TO_BUMPER_CENTER_OFFSET,
         dampingCoefficient: Double = 0.3
     ) {
         val propellingForce: Double

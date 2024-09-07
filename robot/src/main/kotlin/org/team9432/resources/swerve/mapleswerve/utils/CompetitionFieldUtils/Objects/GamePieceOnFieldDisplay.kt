@@ -15,7 +15,7 @@ interface GamePieceOnFieldDisplay: Object2dOnFieldDisplay {
         get() {
             val pose2d = objectOnFieldPose2d
             val translation3d = Translation3d(
-                pose2d!!.x,
+                pose2d.x,
                 pose2d.y,
                 gamePieceHeight / 2
             )

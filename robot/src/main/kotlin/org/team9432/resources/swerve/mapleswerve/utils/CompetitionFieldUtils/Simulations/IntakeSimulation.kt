@@ -15,9 +15,9 @@ import org.team9432.resources.swerve.mapleswerve.utils.CustomMaths.GeometryConve
 import java.util.*
 import java.util.function.BooleanSupplier
 
-class IntakeSimulation(shape: Convex, capacity: Int, private val intakeRunningSupplier: BooleanSupplier): BodyFixture(shape) {
+open class IntakeSimulation(shape: Convex, capacity: Int, private val intakeRunningSupplier: BooleanSupplier): BodyFixture(shape) {
     private val capacity: Int
-    private var gamePieceCount = 0
+    var gamePieceCount = 0
 
     val gamePiecesToRemove: Queue<GamePieceInSimulation>
 

@@ -90,7 +90,7 @@ object Actions {
         Loader.setState(Loader.State.INTAKE)
 
         if (Robot.isSimulated) {
-            NoteVisualizer.awaitNotePickup()
+            IntakeSim.awaitPickup()
             Beambreaks.lower.setSimTripped()
         } else {
             Beambreaks.lower.awaitTripped()

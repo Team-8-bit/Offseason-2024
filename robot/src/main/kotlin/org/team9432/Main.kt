@@ -21,7 +21,6 @@ import org.team9432.auto.types.AmpsideCenterline
 import org.team9432.auto.types.FarsideCenterline
 import org.team9432.auto.types.FourNote
 import org.team9432.lib.Library
-import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.coroutines.LoggedCoroutineRobot
 import org.team9432.lib.coroutines.Team8BitRobot.Runtime.*
 import org.team9432.lib.coroutines.robotPeriodic
@@ -33,8 +32,6 @@ import org.team9432.resources.swerve.SwerveDrive
 import org.team9432.resources.swerve.TunerConstants
 import org.team9432.resources.swerve.gyro.GyroIOPigeon2
 import org.team9432.resources.swerve.gyro.GyroIOSim
-import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.CompetitionFieldSimulation
-import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.Crescendo2024FieldSimulation
 import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.SwerveDriveSimulation
 import org.team9432.resources.swerve.module.ModuleIOKraken
 import org.team9432.resources.swerve.module.ModuleIOSim
@@ -44,6 +41,7 @@ object Robot: LoggedCoroutineRobot() {
     val runtime = if (RobotBase.isReal()) REAL else SIM
 
     lateinit var drive: SwerveDrive
+    lateinit var simulation: RobotSim
 
     override suspend fun init() {
         Logger.recordMetadata("ProjectName", "2024-Offseason") // Set a metadata value
@@ -114,14 +112,7 @@ object Robot: LoggedCoroutineRobot() {
                 drive::setPose
             )
 
-            val fieldSimulation: CompetitionFieldSimulation = Crescendo2024FieldSimulation(swerveSim)
-            val competitionFieldVisualizer = fieldSimulation.competitionField
-            fieldSimulation.placeGamePiecesOnField()
-
-            RobotPeriodicManager.startPeriodic {
-                fieldSimulation.updateSimulationWorld()
-                competitionFieldVisualizer.updateObjectsToDashboardAndTelemetry()
-            }
+            simulation = RobotSim(swerveSim)
         } else {
             val frontLeft = ModuleIOKraken(TunerConstants.FrontLeft, TunerConstants.kCANbusName)
             val frontRight = ModuleIOKraken(TunerConstants.FrontRight, TunerConstants.kCANbusName)

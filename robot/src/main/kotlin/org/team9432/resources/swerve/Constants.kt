@@ -1,5 +1,7 @@
 package org.team9432.resources.swerve
 
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.system.plant.DCMotor
@@ -11,6 +13,8 @@ import kotlin.math.min
  * because we want an all-real simulation for the chassis, the numbers are required to be considerably precise
  */
 object DriveTrainConstants {
+    val ROBOT_TO_BUMPER_CENTER_OFFSET = Transform2d(Units.inchesToMeters(2.75), 0.0, Rotation2d())
+
     /**
      * numbers that needs to be changed to fit each robot
      * TODO: change these numbers to match your robot
@@ -26,7 +30,6 @@ object DriveTrainConstants {
 
     /**
      * numbers imported from [TunerConstants]
-     * TODO: for REV chassis, replace them with actual numbers
      */
     val WHEEL_RADIUS_METERS: Double = Units.inchesToMeters(TunerConstants.kWheelRadiusInches)
     const val DRIVE_GEAR_RATIO: Double = TunerConstants.kDriveGearRatio
