@@ -20,11 +20,11 @@ import org.team9432.resources.swerve.mapleswerve.utils.CustomMaths.GeometryConve
  * should only be created during a robot simulation (not in real or replay mode)
  */
 abstract class CompetitionFieldSimulation(mainRobot: HolonomicChassisSimulation, obstaclesMap: FieldObstaclesMap) {
-    private val physicsWorld: World<Body>
+    protected val physicsWorld: World<Body>
     val competitionField: CompetitionFieldVisualizer
-    private val robotSimulations: MutableSet<HolonomicChassisSimulation> = HashSet()
+    protected val robotSimulations: MutableSet<HolonomicChassisSimulation> = HashSet()
     val mainRobot: HolonomicChassisSimulation
-    private val gamePieces: MutableSet<GamePieceInSimulation>
+    protected val gamePieces: MutableSet<GamePieceInSimulation>
 
     private val intakeSimulations: MutableList<IntakeSimulation> = ArrayList()
 
@@ -41,6 +41,7 @@ abstract class CompetitionFieldSimulation(mainRobot: HolonomicChassisSimulation,
     }
 
     fun updateSimulationWorld() {
+        competitionPeriodic()
         val subPeriodSeconds: Double = Robot.period / SIMULATION_TICKS_IN_1_PERIOD
         // move through 5 sub-periods in each update
         for (i in 0 until SIMULATION_TICKS_IN_1_PERIOD) {
@@ -66,11 +67,13 @@ abstract class CompetitionFieldSimulation(mainRobot: HolonomicChassisSimulation,
     fun addGamePiece(gamePieceInSimulation: GamePieceInSimulation) {
         physicsWorld.addBody(gamePieceInSimulation)
         competitionField.addObject(gamePieceInSimulation)
+        gamePieces.add(gamePieceInSimulation)
     }
 
     fun removeGamePiece(gamePieceInSimulation: GamePieceInSimulation) {
         physicsWorld.removeBody(gamePieceInSimulation)
         competitionField.deleteObject(gamePieceInSimulation)
+        gamePieces.remove(gamePieceInSimulation)
     }
 
     fun clearGamePieces() {
@@ -90,6 +93,12 @@ abstract class CompetitionFieldSimulation(mainRobot: HolonomicChassisSimulation,
      * place all game pieces on the field (for autonomous)
      */
     abstract fun placeGamePiecesOnField()
+
+    /**
+     * update the score counts & human players periodically
+     * implement this method in current year's simulation
+     */
+    abstract fun competitionPeriodic()
 
     /**
      * stores the obstacles on a competition field, which includes the border and the game pieces

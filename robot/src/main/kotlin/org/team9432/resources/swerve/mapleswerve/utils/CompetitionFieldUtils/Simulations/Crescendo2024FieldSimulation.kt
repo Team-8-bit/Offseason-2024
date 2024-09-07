@@ -3,7 +3,10 @@ package org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Si
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.wpilibj.DriverStation
 import org.team9432.resources.swerve.FieldConstants.FIELD_WIDTH
+import org.team9432.resources.swerve.FieldConstants.toCurrentAllianceTranslation
+import org.team9432.resources.swerve.mapleswerve.MapleTimeUtils
 import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Objects.Crescendo2024FieldObjects.NoteOnFieldSimulated
 
 /**
@@ -121,7 +124,36 @@ class Crescendo2024FieldSimulation(robot: HolonomicChassisSimulation): Competiti
         }
     }
 
+    override fun competitionPeriodic() {
+        simulateHumanPlayer()
+    }
+
+    private var previousThrowTimeSeconds = 0.0
+    private var previousPickupTimeSeconds = 0.0
+    private fun simulateHumanPlayer() {
+        if (!DriverStation.isTeleopEnabled()) return
+
+        if (MapleTimeUtils.logTimeSeconds - previousThrowTimeSeconds < 1) return
+
+        val sourcePosition: Translation2d = toCurrentAllianceTranslation(BLUE_SOURCE_POSITION)
+        /* if there is any game-piece 0.5 meters within the human player station, we don't throw a new note */
+        if (super.gamePieces.any { it.objectOnFieldPose2d.translation.getDistance(sourcePosition) < 1 }) {
+            previousPickupTimeSeconds = MapleTimeUtils.logTimeSeconds
+            return
+        }
+
+        // Return if it just became possible to drop a game piece within the last four seconds
+        if (MapleTimeUtils.logTimeSeconds - previousPickupTimeSeconds < 4) return
+
+        /* otherwise, place a note */
+        addGamePiece(NoteOnFieldSimulated(sourcePosition))
+        previousThrowTimeSeconds = MapleTimeUtils.logTimeSeconds
+    }
+
     companion object {
+        private val BLUE_SOURCE_POSITION: Translation2d = Translation2d(15.6, 0.8)
+
+
         private val NOTE_INITIAL_POSITIONS: Array<Translation2d> = arrayOf(
             Translation2d(2.9, 4.1),
             Translation2d(2.9, 5.55),
