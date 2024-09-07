@@ -84,6 +84,8 @@ class SwerveDrive(private val gyroIO: GyroIO, frontLeftModuleIO: ModuleIO, front
 
         Logger.processInputs("Drive/Gyro", gyroInputs)
         Logger.processInputs("Drive/OdometryThread", odometryThreadInputs)
+        Logger.recordOutput("Drive/OdometryPose", getPose())
+        Logger.recordOutput("Drive/MeasuredModuleStates", *moduleStates)
 
         modules.forEach(SwerveModule::periodic)
 
@@ -165,6 +167,8 @@ class SwerveDrive(private val gyroIO: GyroIO, frontLeftModuleIO: ModuleIO, front
         poseEstimator.addVisionMeasurement(visionPose, timestamp, measurementStdDevs)
         previousVisionMeasurementTimeStamp = max(timestamp, previousVisionMeasurementTimeStamp)
     }
+
+    fun setGyroAngle(angle: Rotation2d) = gyroIO.setAngle(angle)
 
     override var previousVisionMeasurementTimeStamp: Double = -1.0
         private set

@@ -10,10 +10,12 @@ import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
 import org.team9432.Actions
 import org.team9432.Beambreaks
+import org.team9432.Robot.drive
 import org.team9432.RobotController
 import org.team9432.Vision
 import org.team9432.lib.input.XboxController
 import org.team9432.lib.unit.meters
+import org.team9432.lib.util.allianceSwitch
 import org.team9432.resources.intake.Intake
 import org.team9432.resources.loader.Loader
 import org.team9432.resources.shooter.Shooter
@@ -106,7 +108,7 @@ object Controls {
             .onTrue { RobotController.setAction { Actions.amp() } }
 
         controller.back
-//            .onTrue { Swerve.seedFieldRelative() }
+            .onTrue { drive.setGyroAngle(allianceSwitch(blue = Rotation2d(), red = Rotation2d(Math.PI))) }
 
         controller.start
             .onTrue { RobotController.setAction { Actions.outtake() } }

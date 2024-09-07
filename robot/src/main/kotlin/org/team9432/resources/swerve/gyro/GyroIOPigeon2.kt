@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration
 import com.ctre.phoenix6.hardware.Pigeon2
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.util.Units
+import org.team9432.resources.swerve.DriveTrainConstants.ODOMETRY_FREQUENCY
 import org.team9432.resources.swerve.OdometryThreadReal
 import org.team9432.resources.swerve.TunerConstants
 import java.util.*
@@ -22,6 +23,7 @@ class GyroIOPigeon2: GyroIO {
         pigeon.configurator.setYaw(0.0)
 
         yawVelocity.setUpdateFrequency(100.0)
+        yaw.setUpdateFrequency(ODOMETRY_FREQUENCY)
 
         yawPositionQueue = OdometryThreadReal.registerSignal(yaw)
 
@@ -35,5 +37,9 @@ class GyroIOPigeon2: GyroIO {
 
         inputs.odometryYawPositions = yawPositionQueue.map { Rotation2d.fromDegrees(it) }.toTypedArray()
         yawPositionQueue.clear()
+    }
+
+    override fun setAngle(angle: Rotation2d) {
+        pigeon.setYaw(angle.degrees)
     }
 }
