@@ -3,12 +3,12 @@ package org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Ob
 import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.geometry.Translation3d
-import org.team9432.resources.swerve.mapleswerve.MapleTimeUtils.logTimeSeconds
+import edu.wpi.first.wpilibj.Timer
 import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.CompetitionFieldVisualizer.ObjectOnFieldDisplay
 import kotlin.math.atan2
 
 abstract class GamePieceOnFlyDisplay(private val shooterPosition: Translation3d, private val targetedPosition: Translation3d, private val flightTimeSeconds: Double): ObjectOnFieldDisplay {
-    private val startTimeSeconds = logTimeSeconds
+    private val startTimeSeconds = Timer.getFPGATimestamp()
     private val gamePieceRotation: Rotation3d
 
     init {
@@ -25,5 +25,5 @@ abstract class GamePieceOnFlyDisplay(private val shooterPosition: Translation3d,
         get() = t >= 1
 
     val t: Double
-        get() = (logTimeSeconds - startTimeSeconds) / flightTimeSeconds
+        get() = (Timer.getFPGATimestamp() - startTimeSeconds) / flightTimeSeconds
 }

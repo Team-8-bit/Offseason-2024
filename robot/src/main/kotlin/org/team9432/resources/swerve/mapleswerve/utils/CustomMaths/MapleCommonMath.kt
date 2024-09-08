@@ -1,6 +1,5 @@
 package org.team9432.resources.swerve.mapleswerve.utils.CustomMaths
 
-import edu.wpi.first.math.geometry.Rotation3d
 import org.team9432.GIT_SHA
 import java.util.*
 import kotlin.math.*
@@ -12,16 +11,6 @@ object MapleCommonMath {
      * this way when you do log-replay even the generated random numbers are the same
      */
     private val random: Random = Random(GIT_SHA.hashCode().toLong())
-
-    fun linearInterpretationWithBounding(x1: Double, y1: Double, x2: Double, y2: Double, x: Double): Double {
-        val minX: Double = min(x1, x2)
-        val maxX: Double = max(x1, x2)
-        return linearInterpretation(x1, y1, x2, y2, min(maxX, max(minX, x)))
-    }
-
-    fun linearInterpretation(x1: Double, y1: Double, x2: Double, y2: Double, x: Double): Double {
-        return y1 + (x - x1) * (y2 - y1) / (x2 - x1)
-    }
 
     /**
      * using the random number generator of a fixed seed, generate the next random normal variable
@@ -47,10 +36,4 @@ object MapleCommonMath {
         )
     }
 
-    fun printRotation3d(rotation3d: Rotation3d): String {
-        return "rotation 3d object with value: " + rotation3d.getQuaternion() + String.format(
-            "\nand roll %.2f deg, pitch %.2f deg, yaw %.2f deg",
-            Math.toDegrees(rotation3d.getX()), Math.toDegrees(rotation3d.getY()), Math.toDegrees(rotation3d.getZ())
-        )
-    }
 }

@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.util.Units
+import edu.wpi.first.wpilibj.Timer
 import org.dyn4j.geometry.Vector2
 import org.team9432.Robot
 import org.team9432.resources.swerve.DriveTrainConstants.CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC
@@ -18,7 +19,6 @@ import org.team9432.resources.swerve.DriveTrainConstants.SIMULATION_TICKS_IN_1_P
 import org.team9432.resources.swerve.DriveTrainConstants.WHEEL_RADIUS_METERS
 import org.team9432.resources.swerve.OdometryThread
 import org.team9432.resources.swerve.gyro.GyroIOSim
-import org.team9432.resources.swerve.mapleswerve.MapleTimeUtils
 import org.team9432.resources.swerve.mapleswerve.utils.CustomMaths.GeometryConvertor
 import org.team9432.resources.swerve.module.ModuleIOSim
 import java.util.function.Consumer
@@ -168,7 +168,7 @@ class SwerveDriveSimulation(
     class OdometryThreadSim: OdometryThread {
         override fun updateInputs(inputs: OdometryThread.OdometryThreadInputs) {
             inputs.measurementTimestamps = DoubleArray(SIMULATION_TICKS_IN_1_PERIOD)
-            val robotStartingTimeStamps: Double = MapleTimeUtils.logTimeSeconds
+            val robotStartingTimeStamps: Double = Timer.getFPGATimestamp()
             val iterationPeriodSeconds: Double = Robot.period / SIMULATION_TICKS_IN_1_PERIOD
             for (i in 0 until SIMULATION_TICKS_IN_1_PERIOD) inputs.measurementTimestamps[i] = robotStartingTimeStamps + i * iterationPeriodSeconds
         }

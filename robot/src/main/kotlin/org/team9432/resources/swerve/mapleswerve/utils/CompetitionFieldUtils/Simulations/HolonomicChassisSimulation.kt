@@ -64,7 +64,7 @@ abstract class HolonomicChassisSimulation(val profile: RobotSimulationProfile, s
             .multiply(1.0 / profile.robotMaxVelocity)
         simulateChassisTranslationalBehavior(
             Vector2.create(
-                MapleCommonMath.constrainMagnitude(desiredLinearMotionPercent.getMagnitude(), 1.0),
+                MapleCommonMath.constrainMagnitude(desiredLinearMotionPercent.magnitude, 1.0),
                 desiredLinearMotionPercent.getDirection()
             )
         )

@@ -6,10 +6,10 @@ import edu.wpi.first.math.geometry.Transform3d
 import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.littletonrobotics.junction.Logger
+import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.unit.inMeters
 import org.team9432.lib.util.allianceSwitch
 import org.team9432.lib.util.distanceTo
@@ -27,21 +27,7 @@ object NoteVisualizer {
 
     init {
         whenSimulated { // We don't want this running on the actual robot
-            Robot.coroutineScope.launch {
-                while (true) {
-                    render()
-
-//                    if (SmartDashboard.getBoolean("NoteVisualizer/ResetNotes", false)) {
-//                        fieldNotes.addAll(FieldConstants.allNotes)
-//                        noteRegenJobs.forEach { it.cancel() }
-//                        SmartDashboard.putBoolean("NoteVisualizer/ResetNotes", false)
-//                    }
-
-                    delay(5.milliseconds)
-                }
-            }
-
-            SmartDashboard.putBoolean("NoteVisualizer/ResetNotes", false)
+            RobotPeriodicManager.startPeriodic { render() }
         }
     }
 

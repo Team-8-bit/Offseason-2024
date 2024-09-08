@@ -16,9 +16,6 @@ import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
 import org.littletonrobotics.junction.Logger
 import org.team9432.lib.RobotPeriodicManager
-import org.team9432.resources.swerve.DriveTrainConstants.CHASSIS_MAX_ACCELERATION_MPS_SQ
-import org.team9432.resources.swerve.DriveTrainConstants.CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ
-import org.team9432.resources.swerve.DriveTrainConstants.CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC
 import org.team9432.resources.swerve.DriveTrainConstants.CHASSIS_MAX_VELOCITY
 import org.team9432.resources.swerve.DriveTrainConstants.DRIVE_KINEMATICS
 import org.team9432.resources.swerve.DriveTrainConstants.MODULE_TRANSLATIONS
@@ -33,7 +30,7 @@ import org.team9432.resources.swerve.module.SwerveModule
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.max
 
-class SwerveDrive(private val gyroIO: GyroIO, frontLeftModuleIO: ModuleIO, frontRightModuleIO: ModuleIO, backLeftModuleIO: ModuleIO, backRightModuleIO: ModuleIO): HolonomicDriveSubsystem {
+class SwerveDrive(private val gyroIO: GyroIO, frontLeftModuleIO: ModuleIO, frontRightModuleIO: ModuleIO, backLeftModuleIO: ModuleIO, backRightModuleIO: ModuleIO) {
     companion object {
         val odometryLock = ReentrantLock()
     }
@@ -116,10 +113,10 @@ class SwerveDrive(private val gyroIO: GyroIO, frontLeftModuleIO: ModuleIO, front
         }
     }
 
-    override val rawGyroYaw: Rotation2d
+    val rawGyroYaw: Rotation2d
         get() = gyroInputs.yawPosition
 
-    override fun runRawChassisSpeeds(speeds: ChassisSpeeds) {
+    fun runRawChassisSpeeds(speeds: ChassisSpeeds) {
         val setpointStates: Array<SwerveModuleState> = DRIVE_KINEMATICS.toSwerveModuleStates(speeds)
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, CHASSIS_MAX_VELOCITY)
 
@@ -130,6 +127,16 @@ class SwerveDrive(private val gyroIO: GyroIO, frontLeftModuleIO: ModuleIO, front
         Logger.recordOutput("Drive/SetpointsOptimized", *optimizedSetpointStates)
     }
 
+    fun runFieldCentricChassisSpeeds(fieldCentricSpeeds: ChassisSpeeds) {
+        runRobotCentricChassisSpeeds(
+            ChassisSpeeds.fromFieldRelativeSpeeds(fieldCentricSpeeds, getPose().rotation)
+        )
+    }
+
+    fun runRobotCentricChassisSpeeds(speeds: ChassisSpeeds) {
+        runRawChassisSpeeds(ChassisSpeeds.discretize(speeds, 0.02))
+    }
+
     /**
      * Locks the chassis and turns the modules to an X formation to resist movement.
      * The lock will be cancelled the next time a nonzero velocity is requested.
@@ -137,7 +144,6 @@ class SwerveDrive(private val gyroIO: GyroIO, frontLeftModuleIO: ModuleIO, front
     fun lockChassisWithXFormation() {
         val swerveHeadings = Array<Rotation2d>(modules.size) { index -> MODULE_TRANSLATIONS[index].angle }
         DRIVE_KINEMATICS.resetHeadings(*swerveHeadings)
-        super.stop()
     }
 
     /** Returns the module states (turn angles and drive velocities) for all the modules. */
@@ -148,28 +154,19 @@ class SwerveDrive(private val gyroIO: GyroIO, frontLeftModuleIO: ModuleIO, front
     private val moduleLatestPositions: Array<SwerveModulePosition?>
         get() = Array(modules.size) { index -> modules[index].latestPosition }
 
-    override fun getPose() = poseEstimator.estimatedPosition
-    override fun setPose(pose: Pose2d) = poseEstimator.resetPosition(rawGyroRotation, moduleLatestPositions, pose)
+    fun getPose() = poseEstimator.estimatedPosition
+    fun setPose(pose: Pose2d) = poseEstimator.resetPosition(rawGyroRotation, moduleLatestPositions, pose)
 
-    override val measuredChassisSpeedsRobotRelative: ChassisSpeeds
+    val measuredChassisSpeedsRobotRelative: ChassisSpeeds
         get() = DRIVE_KINEMATICS.toChassisSpeeds(*moduleStates)
 
-    override val chassisMaxLinearVelocityMetersPerSec: Double
-        get() = CHASSIS_MAX_VELOCITY
-    override val chassisMaxAccelerationMetersPerSecSq: Double
-        get() = CHASSIS_MAX_ACCELERATION_MPS_SQ
-    override val chassisMaxAngularVelocity: Double
-        get() = CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC
-    override val chassisMaxAngularAccelerationRadPerSecSq: Double
-        get() = CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ
-
-    override fun addVisionMeasurement(visionPose: Pose2d, timestamp: Double, measurementStdDevs: Matrix<N3, N1>) {
+    fun addVisionMeasurement(visionPose: Pose2d, timestamp: Double, measurementStdDevs: Matrix<N3, N1>) {
         poseEstimator.addVisionMeasurement(visionPose, timestamp, measurementStdDevs)
         previousVisionMeasurementTimeStamp = max(timestamp, previousVisionMeasurementTimeStamp)
     }
 
     fun setGyroAngle(angle: Rotation2d) = gyroIO.setAngle(angle)
 
-    override var previousVisionMeasurementTimeStamp: Double = -1.0
+    var previousVisionMeasurementTimeStamp: Double = -1.0
         private set
 }

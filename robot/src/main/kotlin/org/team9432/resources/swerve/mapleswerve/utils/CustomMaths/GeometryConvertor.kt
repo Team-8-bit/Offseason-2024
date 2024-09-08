@@ -30,15 +30,15 @@ object GeometryConvertor {
 
     fun toDyn4jTransform(wpilibPose2d: Pose2d): Transform {
         val transform: Transform = Transform()
-        transform.setTranslation(toDyn4jVector2(wpilibPose2d.getTranslation()))
-        transform.setRotation(toDyn4jRotation(wpilibPose2d.getRotation()))
+        transform.setTranslation(toDyn4jVector2(wpilibPose2d.translation))
+        transform.setRotation(toDyn4jRotation(wpilibPose2d.rotation))
         return transform
     }
 
     fun toWpilibPose2d(dyn4jTransform: Transform): Pose2d {
         return Pose2d(
-            toWpilibTranslation2d(dyn4jTransform.getTranslation()),
-            toWpilibRotation2d(dyn4jTransform.getRotation())
+            toWpilibTranslation2d(dyn4jTransform.translation),
+            toWpilibRotation2d(dyn4jTransform.rotation)
         )
     }
 

@@ -20,9 +20,9 @@ import org.team9432.resources.swerve.mapleswerve.utils.CustomMaths.GeometryConve
  * should only be created during a robot simulation (not in real or replay mode)
  */
 abstract class CompetitionFieldSimulation(mainRobot: HolonomicChassisSimulation, obstaclesMap: FieldObstaclesMap) {
-    protected val physicsWorld: World<Body>
+    private val physicsWorld: World<Body>
     val competitionField: CompetitionFieldVisualizer
-    protected val robotSimulations: MutableSet<HolonomicChassisSimulation> = HashSet()
+    private val robotSimulations: MutableSet<HolonomicChassisSimulation> = HashSet()
     val mainRobot: HolonomicChassisSimulation
     protected val gamePieces: MutableSet<GamePieceInSimulation>
 

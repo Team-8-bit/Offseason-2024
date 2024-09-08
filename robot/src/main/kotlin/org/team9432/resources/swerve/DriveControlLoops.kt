@@ -2,7 +2,6 @@ package org.team9432.resources.swerve
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import org.team9432.resources.swerve.DriveTrainConstants.DRIVE_FRICTION_VOLTAGE
-import org.team9432.resources.swerve.mapleswerve.utils.CustomPIDs.MaplePIDController.MaplePIDConfig
 
 object DriveControlLoops {
     val CHASSIS_ROTATION_CLOSE_LOOP: MaplePIDConfig = MaplePIDConfig(

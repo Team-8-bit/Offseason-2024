@@ -1,6 +1,7 @@
 package org.team9432.resources.swerve.gyro
 
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.wpilibj.Timer
 import org.littletonrobotics.junction.Logger
 import org.team9432.Robot
 import org.team9432.resources.swerve.DriveTrainConstants.AVERAGE_VELOCITY_RAD_PER_SEC_DURING_TEST
@@ -8,7 +9,6 @@ import org.team9432.resources.swerve.DriveTrainConstants.GYRO_ANGULAR_ACCELERATI
 import org.team9432.resources.swerve.DriveTrainConstants.NORMAL_GYRO_DRIFT_IN_1_MIN_Std_Dev_RAD
 import org.team9432.resources.swerve.DriveTrainConstants.SIMULATION_TICKS_IN_1_PERIOD
 import org.team9432.resources.swerve.DriveTrainConstants.SKIDDING_AMOUNT_AT_THRESHOLD_RAD
-import org.team9432.resources.swerve.mapleswerve.MapleTimeUtils
 import org.team9432.resources.swerve.mapleswerve.utils.CustomMaths.MapleCommonMath
 import kotlin.math.abs
 import kotlin.math.sqrt
@@ -41,7 +41,7 @@ class GyroIOSim: GyroIO {
             GYRO_LOG_PATH + "robot true yaw (deg)",
             gyroPhysicsSimulationResults.odometryYawPositions[gyroPhysicsSimulationResults.odometryYawPositions.size - 1].degrees
         )
-        Logger.recordOutput(GYRO_LOG_PATH + "robot power for (Sec)", MapleTimeUtils.logTimeSeconds)
+        Logger.recordOutput(GYRO_LOG_PATH + "robot power for (Sec)", Timer.getFPGATimestamp())
         Logger.recordOutput(GYRO_LOG_PATH + "imu total drift (Deg)", currentGyroDriftAmount.degrees)
         Logger.recordOutput(GYRO_LOG_PATH + "gyro reading yaw (Deg)", inputs.yawPosition.getDegrees())
         Logger.recordOutput(GYRO_LOG_PATH + "angular velocity (Deg per Sec)", Math.toDegrees(previousAngularVelocityRadPerSec))
