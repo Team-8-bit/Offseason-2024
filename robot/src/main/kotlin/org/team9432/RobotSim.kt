@@ -2,9 +2,9 @@ package org.team9432
 
 import edu.wpi.first.math.geometry.Pose2d
 import org.team9432.lib.RobotPeriodicManager
-import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.CompetitionFieldSimulation
-import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.Crescendo2024FieldSimulation
-import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.HolonomicChassisSimulation
+import org.team9432.lib.simulation.competitionfield.simulations.CompetitionFieldSimulation
+import org.team9432.lib.simulation.competitionfield.simulations.Crescendo2024FieldSimulation
+import org.team9432.lib.simulation.competitionfield.simulations.HolonomicChassisSimulation
 
 class RobotSim(swerveSim: HolonomicChassisSimulation) {
     val fieldSimulation: CompetitionFieldSimulation = Crescendo2024FieldSimulation(swerveSim)

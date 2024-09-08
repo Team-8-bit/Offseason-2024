@@ -32,8 +32,8 @@ class ShooterIOSim: ShooterIO {
     }
 
     override fun updateInputs(inputs: ShooterIO.ShooterIOInputs) {
-        upperSim.update(Robot.period)
-        lowerSim.update(Robot.period)
+        upperSim.update(Robot.periodSeconds)
+        lowerSim.update(Robot.periodSeconds)
 
         inputs.upperPositionRotations = upperSim.angularPositionRotations
         inputs.upperVelocityRPM = upperSim.angularVelocityRPM

@@ -24,15 +24,16 @@ import org.team9432.lib.Library
 import org.team9432.lib.coroutines.LoggedCoroutineRobot
 import org.team9432.lib.coroutines.Team8BitRobot.Runtime.*
 import org.team9432.lib.coroutines.robotPeriodic
+import org.team9432.lib.simulation.competitionfield.simulations.SwerveDriveSimulation
 import org.team9432.oi.Controls
 import org.team9432.resources.intake.Intake
 import org.team9432.resources.loader.Loader
 import org.team9432.resources.shooter.Shooter
+import org.team9432.resources.swerve.DriveTrainConstants.simProfile
 import org.team9432.resources.swerve.SwerveDrive
 import org.team9432.resources.swerve.TunerConstants
 import org.team9432.resources.swerve.gyro.GyroIOPigeon2
 import org.team9432.resources.swerve.gyro.GyroIOSim
-import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.SwerveDriveSimulation
 import org.team9432.resources.swerve.module.ModuleIOKraken
 import org.team9432.resources.swerve.module.ModuleIOSim
 import org.team9432.vision.Vision
@@ -108,8 +109,9 @@ object Robot: LoggedCoroutineRobot() {
             )
 
             val swerveSim = SwerveDriveSimulation(
+                simProfile,
                 gyroIOSim, frontLeft, frontRight, backLeft, backRight,
-                Pose2d(3.0, 2.0, Rotation2d()),
+                startingPose = Pose2d(3.0, 2.0, Rotation2d()),
                 drive::setPose
             )
 

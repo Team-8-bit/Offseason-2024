@@ -15,7 +15,7 @@ class IntakeIOSim: IntakeIO {
     }
 
     override fun updateInputs(inputs: IntakeIO.IntakeIOInputs) {
-        sim.update(Robot.period)
+        sim.update(Robot.periodSeconds)
         inputs.leaderPositionRotations = sim.angularPositionRotations
         inputs.leaderVelocityRPM = sim.angularVelocityRPM
         inputs.leaderAppliedVoltage = appliedVoltage

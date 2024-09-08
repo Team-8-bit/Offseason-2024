@@ -10,11 +10,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.littletonrobotics.junction.Logger
 import org.team9432.lib.RobotPeriodicManager
+import org.team9432.lib.simulation.competitionfield.objects.Crescendo2024FieldObjects
 import org.team9432.lib.unit.inMeters
 import org.team9432.lib.util.allianceSwitch
 import org.team9432.lib.util.distanceTo
 import org.team9432.lib.util.whenSimulated
-import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Objects.Crescendo2024FieldObjects
 import kotlin.time.Duration.Companion.milliseconds
 
 

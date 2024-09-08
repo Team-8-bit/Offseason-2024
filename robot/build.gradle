@@ -113,7 +113,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1-Beta")
 
-    // Mapleswerve sim
+    // Swerve sim
     implementation("org.dyn4j:dyn4j:5.0.2")
 
     // AdvantageKit

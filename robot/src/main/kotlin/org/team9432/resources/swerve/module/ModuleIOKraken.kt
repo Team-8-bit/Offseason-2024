@@ -21,7 +21,7 @@ import org.team9432.resources.swerve.DriveTrainConstants.DRIVE_GEAR_RATIO
 import org.team9432.resources.swerve.DriveTrainConstants.ODOMETRY_FREQUENCY
 import org.team9432.resources.swerve.DriveTrainConstants.STEER_CURRENT_LIMIT
 import org.team9432.resources.swerve.DriveTrainConstants.STEER_GEAR_RATIO
-import org.team9432.resources.swerve.OdometryThreadReal
+import org.team9432.resources.swerve.odometrythread.OdometryThreadReal
 import org.team9432.resources.swerve.module.ModuleIO.ModuleIOInputs
 import java.util.*
 

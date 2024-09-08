@@ -6,7 +6,7 @@ import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.unit.Translation2d
 import org.team9432.lib.unit.inches
 import org.team9432.resources.intake.Intake
-import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.IntakeSimulation
+import org.team9432.lib.simulation.competitionfield.simulations.IntakeSimulation
 import java.util.*
 import kotlin.coroutines.resume
 

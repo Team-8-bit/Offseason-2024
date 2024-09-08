@@ -2,10 +2,13 @@ package org.team9432.resources.swerve
 
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
-import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.util.Units
+import org.team9432.lib.simulation.RobotSimulationProfile
+import org.team9432.lib.unit.Translation2d
+import org.team9432.lib.unit.inches
+import org.team9432.lib.unit.meters
 import kotlin.math.min
 
 /**
@@ -37,7 +40,6 @@ object DriveTrainConstants {
     const val TIME_ROBOT_STOP_ROTATING_SECONDS: Double = 0.06
     const val STEER_FRICTION_VOLTAGE: Double = TunerConstants.kSteerFrictionVoltage
     const val DRIVE_FRICTION_VOLTAGE: Double = TunerConstants.kDriveFrictionVoltage
-    const val DRIVE_INERTIA: Double = 0.01
     const val STEER_INERTIA: Double = 0.01
 
     /* adjust current limit */
@@ -48,22 +50,22 @@ object DriveTrainConstants {
     /**
      * translations of the modules to the robot center, in FL, FR, BL, BR
      */
-    val MODULE_TRANSLATIONS: Array<Translation2d> = arrayOf(
+    val MODULE_TRANSLATIONS = listOf(
         Translation2d(
-            Units.inchesToMeters(TunerConstants.kFrontLeftXPosInches),
-            Units.inchesToMeters(TunerConstants.kFrontLeftYPosInches)
+            TunerConstants.kFrontLeftXPosInches.inches,
+            TunerConstants.kFrontLeftYPosInches.inches
         ),
         Translation2d(
-            Units.inchesToMeters(TunerConstants.kFrontRightXPosInches),
-            Units.inchesToMeters(TunerConstants.kFrontRightYPosInches)
+            TunerConstants.kFrontRightXPosInches.inches,
+            TunerConstants.kFrontRightYPosInches.inches
         ),
         Translation2d(
-            Units.inchesToMeters(TunerConstants.kBackLeftXPosInches),
-            Units.inchesToMeters(TunerConstants.kBackLeftYPosInches)
+            TunerConstants.kBackLeftXPosInches.inches,
+            TunerConstants.kBackLeftYPosInches.inches
         ),
         Translation2d(
-            Units.inchesToMeters(TunerConstants.kBackRightXPosInches),
-            Units.inchesToMeters(TunerConstants.kBackRightYPosInches)
+            TunerConstants.kBackRightXPosInches.inches,
+            TunerConstants.kBackRightYPosInches.inches
         )
     )
 
@@ -73,7 +75,6 @@ object DriveTrainConstants {
 
     /* friction_force = normal_force * coefficient_of_friction */
     const val MAX_FRICTION_ACCELERATION: Double = GRAVITY_CONSTANT * WHEEL_COEFFICIENT_OF_FRICTION
-    val MAX_FRICTION_FORCE_PER_MODULE: Double = MAX_FRICTION_ACCELERATION * ROBOT_MASS_KG / MODULE_TRANSLATIONS.size
 
     /* force = torque / distance */
     val MAX_PROPELLING_FORCE_NEWTONS: Double = DRIVE_MOTOR.getTorque(DRIVE_CURRENT_LIMIT) * DRIVE_GEAR_RATIO / WHEEL_RADIUS_METERS
@@ -88,17 +89,11 @@ object DriveTrainConstants {
     val CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ: Double = CHASSIS_MAX_ACCELERATION_MPS_SQ / DRIVE_BASE_RADIUS
     val CHASSIS_FRICTIONAL_ANGULAR_ACCELERATION: Double = CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC / TIME_ROBOT_STOP_ROTATING_SECONDS
 
-    val DRIVE_KINEMATICS: SwerveDriveKinematics = SwerveDriveKinematics(*MODULE_TRANSLATIONS)
+    val DRIVE_KINEMATICS: SwerveDriveKinematics = SwerveDriveKinematics(*MODULE_TRANSLATIONS.toTypedArray())
 
     /* for collision detection in simulation */
     val BUMPER_WIDTH_METERS: Double = Units.inchesToMeters(32.0)
     val BUMPER_LENGTH_METERS: Double = Units.inchesToMeters(31.5)
-
-    /* https://en.wikipedia.org/wiki/Friction#Coefficient_of_friction */
-    const val BUMPER_COEFFICIENT_OF_FRICTION: Double = 0.75
-
-    /* https://simple.wikipedia.org/wiki/Coefficient_of_restitution */
-    const val BUMPER_COEFFICIENT_OF_RESTITUTION: Double = 0.08
 
     /* Gyro Sim */
     const val GYRO_ANGULAR_ACCELERATION_THRESHOLD_SKIDDING_RAD_PER_SEC_SQ: Double = 100.0
@@ -114,9 +109,22 @@ object DriveTrainConstants {
     val NORMAL_GYRO_DRIFT_IN_1_MIN_Std_Dev_RAD: Double = Math.toRadians(1.2)
     val AVERAGE_VELOCITY_RAD_PER_SEC_DURING_TEST: Double = Math.toRadians(60.0)
 
-    /* dead configs, don't change them */
-    const val ODOMETRY_CACHE_CAPACITY: Int = 10
     const val ODOMETRY_FREQUENCY: Double = 250.0
+    const val ODOMETRY_CACHE_CAPACITY: Int = 10
     const val ODOMETRY_WAIT_TIMEOUT_SECONDS: Double = 0.02
-    const val SIMULATION_TICKS_IN_1_PERIOD: Int = 5
+
+    val simProfile = RobotSimulationProfile(
+        moduleTranslations = MODULE_TRANSLATIONS,
+        wheelRadius = WHEEL_RADIUS_METERS.meters,
+        kinematics = DRIVE_KINEMATICS,
+        robotMaxVelocity = CHASSIS_MAX_VELOCITY,
+        robotMaxAcceleration = CHASSIS_MAX_ACCELERATION_MPS_SQ,
+        maxAngularVelocity = CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC,
+        robotMass = ROBOT_MASS_KG,
+        width = BUMPER_WIDTH_METERS,
+        height = BUMPER_LENGTH_METERS,
+        robotBumperToCenterOffset = ROBOT_TO_BUMPER_CENTER_OFFSET,
+        frictionForce = MAX_FRICTION_ACCELERATION * ROBOT_MASS_KG,
+        angularFrictionAcceleration = CHASSIS_FRICTIONAL_ANGULAR_ACCELERATION
+    )
 }

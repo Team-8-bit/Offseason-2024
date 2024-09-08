@@ -4,7 +4,6 @@
 package org.team9432.resources.swerve
 
 import edu.wpi.first.math.Matrix
-import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
@@ -19,14 +18,12 @@ import org.team9432.lib.RobotPeriodicManager
 import org.team9432.resources.swerve.DriveTrainConstants.CHASSIS_MAX_VELOCITY
 import org.team9432.resources.swerve.DriveTrainConstants.DRIVE_KINEMATICS
 import org.team9432.resources.swerve.DriveTrainConstants.MODULE_TRANSLATIONS
-import org.team9432.resources.swerve.VisionConfigs.GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS
-import org.team9432.resources.swerve.VisionConfigs.ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS
-import org.team9432.resources.swerve.VisionConfigs.ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION
-import org.team9432.resources.swerve.VisionConfigs.TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION
 import org.team9432.resources.swerve.gyro.GyroIO
 import org.team9432.resources.swerve.gyro.LoggedGyroIOInputs
 import org.team9432.resources.swerve.module.ModuleIO
 import org.team9432.resources.swerve.module.SwerveModule
+import org.team9432.resources.swerve.odometrythread.LoggedOdometryThreadInputs
+import org.team9432.resources.swerve.odometrythread.OdometryThread
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.max
 
@@ -48,15 +45,7 @@ class SwerveDrive(private val gyroIO: GyroIO, frontLeftModuleIO: ModuleIO, front
     private var rawGyroRotation: Rotation2d = Rotation2d()
     private val lastModulePositions: Array<SwerveModulePosition> = Array(4) { SwerveModulePosition() }
 
-    private val poseEstimator: SwerveDrivePoseEstimator = SwerveDrivePoseEstimator(
-        DRIVE_KINEMATICS, rawGyroRotation, lastModulePositions, Pose2d(),
-        VecBuilder.fill(ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS, ODOMETRY_TRANSLATIONAL_STANDARD_ERROR_METERS, GYRO_ROTATIONAL_STANDARD_ERROR_RADIANS),
-        VecBuilder.fill(
-            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION,
-            TRANSLATIONAL_STANDARD_ERROR_METERS_FOR_SINGLE_OBSERVATION,
-            ROTATIONAL_STANDARD_ERROR_RADIANS_FOR_SINGLE_OBSERVATION
-        )
-    )
+    private val poseEstimator: SwerveDrivePoseEstimator = SwerveDrivePoseEstimator(DRIVE_KINEMATICS, rawGyroRotation, lastModulePositions, Pose2d())
 
     private val odometryThread = OdometryThread.createInstance()
 

@@ -1,12 +1,12 @@
-// By 5516 Iron Maple https://github.com/Shenzhen-Robotics-Alliance/
-package org.team9432.resources.swerve
+package org.team9432.resources.swerve.odometrythread
 
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.StatusSignal
 import org.littletonrobotics.junction.Logger
 import org.team9432.resources.swerve.DriveTrainConstants.ODOMETRY_CACHE_CAPACITY
 import org.team9432.resources.swerve.DriveTrainConstants.ODOMETRY_FREQUENCY
-import org.team9432.resources.swerve.OdometryThread.OdometryThreadInputs
+import org.team9432.resources.swerve.SwerveDrive
+import org.team9432.resources.swerve.odometrythread.OdometryThread.OdometryThreadInputs
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.locks.Lock
@@ -30,6 +30,7 @@ object OdometryThreadReal: Thread(), OdometryThread {
         if (timestampQueues.isNotEmpty()) super<Thread>.start()
     }
 
+    /** Registers a signal to run in the odometry thread and returns a queue that is filled with the received values. */
     fun registerSignal(signal: StatusSignal<Double>): Queue<Double> {
         val queue = ArrayBlockingQueue<Double>(20)
         signalsLock.lock()
