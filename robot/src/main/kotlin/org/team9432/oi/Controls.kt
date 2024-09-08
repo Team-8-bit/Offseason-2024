@@ -12,13 +12,13 @@ import org.team9432.Actions
 import org.team9432.Beambreaks
 import org.team9432.Robot.drive
 import org.team9432.RobotController
-import org.team9432.Vision
 import org.team9432.lib.input.XboxController
 import org.team9432.lib.unit.meters
 import org.team9432.lib.util.allianceSwitch
 import org.team9432.resources.intake.Intake
 import org.team9432.resources.loader.Loader
 import org.team9432.resources.shooter.Shooter
+import org.team9432.vision.Vision
 import kotlin.math.hypot
 import kotlin.math.pow
 

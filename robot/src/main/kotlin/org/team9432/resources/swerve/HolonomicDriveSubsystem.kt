@@ -43,7 +43,7 @@ interface HolonomicDriveSubsystem {
      * @param timestamp  The timestamp of the vision measurement in seconds.
      * @param measurementStdDevs the standard deviation of the measurement
      */
-    fun addVisionMeasurement(visionPose: Pose2d?, timestamp: Double, measurementStdDevs: Matrix<N3?, N1?>?) {}
+    fun addVisionMeasurement(visionPose: Pose2d, timestamp: Double, measurementStdDevs: Matrix<N3, N1>) {}
 
     val previousVisionMeasurementTimeStamp: Double
         get() = (-1).toDouble()

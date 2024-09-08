@@ -163,7 +163,7 @@ class SwerveDrive(private val gyroIO: GyroIO, frontLeftModuleIO: ModuleIO, front
     override val chassisMaxAngularAccelerationRadPerSecSq: Double
         get() = CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ
 
-    override fun addVisionMeasurement(visionPose: Pose2d?, timestamp: Double, measurementStdDevs: Matrix<N3?, N1?>?) {
+    override fun addVisionMeasurement(visionPose: Pose2d, timestamp: Double, measurementStdDevs: Matrix<N3, N1>) {
         poseEstimator.addVisionMeasurement(visionPose, timestamp, measurementStdDevs)
         previousVisionMeasurementTimeStamp = max(timestamp, previousVisionMeasurementTimeStamp)
     }

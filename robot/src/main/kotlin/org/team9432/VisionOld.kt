@@ -1,6 +1,5 @@
 package org.team9432
 
-import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation3d
 import edu.wpi.first.math.geometry.Transform3d
@@ -56,7 +55,7 @@ object Vision2 {
             val (xyDeviation, pose, tagsUsed) = output
 //            Swerve.setVisionMeasurementStdDevs(VecBuilder.fill(xyDeviation.inMeters, xyDeviation.inMeters, 20.0.degrees.inDegrees))
 //            Swerve.addVisionMeasurement(pose.toPose2d(), result.timestampSeconds)
-            Logger.recordOutput("Vision/TrackedTags", *tagsUsed.mapNotNull { FieldConstants.aprilTagFieldLayout.getTagPose(it).getOrNull() }.toTypedArray())
+            Logger.recordOutput("Vision/TrackedTags", *tagsUsed.mapNotNull { FieldConstants.apriltagFieldLayout.getTagPose(it).getOrNull() }.toTypedArray())
             Logger.recordOutput("Vision/EstimatedPose", *arrayOf(pose))
         } else {
             Logger.recordOutput("Vision/TrackedTags", *emptyArray<Pose3d>())
@@ -97,7 +96,7 @@ object Vision2 {
 
         // Calculate the robot position
         val cameraToField = result.multiTagResult.estimatedPose.best
-        val pose = Pose3d().plus(cameraToField).relativeTo(FieldConstants.aprilTagFieldLayout.origin).plus(robotToCamera.inverse())
+        val pose = Pose3d().plus(cameraToField).relativeTo(FieldConstants.apriltagFieldLayout.origin).plus(robotToCamera.inverse())
 
         // Check position validity
         if (!isPositionValid(pose)) return null
@@ -114,7 +113,7 @@ object Vision2 {
         val poses = mutableListOf<VisionTarget>()
         for (target in result.targets) {
             val targetFiducialId = target.fiducialId
-            val targetPosition = FieldConstants.aprilTagFieldLayout.getTagPose(targetFiducialId).getOrNull() ?: continue
+            val targetPosition = FieldConstants.apriltagFieldLayout.getTagPose(targetFiducialId).getOrNull() ?: continue
             val estimatedPose = targetPosition.transformBy(target.bestCameraToTarget.inverse()).transformBy(robotToCamera.inverse())
             poses.add(VisionTarget(targetFiducialId, estimatedPose, target.poseAmbiguity, target.area))
         }

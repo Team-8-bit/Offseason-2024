@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import org.littletonrobotics.junction.Logger
 import org.team9432.PositionConstants
 import org.team9432.Robot
-import org.team9432.Vision
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.resource.Resource
 import org.team9432.lib.unit.*
@@ -14,6 +13,7 @@ import org.team9432.lib.util.distanceTo
 import org.team9432.lib.util.simSwitch
 import org.team9432.lib.util.velocityLessThan
 import org.team9432.resources.swerve.Swerve
+import org.team9432.vision.Vision
 import kotlin.math.abs
 
 object Shooter: Resource("Shooter") {

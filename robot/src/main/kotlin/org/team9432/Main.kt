@@ -35,6 +35,7 @@ import org.team9432.resources.swerve.gyro.GyroIOSim
 import org.team9432.resources.swerve.mapleswerve.utils.CompetitionFieldUtils.Simulations.SwerveDriveSimulation
 import org.team9432.resources.swerve.module.ModuleIOKraken
 import org.team9432.resources.swerve.module.ModuleIOSim
+import org.team9432.vision.Vision
 
 
 object Robot: LoggedCoroutineRobot() {

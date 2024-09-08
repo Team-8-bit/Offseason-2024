@@ -10,7 +10,7 @@ import org.team9432.lib.unit.inches
 import org.team9432.lib.util.flip
 
 object FieldConstants {
-    val aprilTagFieldLayout: AprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField()
+    val apriltagFieldLayout: AprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField()
 
     /* -------- Note Positions -------- */
 
