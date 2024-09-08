@@ -41,6 +41,7 @@ object Vision {
 
         Logger.recordOutput("Vision/Connected", inputs.isConnected)
         Logger.recordOutput("Vision/Enabled", isEnabled)
+        Logger.recordOutput("Vision/TrackedTagIds", *inputs.results.targets.mapNotNull { apriltagFieldLayout.getTagPose(it.fiducialId).getOrNull() }.toTypedArray())
 
         applyToPoseEstimator(inputs.results)
     }

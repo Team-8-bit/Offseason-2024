@@ -19,7 +19,7 @@ object VisionConstants {
             ),
             Rotation3d(
                 0.0,
-                -Math.toRadians(28.125000),
+                -Math.toRadians(28.125),
                 Math.toRadians(6.920208)
             )
         )
