@@ -15,9 +15,9 @@ import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
 import org.littletonrobotics.junction.Logger
 import org.team9432.lib.RobotPeriodicManager
-import org.team9432.resources.swerve.DriveTrainConstants.CHASSIS_MAX_VELOCITY
-import org.team9432.resources.swerve.DriveTrainConstants.DRIVE_KINEMATICS
-import org.team9432.resources.swerve.DriveTrainConstants.MODULE_TRANSLATIONS
+import org.team9432.resources.swerve.DrivetrainConstants.CHASSIS_MAX_VELOCITY
+import org.team9432.resources.swerve.DrivetrainConstants.DRIVE_KINEMATICS
+import org.team9432.resources.swerve.DrivetrainConstants.MODULE_TRANSLATIONS
 import org.team9432.resources.swerve.gyro.GyroIO
 import org.team9432.resources.swerve.gyro.LoggedGyroIOInputs
 import org.team9432.resources.swerve.module.ModuleIO
@@ -117,13 +117,7 @@ class SwerveDrive(private val gyroIO: GyroIO, frontLeftModuleIO: ModuleIO, front
     }
 
     fun runFieldCentricChassisSpeeds(fieldCentricSpeeds: ChassisSpeeds) {
-        runRobotCentricChassisSpeeds(
-            ChassisSpeeds.fromFieldRelativeSpeeds(fieldCentricSpeeds, getPose().rotation)
-        )
-    }
-
-    fun runRobotCentricChassisSpeeds(speeds: ChassisSpeeds) {
-        runRawChassisSpeeds(ChassisSpeeds.discretize(speeds, 0.02))
+        runRawChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(fieldCentricSpeeds, getPose().rotation))
     }
 
     /**

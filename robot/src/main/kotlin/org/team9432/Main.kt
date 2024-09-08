@@ -3,7 +3,6 @@ package org.team9432
 
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.PowerDistribution
@@ -29,7 +28,7 @@ import org.team9432.oi.Controls
 import org.team9432.resources.intake.Intake
 import org.team9432.resources.loader.Loader
 import org.team9432.resources.shooter.Shooter
-import org.team9432.resources.swerve.DriveTrainConstants.simProfile
+import org.team9432.resources.swerve.DrivetrainConstants.simProfile
 import org.team9432.resources.swerve.SwerveDrive
 import org.team9432.resources.swerve.TunerConstants
 import org.team9432.resources.swerve.gyro.GyroIOPigeon2
@@ -133,8 +132,8 @@ object Robot: LoggedCoroutineRobot() {
 
     override suspend fun teleop() {
         robotPeriodic(isFinished = { !Robot.mode.isTeleop }) {
-            val req = Controls.getTeleopSwerveRequest()
-            drive.runFieldCentricChassisSpeeds(ChassisSpeeds(req.VelocityX, req.VelocityY, req.RotationalRate))
+            val speeds = Controls.getTeleopSwerveRequest()
+            drive.runFieldCentricChassisSpeeds(speeds)
         }
     }
 

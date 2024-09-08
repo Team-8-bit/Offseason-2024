@@ -6,10 +6,10 @@ import org.littletonrobotics.junction.Logger
 import org.team9432.Robot
 import org.team9432.lib.simulation.math.MapleCommonMath
 import org.team9432.lib.simulation.SimulatedGyro
-import org.team9432.resources.swerve.DriveTrainConstants.AVERAGE_VELOCITY_RAD_PER_SEC_DURING_TEST
-import org.team9432.resources.swerve.DriveTrainConstants.GYRO_ANGULAR_ACCELERATION_THRESHOLD_SKIDDING_RAD_PER_SEC_SQ
-import org.team9432.resources.swerve.DriveTrainConstants.NORMAL_GYRO_DRIFT_IN_1_MIN_Std_Dev_RAD
-import org.team9432.resources.swerve.DriveTrainConstants.SKIDDING_AMOUNT_AT_THRESHOLD_RAD
+import org.team9432.resources.swerve.DrivetrainConstants.AVERAGE_VELOCITY_RAD_PER_SEC_DURING_TEST
+import org.team9432.resources.swerve.DrivetrainConstants.GYRO_ANGULAR_ACCELERATION_THRESHOLD_SKIDDING_RAD_PER_SEC_SQ
+import org.team9432.resources.swerve.DrivetrainConstants.NORMAL_GYRO_DRIFT_IN_1_MIN_Std_Dev_RAD
+import org.team9432.resources.swerve.DrivetrainConstants.SKIDDING_AMOUNT_AT_THRESHOLD_RAD
 import kotlin.math.abs
 import kotlin.math.sqrt
 

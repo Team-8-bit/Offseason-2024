@@ -15,21 +15,21 @@ import kotlin.math.min
  * stores the constants and PID configs for chassis
  * because we want an all-real simulation for the chassis, the numbers are required to be considerably precise
  */
-object DriveTrainConstants {
+object DrivetrainConstants {
     val ROBOT_TO_BUMPER_CENTER_OFFSET = Transform2d(Units.inchesToMeters(2.75), 0.0, Rotation2d())
 
     /**
      * numbers that needs to be changed to fit each robot
      * TODO: change these numbers to match your robot
      */
-    const val WHEEL_COEFFICIENT_OF_FRICTION: Double = 0.95
+    const val WHEEL_COEFFICIENT_OF_FRICTION: Double = 1.0
     const val ROBOT_MASS_KG: Double = 60.0 // with bumpers
 
     /**
      * TODO: change motor type to match your robot
      */
-    val DRIVE_MOTOR: DCMotor = DCMotor.getKrakenX60(1)
-    val STEER_MOTOR: DCMotor = DCMotor.getKrakenX60(1)
+    val DRIVE_MOTOR: DCMotor = DCMotor.getKrakenX60Foc(1)
+    val STEER_MOTOR: DCMotor = DCMotor.getKrakenX60Foc(1)
 
     /**
      * numbers imported from [TunerConstants]
@@ -40,7 +40,7 @@ object DriveTrainConstants {
     const val TIME_ROBOT_STOP_ROTATING_SECONDS: Double = 0.06
     const val STEER_FRICTION_VOLTAGE: Double = TunerConstants.kSteerFrictionVoltage
     const val DRIVE_FRICTION_VOLTAGE: Double = TunerConstants.kDriveFrictionVoltage
-    const val STEER_INERTIA: Double = 0.01
+    const val STEER_INERTIA: Double = 0.004
 
     /* adjust current limit */
     const val DRIVE_CURRENT_LIMIT: Double = 60.0
@@ -125,6 +125,7 @@ object DriveTrainConstants {
         height = BUMPER_LENGTH_METERS,
         robotBumperToCenterOffset = ROBOT_TO_BUMPER_CENTER_OFFSET,
         frictionForce = MAX_FRICTION_ACCELERATION * ROBOT_MASS_KG,
-        angularFrictionAcceleration = CHASSIS_FRICTIONAL_ANGULAR_ACCELERATION
+        angularFrictionAcceleration = CHASSIS_FRICTIONAL_ANGULAR_ACCELERATION,
+        driveInertia = 0.025
     )
 }

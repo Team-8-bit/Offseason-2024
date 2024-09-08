@@ -6,21 +6,21 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj.simulation.DCMotorSim
 import org.team9432.lib.simulation.SimulatedSwerveModule
-import org.team9432.resources.swerve.DriveTrainConstants.CHASSIS_MAX_VELOCITY
-import org.team9432.resources.swerve.DriveTrainConstants.DRIVE_GEAR_RATIO
-import org.team9432.resources.swerve.DriveTrainConstants.DRIVE_MOTOR
-import org.team9432.resources.swerve.DriveTrainConstants.STEER_FRICTION_VOLTAGE
-import org.team9432.resources.swerve.DriveTrainConstants.STEER_GEAR_RATIO
-import org.team9432.resources.swerve.DriveTrainConstants.STEER_INERTIA
-import org.team9432.resources.swerve.DriveTrainConstants.STEER_MOTOR
-import org.team9432.resources.swerve.DriveTrainConstants.WHEEL_RADIUS_METERS
+import org.team9432.resources.swerve.DrivetrainConstants.CHASSIS_MAX_VELOCITY
+import org.team9432.resources.swerve.DrivetrainConstants.DRIVE_GEAR_RATIO
+import org.team9432.resources.swerve.DrivetrainConstants.DRIVE_MOTOR
+import org.team9432.resources.swerve.DrivetrainConstants.STEER_FRICTION_VOLTAGE
+import org.team9432.resources.swerve.DrivetrainConstants.STEER_GEAR_RATIO
+import org.team9432.resources.swerve.DrivetrainConstants.STEER_INERTIA
+import org.team9432.resources.swerve.DrivetrainConstants.STEER_MOTOR
+import org.team9432.resources.swerve.DrivetrainConstants.WHEEL_RADIUS_METERS
 import org.team9432.resources.swerve.module.ModuleIO.ModuleIOInputs
 import kotlin.math.abs
 
 class ModuleIOSim: ModuleIO, SimulatedSwerveModule() {
     private val steerSim: DCMotorSim = DCMotorSim(STEER_MOTOR, STEER_GEAR_RATIO, STEER_INERTIA)
 
-    private val driveFeedback: PIDController = PIDController(2.1, 0.0, 0.0)
+    private val driveFeedback: PIDController = PIDController(1.0, 0.0, 0.0)
     private val steerFeedback: PIDController = PIDController(10.0, 0.0, 0.0)
 
     private var driveAppliedVolts: Double = 0.0

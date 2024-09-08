@@ -7,8 +7,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.math.util.Units
 import org.littletonrobotics.junction.Logger
 import org.team9432.lib.util.simSwitch
-import org.team9432.resources.swerve.DriveTrainConstants
-import org.team9432.resources.swerve.DriveTrainConstants.WHEEL_RADIUS_METERS
+import org.team9432.resources.swerve.DrivetrainConstants
+import org.team9432.resources.swerve.DrivetrainConstants.WHEEL_RADIUS_METERS
 import kotlin.math.cos
 
 
@@ -91,7 +91,7 @@ class SwerveModule(private val io: ModuleIO, private val name: String) {
         get() = driveWheelRotationsToMeters(inputs.drivePositionRotations)
 
     private fun driveWheelRotationsToMeters(driveWheelRotations: Double): Double {
-        return Units.rotationsToRadians(driveWheelRotations) * DriveTrainConstants.WHEEL_RADIUS_METERS
+        return Units.rotationsToRadians(driveWheelRotations) * DrivetrainConstants.WHEEL_RADIUS_METERS
     }
 
     val driveVelocityMetersPerSec: Double

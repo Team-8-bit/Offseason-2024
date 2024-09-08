@@ -1,26 +1,30 @@
 package org.team9432.oi
 
-import com.ctre.phoenix6.mechanisms.swerve.SwerveModule
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest
 import edu.wpi.first.math.MathUtil
+import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
-import org.team9432.Actions
-import org.team9432.Beambreaks
+import edu.wpi.first.math.kinematics.ChassisSpeeds
+import org.team9432.*
 import org.team9432.Robot.drive
-import org.team9432.RobotController
 import org.team9432.lib.input.XboxController
+import org.team9432.lib.unit.asRotation2d
+import org.team9432.lib.unit.degrees
 import org.team9432.lib.unit.meters
 import org.team9432.lib.util.allianceSwitch
+import org.team9432.lib.util.angleTo
 import org.team9432.resources.intake.Intake
 import org.team9432.resources.loader.Loader
 import org.team9432.resources.shooter.Shooter
+import org.team9432.resources.swerve.DrivetrainConstants
+import org.team9432.resources.swerve.Swerve
 import org.team9432.vision.Vision
 import kotlin.math.hypot
 import kotlin.math.pow
+import kotlin.math.withSign
 
 
 object Controls {
@@ -32,17 +36,9 @@ object Controls {
     private val ratelimitX = SlewRateLimiter(20.0)
     private val ratelimitY = SlewRateLimiter(20.0)
 
-    private val teleopRequest: SwerveRequest.FieldCentric = SwerveRequest.FieldCentric()
-        .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
-        .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
-
-    private val teleAimRequest: SwerveRequest.FieldCentricFacingAngle = SwerveRequest.FieldCentricFacingAngle()
-        .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage)
-        .withSteerRequestType(SwerveModule.SteerRequestType.MotionMagicExpo)
-        .apply {
-            HeadingController.enableContinuousInput(-Math.PI, Math.PI)
-            HeadingController.p = 5.0
-        }
+    private val headingPID = PIDController(5.0, 0.0, 0.5).apply {
+        enableContinuousInput(-Math.PI, Math.PI)
+    }
 
     private val shouldAimAtSpeaker
         get() =
@@ -59,29 +55,36 @@ object Controls {
                     Beambreaks.hasNote &&
                     Vision.isEnabled
 
-    fun getTeleopSwerveRequest(): SwerveRequest.FieldCentric {
-        return when {
-//            shouldAimAtSpeaker -> teleAimRequest.apply {
-//                val speed = getTranslationalSpeed()
-//                withVelocityX(ratelimitX.calculate(speed.x * 5.0))
-//                withVelocityY(ratelimitY.calculate(speed.y * 5.0))
-//                withTargetDirection(Swerve.getRobotTranslation().angleTo(PositionConstants.speakerAimPose).asRotation2d.let { allianceSwitch(blue = it, red = it.plus(Rotation2d.fromDegrees(180.0))) })
-//            }
-//
-//            shouldAimAtAmp -> teleAimRequest.apply {
-//                val speed = getTranslationalSpeed()
-//                withVelocityX(ratelimitX.calculate(speed.x * 5.0))
-//                withVelocityY(ratelimitY.calculate(speed.y * 5.0))
-//                withTargetDirection(90.degrees.asRotation2d.let { allianceSwitch(blue = it, red = it.plus(Rotation2d.fromDegrees(180.0))) })
-//            }
+    private var wasJustUsingHeadingController = false
 
-            else -> teleopRequest.apply {
+    fun getTeleopSwerveRequest(): ChassisSpeeds {
+        return ChassisSpeeds.discretize(when {
+            shouldAimAtSpeaker -> ChassisSpeeds().apply {
+                if (!wasJustUsingHeadingController) headingPID.reset()
                 val speed = getTranslationalSpeed()
-                withVelocityX(ratelimitX.calculate(speed.x * 5.0 * allianceSwitch(blue = 1, red = -1)))
-                withVelocityY(ratelimitY.calculate(speed.y * 5.0 * allianceSwitch(blue = 1, red = -1)))
-                withRotationalRate(getRotationalSpeed())
+                vxMetersPerSecond = ratelimitX.calculate(speed.x * allianceSwitch(blue = 1, red = -1))
+                vyMetersPerSecond = ratelimitY.calculate(speed.y * allianceSwitch(blue = 1, red = -1))
+                omegaRadiansPerSecond = headingPID.calculate(Swerve.getRobotPose().rotation.radians, Swerve.getRobotTranslation().angleTo(PositionConstants.speakerAimPose).asRotation2d.radians)
+                wasJustUsingHeadingController = true
             }
-        }
+
+            shouldAimAtAmp -> ChassisSpeeds().apply {
+                if (!wasJustUsingHeadingController) headingPID.reset()
+                val speed = getTranslationalSpeed()
+                vxMetersPerSecond = ratelimitX.calculate(speed.x * allianceSwitch(blue = 1, red = -1))
+                vyMetersPerSecond = ratelimitY.calculate(speed.y * allianceSwitch(blue = 1, red = -1))
+                omegaRadiansPerSecond = headingPID.calculate(Swerve.getRobotPose().rotation.radians, 90.degrees.asRotation2d.radians)
+                wasJustUsingHeadingController = true
+            }
+
+            else -> ChassisSpeeds().apply {
+                val speed = getTranslationalSpeed()
+                vxMetersPerSecond = ratelimitX.calculate(speed.x * allianceSwitch(blue = 1, red = -1))
+                vyMetersPerSecond = ratelimitY.calculate(speed.y * allianceSwitch(blue = 1, red = -1))
+                omegaRadiansPerSecond = getRotationalSpeed()
+                wasJustUsingHeadingController = false
+            }
+        }, Robot.period)
     }
 
     init {
@@ -123,13 +126,13 @@ object Controls {
     }
 
     private fun getJoystickRotationSpeed(): Double {
-        return -controller.rightX * Math.toRadians(360.0)
+        return -controller.rightX * Math.PI * 3
     }
 
     private fun getTriggerRotationSpeed(): Double {
         val rightAxis = controller.rightTriggerAxis
         val leftAxis = controller.leftTriggerAxis
-        return ((rightAxis.pow(2) * -1) + leftAxis.pow(2)) * Math.toRadians(360.0)
+        return ((rightAxis.pow(2).withSign(rightAxis) * -1) + leftAxis.pow(2).withSign(leftAxis)) * Math.toRadians(360.0)
     }
 
     // https://github.com/Mechanical-Advantage/RobotCode2024/blob/a025615a52193b7709db7cf14c51c57be17826f2/src/main/java/org/littletonrobotics/frc2024/subsystems/drive/controllers/TeleopDriveController.java#L83
@@ -144,7 +147,7 @@ object Controls {
         val linearDirection = Rotation2d(x, y)
 
         // Square magnitude
-        linearMagnitude = linearMagnitude * linearMagnitude
+        linearMagnitude = linearMagnitude.pow(2).withSign(linearMagnitude)
 
         // Calcaulate new linear velocity
         val linearVelocity =
@@ -152,6 +155,6 @@ object Controls {
                 .transformBy(Transform2d(linearMagnitude, 0.0, Rotation2d()))
                 .translation
 
-        return linearVelocity
+        return linearVelocity.times(DrivetrainConstants.CHASSIS_MAX_VELOCITY)
     }
 }

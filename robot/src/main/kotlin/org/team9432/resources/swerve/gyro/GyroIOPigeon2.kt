@@ -6,7 +6,7 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration
 import com.ctre.phoenix6.hardware.Pigeon2
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.util.Units
-import org.team9432.resources.swerve.DriveTrainConstants.ODOMETRY_FREQUENCY
+import org.team9432.resources.swerve.DrivetrainConstants.ODOMETRY_FREQUENCY
 import org.team9432.resources.swerve.odometrythread.OdometryThreadReal
 import org.team9432.resources.swerve.TunerConstants
 import java.util.*

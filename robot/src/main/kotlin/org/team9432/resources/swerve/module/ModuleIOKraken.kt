@@ -16,11 +16,11 @@ import com.ctre.phoenix6.signals.NeutralModeValue
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.util.Units
 import org.team9432.lib.util.printOnError
-import org.team9432.resources.swerve.DriveTrainConstants.DRIVE_CURRENT_LIMIT
-import org.team9432.resources.swerve.DriveTrainConstants.DRIVE_GEAR_RATIO
-import org.team9432.resources.swerve.DriveTrainConstants.ODOMETRY_FREQUENCY
-import org.team9432.resources.swerve.DriveTrainConstants.STEER_CURRENT_LIMIT
-import org.team9432.resources.swerve.DriveTrainConstants.STEER_GEAR_RATIO
+import org.team9432.resources.swerve.DrivetrainConstants.DRIVE_CURRENT_LIMIT
+import org.team9432.resources.swerve.DrivetrainConstants.DRIVE_GEAR_RATIO
+import org.team9432.resources.swerve.DrivetrainConstants.ODOMETRY_FREQUENCY
+import org.team9432.resources.swerve.DrivetrainConstants.STEER_CURRENT_LIMIT
+import org.team9432.resources.swerve.DrivetrainConstants.STEER_GEAR_RATIO
 import org.team9432.resources.swerve.odometrythread.OdometryThreadReal
 import org.team9432.resources.swerve.module.ModuleIO.ModuleIOInputs
 import java.util.*

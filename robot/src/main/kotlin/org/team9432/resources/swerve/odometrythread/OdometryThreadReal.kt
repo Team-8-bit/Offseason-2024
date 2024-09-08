@@ -3,8 +3,8 @@ package org.team9432.resources.swerve.odometrythread
 import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.StatusSignal
 import org.littletonrobotics.junction.Logger
-import org.team9432.resources.swerve.DriveTrainConstants.ODOMETRY_CACHE_CAPACITY
-import org.team9432.resources.swerve.DriveTrainConstants.ODOMETRY_FREQUENCY
+import org.team9432.resources.swerve.DrivetrainConstants.ODOMETRY_CACHE_CAPACITY
+import org.team9432.resources.swerve.DrivetrainConstants.ODOMETRY_FREQUENCY
 import org.team9432.resources.swerve.SwerveDrive
 import org.team9432.resources.swerve.odometrythread.OdometryThread.OdometryThreadInputs
 import java.util.*
