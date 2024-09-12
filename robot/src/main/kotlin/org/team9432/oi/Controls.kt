@@ -119,7 +119,8 @@ object Controls {
 
 
     private fun getRotationalSpeed(): Double {
-        return getTriggerRotationSpeed() //+ getJoystickRotationSpeed()
+//        return getTriggerRotationSpeed()
+        return getJoystickRotationSpeed()
     }
 
     private fun getJoystickRotationSpeed(): Double {
