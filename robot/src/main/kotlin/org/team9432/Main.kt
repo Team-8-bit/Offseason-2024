@@ -1,48 +1,36 @@
 @file:JvmName("Main") // set the compiled Java class name to "Main" rather than "MainKt"
 package org.team9432
 
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
+import com.choreo.lib.Choreo
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.RobotBase
+import kotlinx.coroutines.delay
 import org.littletonrobotics.junction.LogFileUtil
+import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.networktables.NT4Publisher
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
 import org.team9432.auto.AutoChooser
-import org.team9432.auto.RobotAmpsideCenterline
-import org.team9432.auto.RobotFarsideCenterline
-import org.team9432.auto.RobotFourNote
-import org.team9432.auto.types.AmpsideCenterline
-import org.team9432.auto.types.FarsideCenterline
-import org.team9432.auto.types.FourNote
 import org.team9432.lib.Library
 import org.team9432.lib.coroutines.LoggedCoroutineRobot
 import org.team9432.lib.coroutines.Team8BitRobot.Runtime.*
 import org.team9432.lib.coroutines.robotPeriodic
-import org.team9432.lib.simulation.competitionfield.simulations.SwerveDriveSimulation
+import org.team9432.lib.util.ChoreoUtil.getAutoFlippedInitialPose
+import org.team9432.lib.util.applyFlip
 import org.team9432.oi.Controls
 import org.team9432.resources.intake.Intake
 import org.team9432.resources.loader.Loader
 import org.team9432.resources.shooter.Shooter
-import org.team9432.resources.swerve.DrivetrainConstants.simProfile
-import org.team9432.resources.swerve.SwerveDrive
-import org.team9432.resources.swerve.TunerConstants
-import org.team9432.resources.swerve.gyro.GyroIOPigeon2
-import org.team9432.resources.swerve.gyro.GyroIOSim
-import org.team9432.resources.swerve.module.ModuleIOKraken
-import org.team9432.resources.swerve.module.ModuleIOSim
+import org.team9432.resources.swerve.Swerve
 import org.team9432.vision.Vision
+import kotlin.time.Duration.Companion.seconds
 
 
 object Robot: LoggedCoroutineRobot() {
     val runtime = if (RobotBase.isReal()) REAL else SIM
-
-    lateinit var drive: SwerveDrive
-    lateinit var simulation: RobotSim
 
     override suspend fun init() {
         Logger.recordMetadata("ProjectName", "2024-Offseason") // Set a metadata value
@@ -74,10 +62,14 @@ object Robot: LoggedCoroutineRobot() {
 
         Logger.start() // Start logging! No more data receivers, replay sources, or metadata values may be added.
 
+        // Disables protobuf encoding warning, supposedly it's only bad the first few times it's called, we'll have to see
+        // Original warning:
+        // Warning at org.littletonrobotics.junction.LogTable.put(LogTable.java:429): Logging value to field "/Vision/Results" using protobuf encoding. This may cause high loop overruns, please monitor performance or save the value in a different format. Call "LogTable.disableProtobufWarning()" to disable this message.
+        LogTable.disableProtobufWarning()
+
         Library.initialize(this, runtime)
 
-        //Logger.configure(ntPublish = true, logExtras = false)
-
+        Swerve
         Intake
         Shooter
         Loader
@@ -93,37 +85,6 @@ object Robot: LoggedCoroutineRobot() {
 
         `LEDs!`
 
-        if (isSimulated) {
-            // Sim robot, instantiate physics sim IO implementations
-            val frontLeft = ModuleIOSim()
-            val frontRight = ModuleIOSim()
-            val backLeft = ModuleIOSim()
-            val backRight = ModuleIOSim()
-            val gyroIOSim = GyroIOSim()
-
-            drive = SwerveDrive(
-                gyroIOSim,
-                frontLeft,
-                frontRight, backLeft, backRight
-            )
-
-            val swerveSim = SwerveDriveSimulation(
-                simProfile,
-                gyroIOSim, frontLeft, frontRight, backLeft, backRight,
-                startingPose = Pose2d(3.0, 2.0, Rotation2d()),
-                drive::setPose
-            )
-
-            simulation = RobotSim(swerveSim)
-        } else {
-            val frontLeft = ModuleIOKraken(TunerConstants.FrontLeft, TunerConstants.kCANbusName)
-            val frontRight = ModuleIOKraken(TunerConstants.FrontRight, TunerConstants.kCANbusName)
-            val backLeft = ModuleIOKraken(TunerConstants.BackLeft, TunerConstants.kCANbusName)
-            val backRight = ModuleIOKraken(TunerConstants.BackRight, TunerConstants.kCANbusName)
-            val gyroIO = GyroIOPigeon2()
-            drive = SwerveDrive(gyroIO, frontLeft, frontRight, backLeft, backRight)
-        }
-
         AutoChooser
 
         DriverStation.silenceJoystickConnectionWarning(true)
@@ -133,7 +94,7 @@ object Robot: LoggedCoroutineRobot() {
     override suspend fun teleop() {
         robotPeriodic(isFinished = { !Robot.mode.isTeleop }) {
             val speeds = Controls.getTeleopSwerveRequest()
-            drive.runFieldCentricChassisSpeeds(speeds)
+            Swerve.runFieldCentricChassisSpeeds(speeds)
         }
     }
 

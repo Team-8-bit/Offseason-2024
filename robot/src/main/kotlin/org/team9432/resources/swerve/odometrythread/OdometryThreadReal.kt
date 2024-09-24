@@ -5,7 +5,7 @@ import com.ctre.phoenix6.StatusSignal
 import org.littletonrobotics.junction.Logger
 import org.team9432.resources.swerve.DrivetrainConstants.ODOMETRY_CACHE_CAPACITY
 import org.team9432.resources.swerve.DrivetrainConstants.ODOMETRY_FREQUENCY
-import org.team9432.resources.swerve.SwerveDrive
+import org.team9432.resources.swerve.Swerve
 import org.team9432.resources.swerve.odometrythread.OdometryThread.OdometryThreadInputs
 import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
@@ -34,13 +34,13 @@ object OdometryThreadReal: Thread(), OdometryThread {
     fun registerSignal(signal: StatusSignal<Double>): Queue<Double> {
         val queue = ArrayBlockingQueue<Double>(20)
         signalsLock.lock()
-        SwerveDrive.odometryLock.lock()
+        Swerve.odometryLock.lock()
         try {
             signals += signal
             queues.add(queue)
         } finally {
             signalsLock.unlock()
-            SwerveDrive.odometryLock.unlock()
+            Swerve.odometryLock.unlock()
         }
 
         return queue
@@ -57,7 +57,7 @@ object OdometryThreadReal: Thread(), OdometryThread {
             }
 
             // Save data
-            SwerveDrive.odometryLock.lock()
+            Swerve.odometryLock.lock()
             try {
                 var timestamp = Logger.getRealTimestamp() / 1e6
                 var totalLatency = 0.0
@@ -80,7 +80,7 @@ object OdometryThreadReal: Thread(), OdometryThread {
                     timestampQueues[i].offer(timestamp)
                 }
             } finally {
-                SwerveDrive.odometryLock.unlock()
+                Swerve.odometryLock.unlock()
             }
         }
     }

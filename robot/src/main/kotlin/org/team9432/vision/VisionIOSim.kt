@@ -1,4 +1,4 @@
-package frc.robot.subsystems.apriltagvision
+package org.team9432.vision
 
 import edu.wpi.first.math.geometry.Rotation2d
 import org.photonvision.PhotonCamera
@@ -6,10 +6,8 @@ import org.photonvision.simulation.PhotonCameraSim
 import org.photonvision.simulation.SimCameraProperties
 import org.photonvision.simulation.VisionSystemSim
 import org.team9432.FieldConstants.apriltagFieldLayout
-import org.team9432.Robot
 import org.team9432.lib.RobotPeriodicManager
-import org.team9432.vision.VisionConstants
-import org.team9432.vision.VisionIO
+import org.team9432.resources.swerve.Swerve
 
 class VisionIOSim: VisionIO {
     private val visionSim = VisionSystemSim("main")
@@ -32,7 +30,7 @@ class VisionIOSim: VisionIO {
 
         cameraSim.enableDrawWireframe(true)
 
-        RobotPeriodicManager.startPeriodic { visionSim.update(Robot.simulation.getActualRobotPose()) }
+        RobotPeriodicManager.startPeriodic { visionSim.update(Swerve.robotSimulation.getActualRobotPose()) }
     }
 
     override fun updateInputs(inputs: VisionIO.VisionIOInputs) {

@@ -15,6 +15,7 @@ import org.team9432.lib.unit.inMeters
 import org.team9432.lib.util.allianceSwitch
 import org.team9432.lib.util.distanceTo
 import org.team9432.lib.util.whenSimulated
+import org.team9432.resources.swerve.Swerve
 import kotlin.time.Duration.Companion.milliseconds
 
 
@@ -36,7 +37,7 @@ object NoteVisualizer {
         val notes = mutableSetOf<Pose3d>()
 
         // Robot relative note (i.e. one stored in the loader)
-        robotNoteTransform?.let { notes.add(Pose3d(Robot.simulation.getActualRobotPose()).transformBy(it)) }
+        robotNoteTransform?.let { notes.add(Pose3d(Swerve.robotSimulation.getActualRobotPose()).transformBy(it)) }
 
         // Field-relative note (i.e. one moving from the robot to the speaker)
         shotNotePose?.let { notes.add(it) }
@@ -54,13 +55,13 @@ object NoteVisualizer {
     fun animateShoot() {
         if (!Robot.isSimulated) return
 
-        val startPose = Pose3d(Robot.simulation.getActualRobotPose()).transformBy(loadedTransform).translation
+        val startPose = Pose3d(Swerve.robotSimulation.getActualRobotPose()).transformBy(loadedTransform).translation
         allianceSwitch(blue = blueSpeaker, red = redSpeaker)
 
-        val duration = Robot.simulation.getActualRobotPose().translation.distanceTo(PositionConstants.speakerAimPose).inMeters / SHOT_SPEED_MPS
+        val duration = Swerve.robotSimulation.getActualRobotPose().translation.distanceTo(PositionConstants.speakerAimPose).inMeters / SHOT_SPEED_MPS
 
         val display = Crescendo2024FieldObjects.NoteOnFly(startPose, duration)
-        Robot.simulation.competitionFieldVisualizer.addGamePieceOnFly(display)
+        Swerve.robotSimulation.competitionFieldVisualizer.addGamePieceOnFly(display)
 
         robotNoteTransform = null
     }

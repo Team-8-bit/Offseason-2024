@@ -9,13 +9,13 @@ import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import org.team9432.*
-import org.team9432.Robot.drive
 import org.team9432.lib.input.XboxController
 import org.team9432.lib.unit.asRotation2d
 import org.team9432.lib.unit.degrees
 import org.team9432.lib.unit.meters
 import org.team9432.lib.util.allianceSwitch
 import org.team9432.lib.util.angleTo
+import org.team9432.lib.util.velocityLessThan
 import org.team9432.resources.intake.Intake
 import org.team9432.resources.loader.Loader
 import org.team9432.resources.shooter.Shooter
@@ -43,8 +43,9 @@ object Controls {
     private val shouldAimAtSpeaker
         get() =
             getRotationalSpeed() == 0.0 &&
+                    Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 1.0, rotationsPerSecond = Double.MAX_VALUE) && // Don't aim if the robot is driving fast
                     Shooter.isShootingSpeaker &&
-                    Shooter.distanceToSpeaker() < 5.0.meters &&
+                    Shooter.distanceToSpeaker() < 3.0.meters &&
                     Beambreaks.hasNote &&
                     Vision.isEnabled
 
@@ -111,7 +112,7 @@ object Controls {
             .onTrue { RobotController.setAction { Actions.amp() } }
 
         controller.back
-            .onTrue { drive.setGyroAngle(allianceSwitch(blue = Rotation2d(), red = Rotation2d(Math.PI))) }
+            .onTrue { Swerve.setGyroAngle(allianceSwitch(blue = Rotation2d(), red = Rotation2d(Math.PI))) }
 
         controller.start
             .onTrue { RobotController.setAction { Actions.outtake() } }
@@ -132,7 +133,7 @@ object Controls {
     private fun getTriggerRotationSpeed(): Double {
         val rightAxis = controller.rightTriggerAxis
         val leftAxis = controller.leftTriggerAxis
-        return ((rightAxis.pow(2).withSign(rightAxis) * -1) + leftAxis.pow(2).withSign(leftAxis)) * Math.toRadians(360.0)
+        return ((rightAxis.pow(2.0).withSign(rightAxis) * -1) + leftAxis.pow(2.0).withSign(leftAxis)) * Math.toRadians(400.0)
     }
 
     // https://github.com/Mechanical-Advantage/RobotCode2024/blob/a025615a52193b7709db7cf14c51c57be17826f2/src/main/java/org/littletonrobotics/frc2024/subsystems/drive/controllers/TeleopDriveController.java#L83

@@ -4,17 +4,16 @@ import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
-import frc.robot.subsystems.apriltagvision.VisionIOSim
 import org.littletonrobotics.junction.Logger
 import org.photonvision.EstimatedRobotPose
 import org.photonvision.PhotonPoseEstimator
 import org.photonvision.targeting.PhotonPipelineResult
 import org.team9432.FieldConstants.apriltagFieldLayout
-import org.team9432.Robot.drive
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
 import org.team9432.lib.util.simSwitch
 import org.team9432.oi.Controls
+import org.team9432.resources.swerve.Swerve
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
@@ -57,7 +56,7 @@ object Vision {
         val timestamp = estimatedRobotPose.timestampSeconds
         val stdDevs: Matrix<N3, N1> = getEstimationStdDevs(estimatedRobotPose)
 
-        drive.addVisionMeasurement(visionPose, timestamp, stdDevs)
+        Swerve.addVisionMeasurement(visionPose, timestamp, stdDevs)
     }
 
     private fun getEstimationStdDevs(estimatedPose: EstimatedRobotPose): Matrix<N3, N1> {
