@@ -93,13 +93,13 @@ class ModuleIOKraken(private val moduleConstants: SwerveModuleConstants, canbusN
         inputs.driveSupplyCurrentAmps = driveSupplyCurrent.valueAsDouble
 
         inputs.steerAbsolutePosition = Rotation2d.fromRotations(steerAbsolutePosition.valueAsDouble)
-        inputs.steerPosition = Rotation2d.fromRotations(steerPosition.valueAsDouble / STEER_GEAR_RATIO)
-        inputs.steerVelocityRadPerSec = Units.rotationsToRadians(steerVelocity.valueAsDouble) / STEER_GEAR_RATIO
+        inputs.steerPosition = Rotation2d.fromRotations(steerPosition.valueAsDouble)
+        inputs.steerVelocityRadPerSec = Units.rotationsToRadians(steerVelocity.valueAsDouble)
         inputs.steerAppliedVolts = steerAppliedVolts.valueAsDouble
         inputs.steerSupplyCurrentAmps = steerSupplyCurrent.valueAsDouble
 
-        inputs.odometryDrivePositionsRotations = drivePositionQueue.map { Units.rotationsToRadians(it) / DRIVE_GEAR_RATIO }.toDoubleArray()
-        inputs.odometrySteerPositions = steerPositionQueue.map { Rotation2d.fromRotations(it / STEER_GEAR_RATIO) }.toTypedArray()
+        inputs.odometryDrivePositionsRotations = drivePositionQueue.map { it / DRIVE_GEAR_RATIO }.toDoubleArray()
+        inputs.odometrySteerPositions = steerPositionQueue.map { Rotation2d.fromRotations(it) }.toTypedArray()
 
         drivePositionQueue.clear()
         steerPositionQueue.clear()
