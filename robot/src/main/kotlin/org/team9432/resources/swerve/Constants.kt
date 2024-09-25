@@ -23,7 +23,7 @@ object DrivetrainConstants {
      * TODO: change these numbers to match your robot
      */
     const val WHEEL_COEFFICIENT_OF_FRICTION: Double = 1.0
-    const val ROBOT_MASS_KG: Double = 60.0 // with bumpers
+    const val ROBOT_MASS_KG: Double = 74.0 // with bumpers
 
     /**
      * TODO: change motor type to match your robot

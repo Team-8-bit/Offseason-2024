@@ -7,6 +7,8 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.RobotBase
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.time.withTimeout
+import kotlinx.coroutines.withTimeout
 import org.littletonrobotics.junction.LogFileUtil
 import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.Logger
@@ -14,6 +16,12 @@ import org.littletonrobotics.junction.networktables.NT4Publisher
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
 import org.team9432.auto.AutoChooser
+import org.team9432.auto.RobotAmpsideCenterline
+import org.team9432.auto.RobotFarsideCenterline
+import org.team9432.auto.RobotFourNote
+import org.team9432.auto.types.AmpsideCenterline
+import org.team9432.auto.types.FarsideCenterline
+import org.team9432.auto.types.FourNote
 import org.team9432.lib.Library
 import org.team9432.lib.coroutines.LoggedCoroutineRobot
 import org.team9432.lib.coroutines.Team8BitRobot.Runtime.*
@@ -94,12 +102,22 @@ object Robot: LoggedCoroutineRobot() {
     override suspend fun teleop() {
         robotPeriodic(isFinished = { !Robot.mode.isTeleop }) {
             val speeds = Controls.getTeleopSwerveRequest()
-            Swerve.runFieldCentricChassisSpeeds(speeds)
+            Swerve.runFieldRelativeChassisSpeeds(speeds)
         }
     }
 
     override suspend fun autonomous() {
         RobotController.setAction {
+//            val trajectoryGroup = Choreo.getTrajectoryGroup("testing")
+//            Swerve.resetOdometry(trajectoryGroup.first().getAutoFlippedInitialPose())
+//            Swerve.setActualSimPose(trajectoryGroup.first().getAutoFlippedInitialPose())
+//            trajectoryGroup.forEachIndexed { index1, it ->
+//                println("starting $index1")
+//                Logger.recordOutput("Test/TargetEndPose", it.finalPose.applyFlip())
+//                Logger.recordOutput("Test/Samples", *it.poses.map { it.applyFlip() }.filterIndexed { index, _ -> index % 4 == 0 }.toTypedArray())
+//                Swerve.followChoreo(it)
+//                delay(1.seconds)
+//            }
             val selectedAuto = AutoChooser.getAuto()
 
             if (selectedAuto == null) {

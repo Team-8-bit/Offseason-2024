@@ -19,11 +19,11 @@ object FourNotePaths {
     private val FOUR_NOTE_SHOT = Position(2.0.meters, AutoFieldConstants.speakerYCoordinate, 180.0.degrees)
     private val FOUR_NOTE_AMP_ALIGN = AutoFieldConstants.ampNote.copy().moveX(-0.6.meters).pointAwayFrom(AutoFieldConstants.ampNote)
     private val FOUR_NOTE_AMP_PICKUP = AutoFieldConstants.ampNote.copy().moveX(-0.2.meters).pointAwayFrom(AutoFieldConstants.ampNote)
-    private val FOUR_NOTE_AMP_EXIT = AutoFieldConstants.ampNote.copy().move(x = -0.5.meters, y = -0.6.meters, heading = 180.degrees)
+    private val FOUR_NOTE_AMP_EXIT = AutoFieldConstants.ampNote.copy().move(x = -0.625.meters, y = -0.6.meters, heading = 180.degrees)
     private val FOUR_NOTE_SPEAKER_PICKUP = Position(2.88.meters, AutoFieldConstants.speakerYCoordinate, 180.0.degrees)/*This part is because of a choreo bug, not to align better*/.moveX(-5.inches)
     private val FOUR_NOTE_STAGE_ALIGN = AutoFieldConstants.stageNote.copy().moveX(-0.6.meters).pointAwayFrom(AutoFieldConstants.stageNote)
     private val FOUR_NOTE_STAGE_PICKUP = AutoFieldConstants.stageNote.copy().moveX(-0.2.meters).pointAwayFrom(AutoFieldConstants.stageNote)
-    private val FOUR_NOTE_STAGE_EXIT = AutoFieldConstants.stageNote.copy().move(x = -0.5.meters, y = 0.6.meters, heading = 180.degrees)
+    private val FOUR_NOTE_STAGE_EXIT = AutoFieldConstants.stageNote.copy().move(x = -0.625.meters, y = 0.6.meters, heading = 180.degrees)
 
     private val FOUR_NOTE_ABOVE_STAGE_DRIVE = Position(5.5.meters, 6.3.meters, 180.0.degrees)
     private val FOUR_NOTE_THROUGH_STAGE_DRIVE_CLOSE = Position(4.4.meters, 5.meters, 180.0.degrees)

@@ -23,7 +23,7 @@ class ModuleIOSim: ModuleIO, SimulatedSwerveModule() {
     private val driveFeedback: PIDController = PIDController(1.0, 0.0, 0.0).apply {
         setTolerance(0.25)
     }
-    private val steerFeedback: PIDController = PIDController(10.0, 0.0, 0.0)
+    private val steerFeedback: PIDController = PIDController(8.0, 0.0, 0.2)
 
     private var driveAppliedVolts: Double = 0.0
     private var steerAppliedVolts: Double = 0.0

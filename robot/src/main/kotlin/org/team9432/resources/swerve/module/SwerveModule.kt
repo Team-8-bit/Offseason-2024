@@ -1,5 +1,6 @@
 package org.team9432.resources.swerve.module
 
+import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.SwerveModulePosition
@@ -57,10 +58,11 @@ class SwerveModule(private val io: ModuleIO, private val name: String) {
                 // When the error is 90°, the velocity setpoint should be 0. As the wheel turns
                 // towards the setpoint, its velocity should increase. This is achieved by
                 // taking the component of the velocity in the direction of the setpoint.
-                val adjustedSpeedSetpointMPS = speedTarget * cos(angleTarget.minus(inputs.steerAbsolutePosition).radians)
+                val angleAdjustedTarget = speedTarget * cos(angleTarget.minus(inputs.steerAbsolutePosition).radians)
+                val deadbandedTarget = MathUtil.applyDeadband(angleAdjustedTarget, .025)
 
                 // Run drive controller
-                io.runDriveVelocity(adjustedSpeedSetpointMPS, simSwitch(real = 0.0, sim = driveFeedforward.calculate(adjustedSpeedSetpointMPS / WHEEL_RADIUS_METERS)))
+                io.runDriveVelocity(deadbandedTarget, simSwitch(real = 0.0, sim = driveFeedforward.calculate(deadbandedTarget / WHEEL_RADIUS_METERS)))
             }
         }
     }
