@@ -14,11 +14,11 @@ import java.util.concurrent.locks.ReentrantLock
 
 
 object OdometryThreadReal: Thread(), OdometryThread {
-    private val timeStampsQueue: Queue<Double> = ArrayBlockingQueue(ODOMETRY_CACHE_CAPACITY)
+    private val timestampsQueue: Queue<Double> = ArrayBlockingQueue(ODOMETRY_CACHE_CAPACITY)
     private val signalsLock: Lock = ReentrantLock()
 
     private val queues = mutableListOf<Queue<Double>>()
-    private val timestampQueues = mutableListOf<Queue<Double>>()
+
     private var signals: Array<BaseStatusSignal> = emptyArray()
 
     init {
@@ -27,7 +27,7 @@ object OdometryThreadReal: Thread(), OdometryThread {
     }
 
     @Synchronized override fun start() {
-        if (timestampQueues.isNotEmpty()) super<Thread>.start()
+        super<Thread>.start()
     }
 
     /** Registers a signal to run in the odometry thread and returns a queue that is filled with the received values. */
@@ -76,9 +76,7 @@ object OdometryThreadReal: Thread(), OdometryThread {
                     queues[i].offer(signals[i].valueAsDouble)
                 }
                 // Add the timestamp to the queue
-                for (i in timestampQueues.indices) {
-                    timestampQueues[i].offer(timestamp)
-                }
+                timestampsQueue.offer(timestamp)
             } finally {
                 Swerve.odometryLock.unlock()
             }
@@ -86,7 +84,11 @@ object OdometryThreadReal: Thread(), OdometryThread {
     }
 
     override fun updateInputs(inputs: OdometryThreadInputs) {
-        inputs.measurementTimestamps = timeStampsQueue.toDoubleArray()
-        timeStampsQueue.clear()
+        inputs.measurementTimestamps = DoubleArray(timestampsQueue.size)
+        var i = 0
+        while (timestampsQueue.isNotEmpty()) {
+            inputs.measurementTimestamps[i] = timestampsQueue.poll()
+            i++
+        }
     }
 }

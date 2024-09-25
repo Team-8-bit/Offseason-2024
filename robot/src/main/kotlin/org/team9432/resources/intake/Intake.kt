@@ -6,7 +6,7 @@ import org.team9432.lib.resource.Resource
 import org.team9432.lib.util.simSwitch
 
 object Intake: Resource("Intake") {
-    private val io = simSwitch(real = IntakeIONeo(), sim = IntakeIOSim())
+    private val io = simSwitch(real = { IntakeIONeo() }, sim = { IntakeIOSim() })
     private val inputs = LoggedIntakeIOInputs()
 
     private var state = State.IDLE

@@ -18,7 +18,7 @@ import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
 object Vision {
-    private val io = simSwitch(real = VisionIOReal(), sim = VisionIOSim())
+    private val io = simSwitch(real = { VisionIOReal() }, sim = { VisionIOSim() })
     private val inputs = LoggedVisionIOInputs()
 
     val isEnabled get() = !Controls.forceDisableVision && inputs.isConnected

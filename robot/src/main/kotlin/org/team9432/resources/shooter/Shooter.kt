@@ -17,7 +17,7 @@ import org.team9432.vision.Vision
 import kotlin.math.abs
 
 object Shooter: Resource("Shooter") {
-    private val io = simSwitch(real = ShooterIONeo(), sim = ShooterIOSim())
+    private val io = simSwitch(real = { ShooterIONeo() }, sim = { ShooterIOSim() })
     private val inputs = LoggedShooterIOInputs()
 
     private val topShooterMap = InterpolatingDoubleTreeMap()

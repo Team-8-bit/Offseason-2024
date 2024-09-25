@@ -7,7 +7,7 @@ import org.team9432.lib.resource.Resource
 import org.team9432.lib.util.simSwitch
 
 object Loader: Resource("Loader") {
-    private val io = simSwitch(real = LoaderIONeo(), sim = LoaderIOSim())
+    private val io = simSwitch(real = { LoaderIONeo() }, sim = { LoaderIOSim() })
     private val inputs = LoggedLoaderIOInputs()
 
     private var state = State.IDLE

@@ -1,6 +1,5 @@
 package org.team9432.resources.swerve
 
-import com.choreo.lib.Choreo
 import com.choreo.lib.ChoreoTrajectory
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.controller.PIDController
@@ -62,11 +61,11 @@ object Swerve {
     private var swerveSim: SwerveDriveSimulation by Delegates.notNull() // This is only initialized when the robot is simulated
 
     init {
-        val frontLeft = simSwitch(real = ModuleIOKraken(TunerConstants.FrontLeft, TunerConstants.kCANbusName), sim = ModuleIOSim())
-        val frontRight = simSwitch(real = ModuleIOKraken(TunerConstants.FrontRight, TunerConstants.kCANbusName), sim = ModuleIOSim())
-        val backLeft = simSwitch(real = ModuleIOKraken(TunerConstants.BackLeft, TunerConstants.kCANbusName), sim = ModuleIOSim())
-        val backRight = simSwitch(real = ModuleIOKraken(TunerConstants.BackRight, TunerConstants.kCANbusName), sim = ModuleIOSim())
-        gyroIO = simSwitch(real = GyroIOPigeon2(), sim = GyroIOSim())
+        val frontLeft = simSwitch(real = { ModuleIOKraken(TunerConstants.FrontLeft, TunerConstants.kCANbusName) }, sim = { ModuleIOSim() })
+        val frontRight = simSwitch(real = { ModuleIOKraken(TunerConstants.FrontRight, TunerConstants.kCANbusName) }, sim = { ModuleIOSim() })
+        val backLeft = simSwitch(real = { ModuleIOKraken(TunerConstants.BackLeft, TunerConstants.kCANbusName) }, sim = { ModuleIOSim() })
+        val backRight = simSwitch(real = { ModuleIOKraken(TunerConstants.BackRight, TunerConstants.kCANbusName) }, sim = { ModuleIOSim() })
+        gyroIO = simSwitch(real = { GyroIOPigeon2() }, sim = { GyroIOSim() })
 
         modules = arrayOf(
             SwerveModule(frontLeft, "FrontLeft"),
