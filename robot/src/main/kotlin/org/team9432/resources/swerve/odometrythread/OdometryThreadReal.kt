@@ -60,16 +60,16 @@ object OdometryThreadReal: Thread(), OdometryThread {
             Swerve.odometryLock.lock()
             try {
                 var timestamp = Logger.getRealTimestamp() / 1e6
-                var totalLatency = 0.0
-
-                for (signal in signals) {
-                    totalLatency += signal.timestamp.latency
-                }
-
-                if (signals.isNotEmpty()) {
-                    // Subtract average latency from the timestamp
-                    timestamp -= totalLatency / signals.size
-                }
+//                var totalLatency = 0.0
+//
+//                for (signal in signals) {
+//                    totalLatency += signal.timestamp.latency
+//                }
+//
+//                if (signals.isNotEmpty()) {
+//                    // Subtract average latency from the timestamp
+//                    timestamp -= totalLatency / signals.size
+//                }
 
                 // Add each new value to it's respective queue
                 for (i in signals.indices) {
