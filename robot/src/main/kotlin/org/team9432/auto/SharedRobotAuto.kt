@@ -25,7 +25,11 @@ object SharedRobotAuto {
             { Swerve.followChoreo(firstPath) },
             { simDelay(1.seconds) }
         )
-        Actions.visionShoot(spindown = false)
+
+        if (Beambreaks.hasNote) {
+            delay(0.1.seconds)
+            Actions.visionShoot(spindown = false)
+        }
     }
 
     suspend fun scoreNote(note: ChoreoTrajectory) = coroutineScope {
