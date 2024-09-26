@@ -43,10 +43,11 @@ object Shooter: Resource("Shooter") {
         SmartDashboard.putNumber("Shooter/Tuning/ffV", 0.0)
         SmartDashboard.putNumber("Shooter/DistanceOffset", 0.0)
 
-        addMapValue(2.0.meters, ShooterSpeeds(upperRPM = 5000.0, lowerRPM = 2750.0))
-        addMapValue(1.75.meters, ShooterSpeeds(upperRPM = 5000.0, lowerRPM = 3000.0))
-        addMapValue(1.5.meters, ShooterSpeeds(upperRPM = 2500.0, lowerRPM = 4000.0))
-        addMapValue(1.25.meters, ShooterSpeeds(upperRPM = 4000.0, lowerRPM = 5000.0))
+        addMapValue(2.25.meters, ShooterSpeeds(upperRPM = 5000.0, lowerRPM = 2000.0))
+        addMapValue(2.0.meters, ShooterSpeeds(upperRPM = 5000.0, lowerRPM = 2800.0))
+        addMapValue(1.75.meters, ShooterSpeeds(upperRPM = 4000.0, lowerRPM = 3000.0))
+        addMapValue(1.5.meters, ShooterSpeeds(upperRPM = 4000.0, lowerRPM = 4000.0))
+        addMapValue(1.2.meters, ShooterSpeeds(upperRPM = 4500.0, lowerRPM = 3000.0))
     }
 
     private fun trackState() {
