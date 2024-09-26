@@ -148,8 +148,8 @@ object Swerve {
     suspend fun followChoreo(trajectory: ChoreoTrajectory) {
         val controlFunction = ChoreoUtil.choreoSwerveController(xChoreoPid, yChoreoPid, rChoreoPid, ::getRobotPose)
 
-        Logger.recordOutput("Swerve/CurrentTrajectory", *allianceSwitch(blue = trajectory.poses, red = trajectory.flipped().poses))
-        Logger.recordOutput("Swerve/TrajectoryEndPose", trajectory.finalPose.applyFlip())
+        Logger.recordOutput("Drive/CurrentTrajectory", *allianceSwitch(blue = trajectory.poses, red = trajectory.flipped().poses))
+        Logger.recordOutput("Drive/TrajectoryEndPose", trajectory.finalPose.applyFlip())
 
         ChoreoUtil.choreoSwerveAction(trajectory, controlFunction) { speedsToApply ->
             runRawChassisSpeeds(speedsToApply)
@@ -199,9 +199,6 @@ object Swerve {
             periodic.stopPeriodic()
         }
     }
-
-    val rawGyroYaw: Rotation2d
-        get() = gyroInputs.yawPosition
 
     fun runRawChassisSpeeds(speeds: ChassisSpeeds) {
         val speeds = SwerveUtil.correctForDynamics(speeds, Robot.period)
