@@ -17,7 +17,7 @@ import kotlin.time.Duration.Companion.seconds
 
 object SharedRobotAuto {
     suspend fun preload(firstPath: ChoreoTrajectory) {
-        Swerve.resetOdometry(firstPath.getAutoFlippedInitialPose())
+        //Swerve.resetOdometry(firstPath.getAutoFlippedInitialPose())
         whenSimulated { Swerve.setActualSimPose(firstPath.getAutoFlippedInitialPose()) }
 
         Shooter.setState(Shooter.State.VISION_SHOOT)

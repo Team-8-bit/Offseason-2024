@@ -237,8 +237,10 @@ object Swerve {
     fun resetOdometry(pose: Pose2d) = poseEstimator.resetPosition(pose.rotation, moduleLatestPositions, pose)
     fun setActualSimPose(pose: Pose2d) = swerveSim.setSimulationWorldPose(pose)
 
-    fun getRobotTranslation(): Translation2d = Swerve.getRobotPose().translation
     fun getRobotRelativeSpeeds(): ChassisSpeeds = DRIVE_KINEMATICS.toChassisSpeeds(*moduleStates)
+    fun getFieldRelativeSpeeds(): ChassisSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeSpeeds(), getRobotPose().rotation)
+
+    fun getFutureRobotPose(timeSeconds: Double) = getRobotPose().transformBySpeeds(getFieldRelativeSpeeds(), timeSeconds)
 
     fun addVisionMeasurement(visionPose: Pose2d, timestamp: Double, measurementStdDevs: Matrix<N3, N1>) {
         poseEstimator.addVisionMeasurement(visionPose, timestamp, measurementStdDevs)

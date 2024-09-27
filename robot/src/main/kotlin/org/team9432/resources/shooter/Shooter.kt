@@ -26,6 +26,8 @@ object Shooter: Resource("Shooter") {
     private var state = State.IDLE
     private var currentTargetSpeeds = ShooterSpeeds(0.0, 0.0)
 
+    const val SHOT_TIME_SECONDS = 0.4
+
     enum class State(val getSpeeds: () -> ShooterSpeeds) {
         IDLE({ ShooterSpeeds(0.0, 0.0) }),
         VISION_SHOOT({ getMapValue(distanceToSpeaker() + SmartDashboard.getNumber("Shooter/DistanceOffset", 0.0).inches) }),
@@ -62,7 +64,8 @@ object Shooter: Resource("Shooter") {
         } else {
             if (Vision.isEnabled) {
                 distanceToSpeaker() < 2.3.meters &&
-                        Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 0.5, rotationsPerSecond = 0.25) &&
+                        distanceToSpeaker() > 1.3.meters &&
+                        Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 1.5, rotationsPerSecond = 0.25) &&
                         isAimedAtSpeaker() &&
                         (flywheelsAtSpeed() || Robot.isSimulated) // Ignore speed in sim as the flywheels aren't simulated yet
             } else {
@@ -74,15 +77,17 @@ object Shooter: Resource("Shooter") {
 
     private fun isAimedAtSpeaker(): Boolean {
         return if (distanceToSpeaker().inMeters > 1.5) {
-            getAimingErrorDegrees() < 10
+            getAimingErrorDegrees() < 5
         } else if (distanceToSpeaker().inMeters > 1.25) {
-            getAimingErrorDegrees() < 15
+            getAimingErrorDegrees() < 10
         } else {
             getAimingErrorDegrees() < 25
         }
     }
 
-    private fun getAimingErrorDegrees() = abs((Swerve.getRobotTranslation().angleTo(PositionConstants.speakerAimPose).asRotation2d - Swerve.getRobotPose().rotation).degrees)
+    private fun getAimingErrorDegrees(): Double {
+        return abs((Swerve.getFutureRobotPose(SHOT_TIME_SECONDS).angleTo(PositionConstants.speakerAimPose).asRotation2d - Swerve.getRobotPose().rotation).degrees)
+    }
 
     fun flywheelsAtSpeed(rpmTolerance: Int = 300): Boolean {
         val (upperTarget, lowerTarget) = currentTargetSpeeds
@@ -109,7 +114,9 @@ object Shooter: Resource("Shooter") {
     }
 
     /** Return the distance from the robot to the speaker. */
-    fun distanceToSpeaker() = Swerve.getRobotTranslation().distanceTo(PositionConstants.speakerAimPose)
+    fun distanceToSpeaker(): Length {
+        return Swerve.getFutureRobotPose(SHOT_TIME_SECONDS).distanceTo(PositionConstants.speakerAimPose)
+    }
 
     data class ShooterSpeeds(val upperRPM: Double, val lowerRPM: Double) {
         val isIdle = upperRPM == 0.0 && lowerRPM == 0.0

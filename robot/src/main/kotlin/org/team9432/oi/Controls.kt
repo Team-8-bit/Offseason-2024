@@ -15,11 +15,9 @@ import org.team9432.lib.unit.degrees
 import org.team9432.lib.unit.meters
 import org.team9432.lib.util.allianceSwitch
 import org.team9432.lib.util.angleTo
-import org.team9432.lib.util.velocityLessThan
 import org.team9432.resources.intake.Intake
 import org.team9432.resources.loader.Loader
 import org.team9432.resources.shooter.Shooter
-import org.team9432.resources.swerve.DrivetrainConstants
 import org.team9432.resources.swerve.Swerve
 import org.team9432.vision.Vision
 import kotlin.math.hypot
@@ -36,17 +34,15 @@ object Controls {
     private val ratelimitX = SlewRateLimiter(20.0)
     private val ratelimitY = SlewRateLimiter(20.0)
 
-    private val headingPID = PIDController(5.0, 0.0, 0.5).apply {
+    private val headingPID = PIDController(5.0, 0.0, 0.0).apply {
         enableContinuousInput(-Math.PI, Math.PI)
     }
 
     private val shouldAimAtSpeaker
         get() =
             getRotationalSpeed() == 0.0 &&
-                    Swerve.getRobotRelativeSpeeds().velocityLessThan(metersPerSecond = 1.0, rotationsPerSecond = Double.MAX_VALUE) && // Don't aim if the robot is driving fast
                     Shooter.isShootingSpeaker &&
-                    Shooter.distanceToSpeaker() < 3.0.meters &&
-                    Beambreaks.hasNote &&
+                    Shooter.distanceToSpeaker() < 4.0.meters &&
                     Vision.isEnabled
 
     private val shouldAimAtAmp
@@ -65,7 +61,8 @@ object Controls {
                 val speed = getTranslationalSpeed()
                 vxMetersPerSecond = ratelimitX.calculate(speed.x * allianceSwitch(blue = 1, red = -1))
                 vyMetersPerSecond = ratelimitY.calculate(speed.y * allianceSwitch(blue = 1, red = -1))
-                omegaRadiansPerSecond = headingPID.calculate(Swerve.getRobotPose().rotation.radians, Swerve.getRobotTranslation().angleTo(PositionConstants.speakerAimPose).asRotation2d.radians)
+                val futureRobotPose = Swerve.getFutureRobotPose(Shooter.SHOT_TIME_SECONDS)
+                omegaRadiansPerSecond = headingPID.calculate(Swerve.getRobotPose().rotation.radians, futureRobotPose.angleTo(PositionConstants.speakerAimPose).asRotation2d.radians)
                 wasJustUsingHeadingController = true
             }
 
