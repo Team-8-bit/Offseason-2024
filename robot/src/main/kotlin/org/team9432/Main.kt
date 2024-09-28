@@ -1,14 +1,10 @@
 @file:JvmName("Main") // set the compiled Java class name to "Main" rather than "MainKt"
 package org.team9432
 
-import com.choreo.lib.Choreo
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.RobotBase
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.time.withTimeout
-import kotlinx.coroutines.withTimeout
 import org.littletonrobotics.junction.LogFileUtil
 import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.Logger
@@ -26,15 +22,12 @@ import org.team9432.lib.Library
 import org.team9432.lib.coroutines.LoggedCoroutineRobot
 import org.team9432.lib.coroutines.Team8BitRobot.Runtime.*
 import org.team9432.lib.coroutines.robotPeriodic
-import org.team9432.lib.util.ChoreoUtil.getAutoFlippedInitialPose
-import org.team9432.lib.util.applyFlip
 import org.team9432.oi.Controls
 import org.team9432.resources.intake.Intake
 import org.team9432.resources.loader.Loader
 import org.team9432.resources.shooter.Shooter
 import org.team9432.resources.swerve.Swerve
 import org.team9432.vision.Vision
-import kotlin.time.Duration.Companion.seconds
 
 
 object Robot: LoggedCoroutineRobot() {
@@ -90,6 +83,7 @@ object Robot: LoggedCoroutineRobot() {
 
         PortForwarder.add(5800, "10.94.32.11", 5800)
         PortForwarder.add(5800, "10.94.32.12", 5800)
+        PortForwarder.add(5800, "photonvision.local", 5800)
 
         `LEDs!`
 
@@ -100,6 +94,7 @@ object Robot: LoggedCoroutineRobot() {
 
 
     override suspend fun teleop() {
+        Actions.idle()
         robotPeriodic(isFinished = { !Robot.mode.isTeleop }) {
             val speeds = Controls.getTeleopSwerveRequest()
             Swerve.runFieldRelativeChassisSpeeds(speeds)
