@@ -77,9 +77,9 @@ class ModuleIOKraken(private val moduleConstants: SwerveModuleConstants, canbusN
 
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, *lowFrequencyDriveSignals, *lowFrequencySteerSignals, *lowFrequencyCANCoderSignals)
 
-        driveMotor.optimizeBusUtilization()
-        steerMotor.optimizeBusUtilization()
-        cancoder.optimizeBusUtilization()
+//        driveMotor.optimizeBusUtilization()
+//        steerMotor.optimizeBusUtilization()
+//        cancoder.optimizeBusUtilization()
     }
 
     override fun updateInputs(inputs: ModuleIOInputs) {
