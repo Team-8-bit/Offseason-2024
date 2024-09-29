@@ -8,7 +8,10 @@ import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Transform2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.wpilibj.Timer
+import kotlinx.coroutines.delay
 import org.team9432.*
+import org.team9432.lib.input.Trigger
 import org.team9432.lib.input.XboxController
 import org.team9432.lib.unit.asRotation2d
 import org.team9432.lib.unit.degrees
@@ -23,6 +26,7 @@ import org.team9432.vision.Vision
 import kotlin.math.hypot
 import kotlin.math.pow
 import kotlin.math.withSign
+import kotlin.time.Duration.Companion.seconds
 
 
 object Controls {
@@ -116,6 +120,19 @@ object Controls {
             .onFalse { RobotController.setAction { Actions.idle() } }
 
         controller.povRight.onTrue { RobotController.setAction { Actions.feedNote() } }
+
+
+        Trigger {
+            val matchTime = Timer.getMatchTime()
+            Robot.isTeleop &&
+                    matchTime < 30 &&
+                    matchTime != 0.0
+        }.onTrue {
+            repeat(60) {
+                controller.rumbleDuration(0.1.seconds)
+                delay(0.1.seconds)
+            }
+        }
     }
 
 
