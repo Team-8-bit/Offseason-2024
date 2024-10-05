@@ -1,149 +1,253 @@
 package org.team9432.resources.swerve
 
 import com.choreo.lib.ChoreoTrajectory
-import com.ctre.phoenix6.Utils
-import com.ctre.phoenix6.hardware.TalonFX
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics
+import edu.wpi.first.math.kinematics.SwerveModulePosition
+import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
-import edu.wpi.first.math.util.Units
-import edu.wpi.first.wpilibj.DriverStation.Alliance
-import edu.wpi.first.wpilibj.Notifier
-import edu.wpi.first.wpilibj.RobotController
-import kotlinx.coroutines.launch
+import edu.wpi.first.wpilibj.Timer
+import kotlinx.coroutines.suspendCancellableCoroutine
+import org.littletonrobotics.junction.Logger
 import org.team9432.Robot
+import org.team9432.RobotSim
 import org.team9432.lib.RobotPeriodicManager
-import org.team9432.lib.coroutines.RobotScope
-import org.team9432.lib.doglog.Logger
-import org.team9432.lib.resource.Resource
-import org.team9432.lib.resource.use
-import org.team9432.lib.unit.degrees
-import org.team9432.lib.util.ChoreoUtil
-import org.team9432.lib.util.allianceSwitch
-import org.team9432.lib.util.whenSimulated
-import org.team9432.oi.Controls
+import org.team9432.lib.simulation.competitionfield.simulations.SwerveDriveSimulation
+import org.team9432.lib.unit.meters
+import org.team9432.lib.util.*
+import org.team9432.resources.swerve.DrivetrainConstants.DRIVE_KINEMATICS
+import org.team9432.resources.swerve.DrivetrainConstants.MODULE_TRANSLATIONS
+import org.team9432.resources.swerve.DrivetrainConstants.simProfile
+import org.team9432.resources.swerve.gyro.GyroIO
+import org.team9432.resources.swerve.gyro.GyroIOPigeon2
+import org.team9432.resources.swerve.gyro.GyroIOSim
+import org.team9432.resources.swerve.gyro.LoggedGyroIOInputs
+import org.team9432.resources.swerve.module.ModuleIOKraken
+import org.team9432.resources.swerve.module.ModuleIOSim
+import org.team9432.resources.swerve.module.SwerveModule
+import org.team9432.resources.swerve.odometrythread.LoggedOdometryThreadInputs
+import org.team9432.resources.swerve.odometrythread.OdometryThread
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.coroutines.resume
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.properties.Delegates
 
-object Swerve: Resource("Swerve") {
-    private var hasAppliedOperatorPerspective = false
+object Swerve {
+    private val gyroInputs = LoggedGyroIOInputs()
+    private val odometryThreadInputs = LoggedOdometryThreadInputs()
 
-    private val swerve = TunerConstants.drivetrain
+    private val gyroIO: GyroIO
+    private val modules: Array<SwerveModule>
 
-    private var currentState = swerve.state
+    private var rawGyroRotation: Rotation2d = Rotation2d()
+    private val lastModulePositions: Array<SwerveModulePosition> = Array(4) { SwerveModulePosition() }
+
+    private val poseEstimator: SwerveDrivePoseEstimator = SwerveDrivePoseEstimator(DRIVE_KINEMATICS, rawGyroRotation, lastModulePositions, Pose2d())
+
+    private val odometryThread = OdometryThread.createInstance()
+    val odometryLock = ReentrantLock()
+
+    var robotSimulation: RobotSim by Delegates.notNull() // This is only initialized when the robot is simulated
+        private set
+
+    private var swerveSim: SwerveDriveSimulation by Delegates.notNull() // This is only initialized when the robot is simulated
 
     init {
-        swerve.daqThread.setThreadPriority(99)
+        val frontLeft = simSwitch(real = { ModuleIOKraken(TunerConstants.FrontLeft, TunerConstants.kCANbusName) }, sim = { ModuleIOSim() })
+        val frontRight = simSwitch(real = { ModuleIOKraken(TunerConstants.FrontRight, TunerConstants.kCANbusName) }, sim = { ModuleIOSim() })
+        val backLeft = simSwitch(real = { ModuleIOKraken(TunerConstants.BackLeft, TunerConstants.kCANbusName) }, sim = { ModuleIOSim() })
+        val backRight = simSwitch(real = { ModuleIOKraken(TunerConstants.BackRight, TunerConstants.kCANbusName) }, sim = { ModuleIOSim() })
+        gyroIO = simSwitch(real = { GyroIOPigeon2() }, sim = { GyroIOSim() })
 
-        whenSimulated { startSimThread() }
+        modules = arrayOf(
+            SwerveModule(frontLeft, "FrontLeft"),
+            SwerveModule(frontRight, "FrontRight"),
+            SwerveModule(backLeft, "BackLeft"),
+            SwerveModule(backRight, "BackRight"),
+        )
 
-        RobotScope.launch {
-            use(Swerve, name = "DefaultSetter") { } // make it so the default command runs, to be fixed later
+        if (Robot.isSimulated) {
+            swerveSim = SwerveDriveSimulation(
+                simProfile,
+                gyroIO as GyroIOSim,
+                frontLeft as ModuleIOSim,
+                frontRight as ModuleIOSim,
+                backLeft as ModuleIOSim,
+                backRight as ModuleIOSim,
+                startingPose = Pose2d(3.0, 2.0, Rotation2d()).applyFlip(),
+                ::resetOdometry
+            )
+
+            robotSimulation = RobotSim(swerveSim)
         }
+
+        odometryThread.start()
+
+        periodic()
 
         RobotPeriodicManager.startPeriodic {
-            currentState = swerve.state
-
-            Robot.alliance?.let { allianceColor ->
-                swerve.setOperatorPerspectiveForward(getOperatorPerspective(allianceColor))
-                hasAppliedOperatorPerspective = true
-            }
-
-            log()
+            periodic()
+            Logger.recordOutput("Odometry/Robot", this@Swerve.getRobotPose())
+            Logger.recordOutput("Drive/MeasuredModuleStates", *moduleStates)
         }
     }
 
-    fun setTeleDriveControl() {
-        swerve.setControl(Controls.getTeleopSwerveRequest())
+    private fun periodic() {
+        odometryLock.lock()
+        gyroIO.updateInputs(gyroInputs)
+        modules.forEach(SwerveModule::updateInputs)
+        odometryThread.updateInputs(odometryThreadInputs)
+        odometryLock.unlock()
+
+        Logger.processInputs("Drive/Gyro", gyroInputs)
+        Logger.processInputs("Drive/OdometryThread", odometryThreadInputs)
+        Logger.recordOutput("Drive/OdometryPose", this.getRobotPose())
+        Logger.recordOutput("Drive/MeasuredModuleStates", *moduleStates)
+
+        modules.forEach(SwerveModule::periodic)
+
+        val timestampSamples = odometryThreadInputs.measurementTimestamps
+
+        for (timestampIndex in timestampSamples.indices) {
+            val modulePositions = arrayOfNulls<SwerveModulePosition>(4)
+            val moduleDeltas = arrayOfNulls<SwerveModulePosition>(4)
+
+            for (moduleIndex in modules.indices) {
+                val modulePosition = modules[moduleIndex].odometryPositions[timestampIndex]
+                modulePositions[moduleIndex] = modulePosition
+                moduleDeltas[moduleIndex] = SwerveModulePosition(
+                    modulePosition.distanceMeters - lastModulePositions[moduleIndex].distanceMeters,
+                    modulePosition.angle
+                )
+                lastModulePositions[moduleIndex] = modulePosition
+            }
+
+            if (gyroInputs.connected) {
+                rawGyroRotation = gyroInputs.odometryYawPositions[timestampIndex]
+            } else {
+                val twist = DRIVE_KINEMATICS.toTwist2d(*moduleDeltas)
+                rawGyroRotation += Rotation2d(twist.dtheta)
+            }
+
+            poseEstimator.updateWithTime(timestampSamples[timestampIndex], rawGyroRotation, modulePositions)
+        }
     }
 
-    private val wheelCharacterizationRequest = SwerveRequest.ApplyChassisSpeeds()
-    fun setWheelCharacterizationDriveControl(rotationsPerSecond: Double) {
-        swerve.setControl(wheelCharacterizationRequest.withSpeeds(ChassisSpeeds(0.0, 0.0, Units.rotationsToRadians(rotationsPerSecond))))
-    }
+    private val xChoreoPid = PIDController(1.0, 0.0, 0.0)
+    private val yChoreoPid = PIDController(1.0, 0.0, 0.0)
+    private val rChoreoPid = PIDController(1.0, 0.0, 0.0)
 
-    private fun log() {
-        Logger.log("Swerve/Pose", getRobotPose())
-        Logger.log("Swerve/ModuleStates", currentState.ModuleStates)
-        Logger.log("Swerve/ModuleTargets", currentState.ModuleTargets)
-        Logger.log("Swerve/Speeds", this.getRobotRelativeSpeeds())
+    suspend fun followChoreo(trajectory: ChoreoTrajectory) {
+        val controlFunction = ChoreoUtil.choreoSwerveController(xChoreoPid, yChoreoPid, rChoreoPid, ::getRobotPose)
+
+        Logger.recordOutput("Drive/CurrentTrajectory", *allianceSwitch(blue = trajectory.poses, red = trajectory.flipped().poses))
+        Logger.recordOutput("Drive/TrajectoryEndPose", trajectory.finalPose.applyFlip())
+
+        ChoreoUtil.choreoSwerveAction(trajectory, controlFunction) { speedsToApply ->
+            runRawChassisSpeeds(speedsToApply)
+        }
+        driveTo(trajectory.finalPose.applyFlip(), timeout = 1.0)
+        runRawChassisSpeeds(ChassisSpeeds())
     }
 
     private val xPid = PIDController(5.0, 0.0, 0.0)
     private val yPid = PIDController(5.0, 0.0, 0.0)
-    private val rPid = PIDController(5.0, 0.0, 0.0)
+    private val rPid = PIDController(5.0, 0.0, 0.5).apply {
+        enableContinuousInput(-Math.PI, Math.PI)
+    }
 
-    suspend fun followChoreo(trajectory: ChoreoTrajectory) {
-        val speedsRequest = SwerveRequest.ApplyChassisSpeeds()
+    suspend fun driveTo(targetPosition: Pose2d, timeout: Double? = null) = suspendCancellableCoroutine { cont ->
+        val timer = if (timeout != null) Timer() else null
+        timer?.restart()
 
-        val controlFunction = ChoreoUtil.choreoSwerveController(xPid, yPid, rPid, ::getRobotPose)
+        val periodic = RobotPeriodicManager.startPeriodic {
+            val pose = getRobotPose()
 
-        Logger.log("Swerve/CurrentTrajectory", allianceSwitch(blue = trajectory.poses, red = trajectory.flipped().poses))
+            val xFeedback = xPid.calculate(pose.x, targetPosition.x)
+            val yFeedback = yPid.calculate(pose.y, targetPosition.y)
+            val rotationFeedback = rPid.calculate(pose.rotation.radians, targetPosition.rotation.radians)
 
-        ChoreoUtil.choreoSwerveAction(trajectory, controlFunction) { chassisSpeedsToApply ->
-            swerve.setControl(speedsRequest.withSpeeds(chassisSpeedsToApply))
+            runFieldRelativeChassisSpeeds(
+                ChassisSpeeds(
+                    xFeedback + pose.x - targetPosition.x,
+                    yFeedback + pose.y - targetPosition.y,
+                    rotationFeedback
+                )
+            )
+
+            if (pose.distanceTo(targetPosition) < 0.05.meters && abs(pose.rotation.degrees - targetPosition.rotation.degrees) < 2
+                || timeout?.let { timer?.hasElapsed(it) } == true) {
+                timer?.stop()
+                runRawChassisSpeeds(ChassisSpeeds())
+
+                this.stopPeriodic()
+                cont.resume(Unit)
+            }
+        }
+
+        cont.invokeOnCancellation {
+            timer?.stop()
+            runRawChassisSpeeds(ChassisSpeeds())
+            periodic.stopPeriodic()
         }
     }
 
-    private fun getOperatorPerspective(alliance: Alliance): Rotation2d {
-        /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
-        val bluePerspectiveRotation = Rotation2d.fromDegrees(0.0)
+    fun runRawChassisSpeeds(speeds: ChassisSpeeds) {
+        val speeds = SwerveUtil.correctForDynamics(speeds, Robot.period)
+        val setpointStates: Array<SwerveModuleState> = DRIVE_KINEMATICS.toSwerveModuleStates(speeds)
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, 4.0)
 
-        /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
-        val redPerspectiveRotation = Rotation2d.fromDegrees(180.0)
+        // Send setpoints to modules
+        val optimizedSetpointStates = Array(4) { index -> modules[index].runSetpoint(setpointStates[index]) }
 
-        return when (alliance) {
-            Alliance.Red -> redPerspectiveRotation
-            Alliance.Blue -> bluePerspectiveRotation
-        }
+        Logger.recordOutput("Drive/Setpoints", *setpointStates)
+        Logger.recordOutput("Drive/SetpointsOptimized", *optimizedSetpointStates)
     }
 
-    private const val SIM_LOOP_PERIOD: Double = 0.005 // 5 ms
-    private var simNotifier: Notifier? = null
-    private var lastSimTime = 0.0
-
-    private fun startSimThread() {
-        lastSimTime = Utils.getCurrentTimeSeconds()
-
-        /* Run simulation at a faster rate so PID gains behave more reasonably */
-        simNotifier = Notifier {
-            val currentTime = Utils.getCurrentTimeSeconds()
-            val deltaTime = currentTime - lastSimTime
-            lastSimTime = currentTime
-
-            /* use the measured time delta, get battery voltage from WPILib */
-            swerve.updateSimState(deltaTime, RobotController.getBatteryVoltage())
-        }.also {
-            it.startPeriodic(SIM_LOOP_PERIOD)
-        }
+    fun runFieldRelativeChassisSpeeds(fieldCentricSpeeds: ChassisSpeeds) {
+        runRawChassisSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(fieldCentricSpeeds, this.getRobotPose().rotation))
     }
 
-    fun getGyroHeading() = swerve.pigeon2.angle.degrees
-
-    fun seedFieldRelative(pose: Pose2d) = swerve.seedFieldRelative(pose)
-    fun seedFieldRelative() = swerve.seedFieldRelative()
-    fun setVisionMeasurementStdDevs(visionMeasurementStdDevs: Matrix<N3, N1>) = swerve.setVisionMeasurementStdDevs(visionMeasurementStdDevs)
-    fun addVisionMeasurement(visionRobotPoseMeters: Pose2d, timestampSeconds: Double) = swerve.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds)
-    fun addVisionMeasurement(visionRobotPoseMeters: Pose2d, timestampSeconds: Double, visionMeasurementStdDevs: Matrix<N3, N1>) =
-        swerve.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs)
-
-    fun getRobotPose(): Pose2d = currentState.Pose ?: Pose2d()
-    fun getRobotTranslation(): Translation2d = getRobotPose().translation
-    fun getRobotRelativeSpeeds(): ChassisSpeeds = currentState.speeds ?: ChassisSpeeds()
-
-    fun getModuleWheelPositionsRadians() = getModules().map { Units.rotationsToRadians(it.driveMotor.position.valueAsDouble / TunerConstants.kDriveGearRatio) }
-
-    private fun getModules() = buildList { repeat(4) { add(swerve.getModule(it)) } }
-
-    fun getTalons(): List<TalonFX> = buildList {
-        for (i in 0..3) {
-            val module = swerve.getModule(i)
-            add(module.driveMotor)
-            add(module.steerMotor)
-        }
+    /**
+     * Locks the chassis and turns the modules to an X formation to resist movement.
+     * The lock will be cancelled the next time a nonzero velocity is requested.
+     */
+    fun lockChassisWithXFormation() {
+        val swerveHeadings = Array<Rotation2d>(modules.size) { index -> MODULE_TRANSLATIONS[index].angle }
+        DRIVE_KINEMATICS.resetHeadings(*swerveHeadings)
     }
+
+    /** Returns the module states (turn angles and drive velocities) for all the modules. */
+    private val moduleStates: Array<SwerveModuleState>
+        get() = Array(modules.size) { index -> modules[index].measuredState }
+
+    /** Returns the module positions (turn angles and drive positions) for all the modules. */
+    private val moduleLatestPositions: Array<SwerveModulePosition?>
+        get() = Array(modules.size) { index -> modules[index].latestPosition }
+
+    fun getRobotPose(): Pose2d = poseEstimator.estimatedPosition
+    fun resetOdometry(pose: Pose2d) = poseEstimator.resetPosition(pose.rotation, moduleLatestPositions, pose)
+    fun setActualSimPose(pose: Pose2d) = swerveSim.setSimulationWorldPose(pose)
+
+    fun getRobotRelativeSpeeds(): ChassisSpeeds = DRIVE_KINEMATICS.toChassisSpeeds(*moduleStates)
+    fun getFieldRelativeSpeeds(): ChassisSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeSpeeds(), getRobotPose().rotation)
+
+    fun getFutureRobotPose(timeSeconds: Double) = getRobotPose().transformBySpeeds(getFieldRelativeSpeeds(), timeSeconds)
+
+    fun addVisionMeasurement(visionPose: Pose2d, timestamp: Double, measurementStdDevs: Matrix<N3, N1>) {
+        poseEstimator.addVisionMeasurement(visionPose, timestamp, measurementStdDevs)
+        previousVisionMeasurementTimeStamp = max(timestamp, previousVisionMeasurementTimeStamp)
+    }
+
+    fun setGyroAngle(angle: Rotation2d) = gyroIO.setAngle(angle)
+
+    private var previousVisionMeasurementTimeStamp: Double = -1.0
 }

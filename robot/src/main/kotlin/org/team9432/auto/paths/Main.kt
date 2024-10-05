@@ -14,7 +14,7 @@ import kotlin.system.measureTimeMillis
 val OSR2024Config = ChoreoRobotConfiguration(
     mass = 74.08797700309194,
     rotationalInertia = 6,
-    motorMaxTorque = 1.162295081967213,
+    motorMaxTorque = 0.9,
     motorMaxVelocity = 4800,
     gearing = 5.9,
 //    wheelbase = 13.75.inches,

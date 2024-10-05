@@ -4,12 +4,13 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import kotlinx.coroutines.launch
 import org.team9432.lib.RobotPeriodicManager
-import org.team9432.lib.coroutines.CoroutineRobot
-import org.team9432.lib.coroutines.RobotScope
 import org.team9432.lib.led.animations.*
 import org.team9432.lib.led.color.Color
 import org.team9432.lib.led.color.fromRGBString
-import org.team9432.lib.led.color.predefined.*
+import org.team9432.lib.led.color.predefined.Blue
+import org.team9432.lib.led.color.predefined.RainbowColors
+import org.team9432.lib.led.color.predefined.RainbowStripesColors
+import org.team9432.lib.led.color.predefined.Red
 import org.team9432.lib.led.management.AnimationBindScope
 import org.team9432.lib.led.management.AnimationManager
 import org.team9432.lib.led.management.Section
@@ -24,14 +25,14 @@ object `LEDs!` {
 
         LEDStrip.create(RioLedStrip(300, 0))
 
-        RobotScope.launch {
+        Robot.coroutineScope.launch {
             AnimationManager.run(20.milliseconds)
         }
 
         val leds = Section((0..299).toSet())
 
         val scope = AnimationBindScope.build {
-            If({ Robot.mode == CoroutineRobot.Mode.DISABLED }) {
+            If({ Robot.mode.isDisabled }) {
                 If({SmartDashboard.getBoolean("Workmode", false)}) {
                     setAnimation {
                         leds.solid(Color.fromRGBString("191919")).invoke()
@@ -43,9 +44,9 @@ object `LEDs!` {
                         }
                     }
                 }
-            }.ElseIf({ Robot.mode == CoroutineRobot.Mode.AUTONOMOUS }) {
+            }.ElseIf({ Robot.mode.isAutonomous }) {
                 setAnimation(leds.strobe(Color.Red, period = 0.5.seconds))
-            }.ElseIf({ Robot.mode == CoroutineRobot.Mode.TELEOP }) {
+            }.ElseIf({ Robot.mode.isTeleop }) {
                 If ({Beambreaks.hasNote}) {
                     setAnimation(leds.breath(Color.RainbowColors, colorDuration = 0.1.seconds, speed = 10))
                 }.Else {

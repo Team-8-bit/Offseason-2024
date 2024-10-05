@@ -2,9 +2,10 @@ import edu.wpi.first.gradlerio.GradleRIOPlugin
 
 plugins {
     id("java")
-    id("edu.wpi.first.GradleRIO").version("2024.2.1")
+    id("edu.wpi.first.GradleRIO").version("2024.3.2")
     id("org.jetbrains.kotlin.jvm").version("1.9.21")
     id("com.google.devtools.ksp").version("1.9.21-1.0.15")
+    id("com.peterabeles.gversion").version("1.10.3")
 }
 
 def ROBOT_MAIN_CLASS = "org.team9432.Main"
@@ -43,6 +44,16 @@ tasks.register('generateTrajectories', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
+project.compileKotlin.dependsOn(createVersionFile)
+gversion {
+    srcDir       = "src/main/kotlin/"
+    classPackage = "org.team9432"
+    className    = "BuildConstants"
+    dateFormat   = "yyyy-MM-dd '@' h:mm:ss a z"
+    timeZone     = "MST"
+    language     = "kotlin"
+}
+
 repositories {
     mavenLocal()
     maven { url = "https://SleipnirGroup.github.io/ChoreoLib/dep" }
@@ -51,7 +62,21 @@ repositories {
     maven { url = "https://maven.photonvision.org/repository/snapshots" }
     maven { url = "https://maven.revrobotics.com/" }
     maven { url = "https://jitpack.io" }
+    maven {
+        url = uri("https://maven.pkg.github.com/Mechanical-Advantage/AdvantageKit")
+        credentials {
+            username = "Mechanical-Advantage-Bot"
+            password = "\u0067\u0068\u0070\u005f\u006e\u0056\u0051\u006a\u0055\u004f\u004c\u0061\u0079\u0066\u006e\u0078\u006e\u0037\u0051\u0049\u0054\u0042\u0032\u004c\u004a\u006d\u0055\u0070\u0073\u0031\u006d\u0037\u004c\u005a\u0030\u0076\u0062\u0070\u0063\u0051"
+        }
+    }
 }
+
+tasks.register('checkAkitInstall', JavaExec) {
+    dependsOn "classes"
+    mainClass = "org.littletonrobotics.junction.CheckInstall"
+    classpath = sourceSets.main.runtimeClasspath
+}
+compileJava.finalizedBy checkAkitInstall
 
 def deployArtifact = deploy.targets.roborio.artifacts.frcJava
 
@@ -65,6 +90,8 @@ dependencies {
     // Team libraries
     implementation("org.team9432.lib:robot-lib")
     implementation("org.team9432.lib:choreo-generator")
+    implementation("org.team9432.lib:annotation")
+    ksp("org.team9432.lib:annotation")
 
     wpi.java.deps.wpilib().forEach { implementation(it) }
     wpi.java.vendor.java().forEach { implementation(it) }
@@ -85,6 +112,16 @@ dependencies {
     wpi.sim.enableRelease().forEach { simulationRelease(it) }
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1-Beta")
+
+    // Swerve sim
+    implementation("org.dyn4j:dyn4j:5.0.2")
+
+    // AdvantageKit
+    implementation("org.littletonrobotics.akit.junction:junction-core:3.2.1")
+    implementation("org.littletonrobotics.akit.junction:wpilib-shim:3.2.1")
+    implementation("org.littletonrobotics.akit.conduit:conduit-api:3.2.1")
+    nativeDebug("org.littletonrobotics.akit.conduit:conduit-wpilibio:3.2.1")
+    nativeRelease("org.littletonrobotics.akit.conduit:conduit-wpilibio:3.2.1")
 
     // Choreolib
     implementation("com.choreo.lib:ChoreoLib-java:2024.2.3")
@@ -115,6 +152,10 @@ jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     manifest GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+configurations.configureEach {
+    exclude group: "edu.wpi.first.wpilibj"
 }
 
 // Configure jar and deploy tasks

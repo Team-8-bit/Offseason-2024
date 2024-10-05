@@ -1,22 +1,22 @@
 package org.team9432
 
-import edu.wpi.first.math.geometry.*
+import edu.wpi.first.math.geometry.Pose3d
+import edu.wpi.first.math.geometry.Rotation3d
+import edu.wpi.first.math.geometry.Transform3d
+import edu.wpi.first.math.geometry.Translation3d
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.littletonrobotics.junction.Logger
 import org.team9432.lib.RobotPeriodicManager
-import org.team9432.lib.coroutines.RobotScope
-import org.team9432.lib.doglog.Logger
+import org.team9432.lib.simulation.competitionfield.objects.Crescendo2024FieldObjects
 import org.team9432.lib.unit.inMeters
 import org.team9432.lib.util.allianceSwitch
+import org.team9432.lib.util.distanceTo
 import org.team9432.lib.util.whenSimulated
-import org.team9432.resources.Intake
-import org.team9432.resources.Shooter
 import org.team9432.resources.swerve.Swerve
-import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 
 object NoteVisualizer {
@@ -26,37 +26,9 @@ object NoteVisualizer {
     private var robotNoteTransform: Transform3d? = null
     private var shotNotePose: Pose3d? = null
 
-    private val fieldNotes = FieldConstants.allNotes.toMutableSet()
-
-    private var intakeTranslations = mutableSetOf(
-        Transform2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(8.0), Rotation2d()),
-        Transform2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(4.0), Rotation2d()),
-        Transform2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(0.0), Rotation2d()),
-        Transform2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(-4.0), Rotation2d()),
-        Transform2d(Units.inchesToMeters(-14.325), Units.inchesToMeters(-8.0), Rotation2d())
-    )
-
-    private val noteRegenJobs = mutableListOf<Job>()
-
     init {
         whenSimulated { // We don't want this running on the actual robot
-            RobotScope.launch {
-                while (true) {
-                    render()
-
-                    if (SmartDashboard.getBoolean("NoteVisualizer/ResetNotes", false)) {
-                        fieldNotes.addAll(FieldConstants.allNotes)
-                        noteRegenJobs.forEach { it.cancel() }
-                        SmartDashboard.putBoolean("NoteVisualizer/ResetNotes", false)
-                    }
-
-                    delay(5.milliseconds)
-                }
-            }
-
-            RobotPeriodicManager.startPeriodic { checkCollectedNotes() }
-
-            SmartDashboard.putBoolean("NoteVisualizer/ResetNotes", false)
+            RobotPeriodicManager.startPeriodic { render() }
         }
     }
 
@@ -65,53 +37,13 @@ object NoteVisualizer {
         val notes = mutableSetOf<Pose3d>()
 
         // Robot relative note (i.e. one stored in the loader)
-        robotNoteTransform?.let { notes.add(Pose3d(Swerve.getRobotPose()).transformBy(it)) }
+        robotNoteTransform?.let { notes.add(Pose3d(Swerve.robotSimulation.getActualRobotPose()).transformBy(it)) }
 
         // Field-relative note (i.e. one moving from the robot to the speaker)
         shotNotePose?.let { notes.add(it) }
 
-        // Field notes
-        notes.addAll(fieldNotes.map { Pose3d(Pose2d(it.x, it.y, Rotation2d())) })
-
-        Logger.log("NoteVisualizer", notes.toTypedArray())
+        Logger.recordOutput("NoteVisualizer", *notes.toTypedArray())
     }
-
-
-    /******** Intaking Simulation ********/
-
-    private val NOTE_RADIUS_METERS = Units.inchesToMeters(14.0) / 2
-
-    private fun checkCollectedNotes() {
-        val currentIntakePositions = intakeTranslations.map { Swerve.getRobotPose().transformBy(it).translation }
-
-        if (Intake.isIntaking && Swerve.getRobotRelativeSpeeds().vxMetersPerSecond < -0.5) {
-            fieldNotes.toList().forEach { note ->
-                val isBeingCollected = currentIntakePositions.any { intake ->
-                    note.getDistance(intake) < NOTE_RADIUS_METERS
-                }
-
-                if (isBeingCollected) {
-                    awaitingContinuations.forEach { it.resume(Unit) }
-                    awaitingContinuations.clear()
-
-                    fieldNotes.remove(note)
-                    val job = RobotScope.launch {
-                        delay(30.seconds)
-                        fieldNotes.add(note)
-                    }
-                    noteRegenJobs.add(job)
-                }
-            }
-        }
-    }
-
-    private var awaitingContinuations = mutableSetOf<CancellableContinuation<Unit>>()
-
-    /** Suspends until the robot picks up a simulated note. */
-    suspend fun awaitNotePickup() = suspendCancellableCoroutine { continuation ->
-        awaitingContinuations.add(continuation)
-    }
-
 
     /******** Animations ********/
 
@@ -122,14 +54,16 @@ object NoteVisualizer {
 
     fun animateShoot() {
         if (!Robot.isSimulated) return
-        val startPose = Pose3d(Swerve.getRobotPose()).transformBy(loadedTransform)
-        val endPose = Pose3d(allianceSwitch(blue = blueSpeaker, red = redSpeaker), startPose.rotation)
 
-        val duration = Shooter.distanceToSpeaker().inMeters / SHOT_SPEED_MPS
+        val startPose = Pose3d(Swerve.robotSimulation.getActualRobotPose()).transformBy(loadedTransform).translation
+        allianceSwitch(blue = blueSpeaker, red = redSpeaker)
+
+        val duration = Swerve.robotSimulation.getActualRobotPose().translation.distanceTo(PositionConstants.speakerAimPose).inMeters / SHOT_SPEED_MPS
+
+        val display = Crescendo2024FieldObjects.NoteOnFly(startPose, duration)
+        Swerve.robotSimulation.competitionFieldVisualizer.addGamePieceOnFly(display)
 
         robotNoteTransform = null
-
-        animateFieldRelative(startPose, endPose, duration)
     }
 
     fun clearNote() {
@@ -143,12 +77,6 @@ object NoteVisualizer {
         animateRobotRelative(aligningTransform, loadedTransform, 0.2)
     }
 
-    private fun animateFieldRelative(start: Pose3d, end: Pose3d, durationSeconds: Double) {
-        genericAnimation(durationSeconds, onEnd = { shotNotePose = null }) { percentageComplete ->
-            shotNotePose = start.interpolate(end, percentageComplete)
-        }
-    }
-
     private fun animateRobotRelative(start: Transform3d, end: Transform3d, durationSeconds: Double) {
         genericAnimation(durationSeconds) { percentageComplete ->
             val currentPose = start.interpolate(end, percentageComplete)
@@ -158,7 +86,7 @@ object NoteVisualizer {
 
     private fun genericAnimation(durationSeconds: Double, onEnd: (() -> Unit)? = null, onLoop: (Double) -> Unit) {
         val timer = Timer()
-        RobotScope.launch {
+        Robot.coroutineScope.launch {
             timer.restart()
 
             while (!timer.hasElapsed(durationSeconds)) {

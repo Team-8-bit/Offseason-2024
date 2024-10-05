@@ -2,13 +2,11 @@ package org.team9432
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.team9432.lib.coroutines.CoroutineRobot
-import org.team9432.lib.coroutines.RobotScope
 import org.team9432.lib.coroutines.await
 import org.team9432.oi.Controls
-import org.team9432.resources.Intake
-import org.team9432.resources.Loader
-import org.team9432.resources.Shooter
+import org.team9432.resources.intake.Intake
+import org.team9432.resources.loader.Loader
+import org.team9432.resources.shooter.Shooter
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -92,14 +90,14 @@ object Actions {
         Loader.setState(Loader.State.INTAKE)
 
         if (Robot.isSimulated) {
-            NoteVisualizer.awaitNotePickup()
+            IntakeSim.awaitPickup()
             Beambreaks.lower.setSimTripped()
         } else {
             Beambreaks.lower.awaitTripped()
         }
 
-        if (Robot.mode == CoroutineRobot.Mode.TELEOP) {
-            RobotScope.launch { Controls.controller.rumbleDuration(2.seconds) }
+        if (Robot.mode.isTeleop) {
+            Robot.coroutineScope.launch { Controls.controller.rumbleDuration(2.seconds) }
         }
 
         Intake.setState(Intake.State.LOAD)
