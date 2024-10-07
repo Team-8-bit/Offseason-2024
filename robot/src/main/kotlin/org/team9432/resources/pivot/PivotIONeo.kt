@@ -7,10 +7,9 @@ import org.team9432.lib.util.temperatureFahrenheit
 
 class PivotIONeo: PivotIO {
     // Left Motor
-    private val leaderMotor = CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless)
-
+    private val leaderMotor = CANSparkMax(15, CANSparkLowLevel.MotorType.kBrushless)
     // Right Motor
-    private val followerMotor = CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless)
+    private val followerMotor = CANSparkMax(16, CANSparkLowLevel.MotorType.kBrushless)
 
     private val leaderEncoder = leaderMotor.encoder
     private val followerEncoder = followerMotor.encoder

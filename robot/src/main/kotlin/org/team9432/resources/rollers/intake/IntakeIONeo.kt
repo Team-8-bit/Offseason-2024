@@ -6,8 +6,11 @@ import com.revrobotics.CANSparkMax
 import org.team9432.lib.util.temperatureFahrenheit
 
 class IntakeIONeo: IntakeIO {
+    // Upper Motor
     private val leaderMotor = CANSparkMax(10, CANSparkLowLevel.MotorType.kBrushless)
+    // Lower Motor
     private val followerMotor = CANSparkMax(11, CANSparkLowLevel.MotorType.kBrushless)
+
     private val leaderEncoder = leaderMotor.encoder
     private val followerEncoder = followerMotor.encoder
 

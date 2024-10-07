@@ -7,8 +7,8 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import org.team9432.lib.util.temperatureFahrenheit
 
 class FlywheelIONeo: FlywheelIO {
-    private val upperMotor = CANSparkFlex(14, CANSparkLowLevel.MotorType.kBrushless)
-    private val lowerMotor = CANSparkFlex(13, CANSparkLowLevel.MotorType.kBrushless)
+    private val upperMotor = CANSparkFlex(13, CANSparkLowLevel.MotorType.kBrushless)
+    private val lowerMotor = CANSparkFlex(14, CANSparkLowLevel.MotorType.kBrushless)
     private val upperEncoder = upperMotor.encoder
     private val lowerEncoder = lowerMotor.encoder
 
