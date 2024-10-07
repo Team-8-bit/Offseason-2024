@@ -8,4 +8,9 @@ object Beambreaks {
 
     val hasNote get() = upper.isTripped() || lower.isTripped()
     val hasNoNote get() = upper.isClear() && lower.isClear()
+
+    fun simClear() {
+        upper.setSimClear()
+        lower.setSimClear()
+    }
 }

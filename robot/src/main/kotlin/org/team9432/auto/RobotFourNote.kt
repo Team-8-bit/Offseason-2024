@@ -7,8 +7,6 @@ import org.team9432.auto.paths.FourNotePaths
 import org.team9432.auto.types.FourNote
 import org.team9432.auto.types.FourNote.EndAction.*
 import org.team9432.lib.util.ChoreoUtil
-import org.team9432.resources.shooter.Shooter
-import org.team9432.resources.swerve.Swerve
 
 object RobotFourNote {
     suspend fun run(auto: FourNote) {
@@ -38,15 +36,15 @@ object RobotFourNote {
                 scoreNote(firstNote)
                 scoreNote(secondNote)
                 scoreNote(thirdNote)
-                Shooter.setState(Shooter.State.IDLE)
+//                Shooter.setState(Shooter.State.IDLE)
                 driveToCenterEnd(driveToCenter)
             }
         }
 
-        Shooter.setState(Shooter.State.IDLE)
+//        Shooter.setState(Shooter.State.IDLE)
     }
 
     private suspend fun driveToCenterEnd(driveToCenter: ChoreoTrajectory) {
-        Swerve.followChoreo(driveToCenter)
+//        Drive.followChoreo(driveToCenter)
     }
 }

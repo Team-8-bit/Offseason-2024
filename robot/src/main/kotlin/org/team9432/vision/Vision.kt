@@ -9,19 +9,15 @@ import org.photonvision.EstimatedRobotPose
 import org.photonvision.PhotonPoseEstimator
 import org.photonvision.targeting.PhotonPipelineResult
 import org.team9432.FieldConstants.apriltagFieldLayout
+import org.team9432.RobotPosition
+import org.team9432.RobotState
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
-import org.team9432.lib.util.simSwitch
-import org.team9432.oi.Controls
-import org.team9432.resources.swerve.Swerve
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
-object Vision {
-    private val io = simSwitch(real = { VisionIOReal() }, sim = { VisionIOSim() })
+class Vision(private val io: VisionIO) {
     private val inputs = LoggedVisionIOInputs()
-
-    val isEnabled get() = !Controls.forceDisableVision && inputs.isConnected
 
     private val poseEstimator = PhotonPoseEstimator(
         apriltagFieldLayout,
@@ -39,8 +35,9 @@ object Vision {
         Logger.processInputs("Vision", inputs)
 
         Logger.recordOutput("Vision/Connected", inputs.isConnected)
-        Logger.recordOutput("Vision/Enabled", isEnabled)
         Logger.recordOutput("Vision/TrackedTagIds", *inputs.results.targets.mapNotNull { apriltagFieldLayout.getTagPose(it.fiducialId).getOrNull() }.toTypedArray())
+
+        RobotState.visionConnected = inputs.isConnected
 
         applyToPoseEstimator(inputs.results)
     }
@@ -56,7 +53,7 @@ object Vision {
         val timestamp = estimatedRobotPose.timestampSeconds
         val stdDevs: Matrix<N3, N1> = getEstimationStdDevs(estimatedRobotPose)
 
-        Swerve.addVisionMeasurement(visionPose, timestamp, stdDevs)
+        RobotPosition.applyVisionMeasurement(visionPose, timestamp, stdDevs)
     }
 
     private fun getEstimationStdDevs(estimatedPose: EstimatedRobotPose): Matrix<N3, N1> {

@@ -5,7 +5,6 @@ import org.team9432.auto.SharedRobotAuto.scoreNote
 import org.team9432.auto.paths.FarsideCenterlinePaths
 import org.team9432.auto.types.FarsideCenterline
 import org.team9432.lib.util.ChoreoUtil
-import org.team9432.resources.shooter.Shooter
 
 object RobotFarsideCenterline {
     suspend fun run(auto: FarsideCenterline) {
@@ -26,6 +25,6 @@ object RobotFarsideCenterline {
             }
         }
 
-        Shooter.setState(Shooter.State.IDLE)
+//        Shooter.setState(Shooter.State.IDLE)
     }
 }
