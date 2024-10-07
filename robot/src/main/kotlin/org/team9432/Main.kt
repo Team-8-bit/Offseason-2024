@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID.RumbleType
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.RobotBase
+import edu.wpi.first.wpilibj.RobotController
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.Commands
@@ -55,6 +56,10 @@ import org.team9432.resources.flywheels.FlywheelIO
 import org.team9432.resources.flywheels.FlywheelIONeo
 import org.team9432.resources.flywheels.FlywheelIOSim
 import org.team9432.resources.flywheels.Flywheels
+import org.team9432.resources.pivot.Pivot
+import org.team9432.resources.pivot.PivotIO
+import org.team9432.resources.pivot.PivotIONeo
+import org.team9432.resources.pivot.PivotIOSim
 import org.team9432.resources.rollers.Rollers
 import org.team9432.resources.rollers.intake.Intake
 import org.team9432.resources.rollers.intake.IntakeIO
@@ -71,7 +76,7 @@ import org.team9432.vision.VisionIOSim
 
 
 object Robot: LoggedCoroutineRobot() {
-    override val tuningMode = false
+    override val tuningMode = true
 
     val runtime = if (RobotBase.isReal()) REAL else SIM
 
@@ -80,6 +85,7 @@ object Robot: LoggedCoroutineRobot() {
     private val drive: Drive
     private val flywheels: Flywheels
     private val rollers: Rollers
+    private val pivot: Pivot
     private val vision: Vision
 
     private val fieldSimulation: CompetitionFieldSimulation?
@@ -104,6 +110,7 @@ object Robot: LoggedCoroutineRobot() {
                     Intake(IntakeIONeo()),
                     Loader(LoaderIONeo())
                 )
+                pivot = Pivot(PivotIONeo())
 
                 fieldSimulation = null
                 noteSimulation = null
@@ -124,6 +131,7 @@ object Robot: LoggedCoroutineRobot() {
                     Intake(IntakeIOSim()),
                     Loader(LoaderIOSim())
                 )
+                pivot = Pivot(PivotIOSim())
 
                 val swerveSim = SwerveDriveSimulation(
                     simProfile,
@@ -173,6 +181,7 @@ object Robot: LoggedCoroutineRobot() {
                     Intake(object: IntakeIO {}),
                     Loader(object: LoaderIO {})
                 )
+                pivot = Pivot(object: PivotIO {})
 
                 fieldSimulation = null
                 noteSimulation = null
@@ -228,6 +237,9 @@ object Robot: LoggedCoroutineRobot() {
             Commands.startEnd({ drive.setAutoAimGoal(target) }, { drive.clearAutoAimGoal() })
                 .onlyIf { !RobotState.automationDisabled }
 
+        fun pivotAimCommand(goal: Pivot.Goal) =
+            pivot.runGoal(goal).onlyIf { !RobotState.automationDisabled && RobotState.pivotEnabled }
+
         /**** Shooting ****/
         val inSpeakerPrepareRange = Trigger { RobotPosition.distanceToSpeaker() < 10.meters }
 
@@ -235,6 +247,7 @@ object Robot: LoggedCoroutineRobot() {
             RobotPosition.velocityLessThan(metersPerSecond = 1.5, rotationsPerSecond = 0.25) &&
                     RobotPosition.isAimedAtSpeaker() &&
                     RobotPosition.isInScoringRangeOfSpeaker &&
+                    pivot.atGoal &&
                     flywheels.atSpeed()
         }.debounce(0.3, Debouncer.DebounceType.kRising)
 
@@ -245,7 +258,10 @@ object Robot: LoggedCoroutineRobot() {
             .and(inSpeakerPrepareRange.or(RobotState::automationDisabled))
             .whileTrue(
                 driveAimCommand { RobotPosition.getAngleToSpeaker() }
-                    .alongWith(flywheels.runGoal(Flywheels.Goal.VISION_SHOOT))
+                    .alongWith(
+                        flywheels.runGoal(Flywheels.Goal.VISION_SHOOT),
+                        pivotAimCommand(Pivot.Goal.SPEAKER_AIM)
+                    )
                     .withName("Prepare Speaker")
             )
 
@@ -261,6 +277,7 @@ object Robot: LoggedCoroutineRobot() {
                 ).deadlineWith( // Deadline runs the below commands until 0.5 second have passed or the button is released
                     rollers.runGoal(Rollers.Goal.SHOOTER_FEED),
                     flywheels.runGoal(Flywheels.Goal.VISION_SHOOT),
+                    pivotAimCommand(Pivot.Goal.SPEAKER_AIM),
                     driveAimCommand { RobotPosition.getAngleToSpeaker() },
                     Commands.runOnce({ noteSimulation?.animateShoot() })
                 )
@@ -277,7 +294,10 @@ object Robot: LoggedCoroutineRobot() {
             .and { !RobotState.driverRequestedIntake } // Don't aim while trying to intake
             .whileTrue(
                 driveAimCommand { 90.degrees.asRotation2d }
-                    .alongWith(flywheels.runGoal(Flywheels.Goal.AMP))
+                    .alongWith(
+                        flywheels.runGoal(Flywheels.Goal.AMP),
+                        pivotAimCommand(Pivot.Goal.AMP)
+                    )
                     .withName("Prepare Amp")
             )
 
@@ -292,6 +312,7 @@ object Robot: LoggedCoroutineRobot() {
                 ).deadlineWith( // Deadline runs the below commands until 0.5 second have passed or the button is released
                     rollers.runGoal(Rollers.Goal.SHOOTER_FEED),
                     flywheels.runGoal(Flywheels.Goal.AMP),
+                    pivotAimCommand(Pivot.Goal.AMP),
                     driveAimCommand { 90.degrees.asRotation2d }
                 )
                     .withName("Shoot Amp")
@@ -316,9 +337,11 @@ object Robot: LoggedCoroutineRobot() {
                             rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).until(Beambreaks.upper::isTripped).afterSimDelay(0.15) { Beambreaks.upper.setSimTripped() },
                             rollers.runGoal(Rollers.Goal.ALIGN_REVERSE).until(Beambreaks.upper::isClear).afterSimDelay(0.2) { Beambreaks.upper.setSimClear() },
                             rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).until(Beambreaks.upper::isTripped).afterSimDelay(0.2) { Beambreaks.upper.setSimTripped() },
-                        ).alongWith(ScheduleCommand(controller.rumbleCommand().withTimeout(2.0)))
+                        )
+                            .alongWith(ScheduleCommand(controller.rumbleCommand().withTimeout(2.0)))
                             .onlyIf { Beambreaks.hasNote }
                     ).finallyDo { _ -> RobotState.driverRequestedIntake = false }
+                    .deadlineWith(pivotAimCommand(Pivot.Goal.INTAKE))
                     .withName("Teleop Intake")
             )
 
@@ -400,7 +423,7 @@ object Robot: LoggedCoroutineRobot() {
     }
 
     override suspend fun autonomous() {
-        RobotController.setAction {
+//        RobotController.setAction {
 //            val trajectoryGroup = Choreo.getTrajectoryGroup("testing")
 //            Swerve.resetOdometry(trajectoryGroup.first().getAutoFlippedInitialPose())
 //            Swerve.setActualSimPose(trajectoryGroup.first().getAutoFlippedInitialPose())
@@ -411,23 +434,23 @@ object Robot: LoggedCoroutineRobot() {
 //                Swerve.followChoreo(it)
 //                delay(1.seconds)
 //            }
-            val selectedAuto = AutoChooser.getAuto()
+//            val selectedAuto = AutoChooser.getAuto()
 
-            if (selectedAuto == null) {
-                println("[Error] Auto was null")
-                return@setAction
-            }
+//            if (selectedAuto == null) {
+//                println("[Error] Auto was null")
+//                return@setAction
+//            }
 
-            when (selectedAuto) {
-                is FourNote -> RobotFourNote.run(selectedAuto)
-                is FarsideCenterline -> RobotFarsideCenterline.run(selectedAuto)
-                is AmpsideCenterline -> RobotAmpsideCenterline.run(selectedAuto)
-            }
-        }
+//            when (selectedAuto) {
+//                is FourNote -> RobotFourNote.run(selectedAuto)
+//                is FarsideCenterline -> RobotFarsideCenterline.run(selectedAuto)
+//                is AmpsideCenterline -> RobotAmpsideCenterline.run(selectedAuto)
+//            }
+//        }
     }
 
     override suspend fun disabled() {
-        RobotController.resetRequests()
+//        RobotController.resetRequests()
     }
 
     override suspend fun test() {

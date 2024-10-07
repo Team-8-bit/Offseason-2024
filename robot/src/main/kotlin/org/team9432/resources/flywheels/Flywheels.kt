@@ -2,7 +2,6 @@ package org.team9432.resources.flywheels
 
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
 import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.littletonrobotics.junction.Logger
@@ -27,15 +26,10 @@ class Flywheels(private val io: FlywheelIO): SubsystemBase() {
         VISION_SHOOT({ ShooterSpeeds(0.0, 0.0) }),
         SUBWOOFER({ ShooterSpeeds(2000.0, 5000.0) }),
         FEED_SPEED({ ShooterSpeeds(4000.0, 4000.0) }),
-        DASHBOARD_SPEEDS({ ShooterSpeeds(SmartDashboard.getNumber("Shooter/TopTargetSpeed", 0.0), SmartDashboard.getNumber("Shooter/BottomTargetSpeed", 0.0)) }),
         AMP({ ShooterSpeeds(110.0, 4600.0) });
     }
 
     init {
-        SmartDashboard.putNumber("Shooter/TopTargetSpeed", 100.0)
-        SmartDashboard.putNumber("Shooter/BottomTargetSpeed", 4500.0)
-        SmartDashboard.putNumber("Shooter/Tuning/ffV", 0.0)
-
         addMapValue(2.25.meters, ShooterSpeeds(upperRPM = 5000.0, lowerRPM = 2000.0))
         addMapValue(2.0.meters, ShooterSpeeds(upperRPM = 5000.0, lowerRPM = 2800.0))
         addMapValue(1.75.meters, ShooterSpeeds(upperRPM = 4000.0, lowerRPM = 3000.0))
