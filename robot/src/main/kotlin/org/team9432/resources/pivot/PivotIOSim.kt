@@ -35,5 +35,7 @@ class PivotIOSim: PivotIO {
         inputs.followerVelocityRPM = Units.radiansPerSecondToRotationsPerMinute(sim.velocityRadPerSec)
         inputs.followerAppliedVoltage = appliedVoltage
         inputs.followerSupplyCurrentAmps = sim.currentDrawAmps
+
+        inputs.absolutePositionRotations = Units.radiansToRotations(sim.angleRads)
     }
 }

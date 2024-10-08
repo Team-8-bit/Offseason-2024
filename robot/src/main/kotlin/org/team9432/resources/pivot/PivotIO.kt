@@ -10,11 +10,15 @@ interface PivotIO {
         var leaderAppliedVoltage: Double = 0.0
         var leaderSupplyCurrentAmps: Double = 0.0
         var leaderTempFahrenheit: Double = 0.0
+
         var followerPositionRotations: Double = 0.0
         var followerVelocityRPM: Double = 0.0
         var followerAppliedVoltage: Double = 0.0
         var followerSupplyCurrentAmps: Double = 0.0
         var followerTempFahrenheit: Double = 0.0
+
+        var absolutePositionRotations: Double = 0.0
+        var absoluteEncoderConnected: Boolean = true
     }
 
     val reduction get() = (5.0 / 1.0) * (50.0 / 18.0) * (60.0 / 20.0)

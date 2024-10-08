@@ -74,7 +74,7 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
         if (disabled) {
             io.runVoltage(0.0)
             feedback.reset()
-            setpointState = TrapezoidProfile.State(positionRadians, 0.0)
+            setpointState = TrapezoidProfile.State(mechanismPositionRadians, 0.0)
         }
 
         io.setBrakeMode(!disabled) // Coast when disabled
@@ -99,7 +99,7 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
 //            } else {
             io.runVoltage(
                 feedforward.calculate(setpointState.position, setpointState.velocity) +
-                        feedback.calculate(positionRadians, setpointState.position)
+                        feedback.calculate(mechanismPositionRadians, setpointState.position)
             )
 //            }
 
@@ -107,14 +107,15 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
         }
 
         Logger.recordOutput("Pivot/Mechanism/SetpointAngle", *setpointState.position.pivotAngleToMechanismPose3d())
-        Logger.recordOutput("Pivot/Mechanism/Measured", *positionRadians.pivotAngleToMechanismPose3d())
+        Logger.recordOutput("Pivot/Mechanism/Measured", *mechanismPositionRadians.pivotAngleToMechanismPose3d())
         Logger.recordOutput("Pivot/SetpointAngleDegrees", Units.radiansToDegrees(setpointState.position))
         Logger.recordOutput("Pivot/Goal", goal)
     }
 
     fun runGoal(newGoal: Goal): Command = startEnd({ this.goal = newGoal }, { goal = Goal.IDLE }).withName("Pivot $goal")
 
-    private val positionRadians get() = Units.rotationsToRadians(inputs.leaderPositionRotations)
+    private val mechanismPositionRadians get() =
+        Units.rotationsToRadians(if (inputs.absoluteEncoderConnected) inputs.absolutePositionRotations else inputs.leaderPositionRotations)
 
     @get:AutoLogOutput(key = "Pivot/AtGoal")
     val atGoal get() = abs(setpointState.position - goal.angleRads) < Units.degreesToRadians(.05)

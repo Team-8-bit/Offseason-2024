@@ -31,10 +31,7 @@ import org.team9432.lib.simulation.competitionfield.simulations.CompetitionField
 import org.team9432.lib.simulation.competitionfield.simulations.Crescendo2024FieldSimulation
 import org.team9432.lib.simulation.competitionfield.simulations.IntakeSimulation
 import org.team9432.lib.simulation.competitionfield.simulations.SwerveDriveSimulation
-import org.team9432.lib.unit.Translation2d
-import org.team9432.lib.unit.asRotation2d
-import org.team9432.lib.unit.degrees
-import org.team9432.lib.unit.inches
+import org.team9432.lib.unit.*
 import org.team9432.lib.util.afterSimCondition
 import org.team9432.lib.util.afterSimDelay
 import org.team9432.lib.util.allianceSwitch
@@ -106,7 +103,7 @@ object Robot: LoggedCoroutineRobot() {
                     Intake(IntakeIONeo()),
                     Loader(LoaderIONeo())
                 )
-                pivot = Pivot(PivotIONeo())
+                pivot = Pivot(PivotIONeo(0.0.rotations))
 
                 fieldSimulation = null
                 noteSimulation = null

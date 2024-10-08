@@ -3,16 +3,19 @@ package org.team9432.resources.pivot
 import com.revrobotics.CANSparkBase
 import com.revrobotics.CANSparkLowLevel
 import com.revrobotics.CANSparkMax
+import edu.wpi.first.wpilibj.DutyCycleEncoder
+import org.team9432.lib.unit.Angle
+import org.team9432.lib.unit.inRotations
 import org.team9432.lib.util.temperatureFahrenheit
 
-class PivotIONeo: PivotIO {
-    // Left Motor
-    private val leaderMotor = CANSparkMax(15, CANSparkLowLevel.MotorType.kBrushless)
-    // Right Motor
-    private val followerMotor = CANSparkMax(16, CANSparkLowLevel.MotorType.kBrushless)
+class PivotIONeo(private val absoluteEncoderOffset: Angle): PivotIO {
+    private val leaderMotor = CANSparkMax(15, CANSparkLowLevel.MotorType.kBrushless) // Left Motor
+    private val followerMotor = CANSparkMax(16, CANSparkLowLevel.MotorType.kBrushless) // Right Motor
 
     private val leaderEncoder = leaderMotor.encoder
     private val followerEncoder = followerMotor.encoder
+
+    private val absoluteEncoder = DutyCycleEncoder(7)
 
     init {
         leaderMotor.enableVoltageCompensation(11.0)
@@ -52,5 +55,8 @@ class PivotIONeo: PivotIO {
         inputs.followerAppliedVoltage = followerMotor.appliedOutput * followerMotor.busVoltage
         inputs.followerSupplyCurrentAmps = followerMotor.outputCurrent
         inputs.followerTempFahrenheit = followerMotor.temperatureFahrenheit
+
+        inputs.absolutePositionRotations = absoluteEncoder.absolutePosition - absoluteEncoderOffset.inRotations
+        inputs.absoluteEncoderConnected = absoluteEncoder.isConnected
     }
 }
