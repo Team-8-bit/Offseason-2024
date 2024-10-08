@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID.RumbleType
 import edu.wpi.first.wpilibj.PowerDistribution
 import edu.wpi.first.wpilibj.RobotBase
-import edu.wpi.first.wpilibj.RobotController
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 import edu.wpi.first.wpilibj2.command.Commands
@@ -25,12 +24,6 @@ import org.littletonrobotics.junction.networktables.NT4Publisher
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
 import org.team9432.auto.AutoChooser
-import org.team9432.auto.RobotAmpsideCenterline
-import org.team9432.auto.RobotFarsideCenterline
-import org.team9432.auto.RobotFourNote
-import org.team9432.auto.types.AmpsideCenterline
-import org.team9432.auto.types.FarsideCenterline
-import org.team9432.auto.types.FourNote
 import org.team9432.lib.Library
 import org.team9432.lib.coroutines.LoggedCoroutineRobot
 import org.team9432.lib.coroutines.Team8BitRobot.Runtime.*
@@ -192,7 +185,7 @@ object Robot: LoggedCoroutineRobot() {
 
         bindButtons()
 
-        Beambreaks
+        Beambreak
 
         PortForwarder.add(5800, "10.94.32.11", 5800)
         PortForwarder.add(5800, "10.94.32.12", 5800)
@@ -283,7 +276,7 @@ object Robot: LoggedCoroutineRobot() {
                 )
                     .withName("Shoot Speaker")
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming) // Don't let this be interrupted
-                    .finallyDo { _ -> Beambreaks.simClear() } // Remove note from the robot in sim
+                    .finallyDo { _ -> Beambreak.simClear() } // Remove note from the robot in sim
             )
 
         controller.a().and(readyToShoot).whileTrue(controller.rumbleCommand())
@@ -317,38 +310,39 @@ object Robot: LoggedCoroutineRobot() {
                 )
                     .withName("Shoot Amp")
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming) // Don't let this be interrupted
-                    .finallyDo { _ -> Beambreaks.simClear(); noteSimulation?.clearNote() } // Remove note from the robot in sim
+                    .finallyDo { _ -> Beambreak.simClear(); noteSimulation?.clearNote() } // Remove note from the robot in sim
             )
 
         /**** Intake ****/
 
         controller.leftBumper()
             .and(DriverStation::isEnabled) // I think this makes it so it runs if you are holding the button while it enables
-            .onTrue(Commands.runOnce({ RobotState.driverRequestedIntake = true }).onlyIf { !Beambreaks.hasNote })
+            .onTrue(Commands.runOnce({ RobotState.driverRequestedIntake = true }))
 
         controller.y().onTrue(Commands.runOnce({ RobotState.driverRequestedIntake = false }))
 
         Trigger { RobotState.driverRequestedIntake }
             .whileTrue(
-                rollers.runGoal(Rollers.Goal.INTAKE).until(Beambreaks.lower::isTripped).afterSimCondition({ noteSimulation!!.hasNote }, { Beambreaks.lower.setSimTripped() })
+                rollers.runGoal(Rollers.Goal.INTAKE).until(Beambreak::hasNote).afterSimCondition({ noteSimulation!!.hasNote }, { Beambreak.beambreak.setSimTripped() })
                     .andThen(
                         Commands.sequence(
                             Commands.runOnce({ noteSimulation?.animateAlign() }),
-                            rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).until(Beambreaks.upper::isTripped).afterSimDelay(0.15) { Beambreaks.upper.setSimTripped() },
-                            rollers.runGoal(Rollers.Goal.ALIGN_REVERSE).until(Beambreaks.upper::isClear).afterSimDelay(0.2) { Beambreaks.upper.setSimClear() },
-                            rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).until(Beambreaks.upper::isTripped).afterSimDelay(0.2) { Beambreaks.upper.setSimTripped() },
+                            rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).withTimeout(0.75).afterSimDelay(0.2) { Beambreak.beambreak.setSimTripped() },
+                            rollers.runGoal(Rollers.Goal.ALIGN_REVERSE).withTimeout(0.1)
                         )
-                            .alongWith(ScheduleCommand(controller.rumbleCommand().withTimeout(2.0)))
-                            .onlyIf { Beambreaks.hasNote }
+                            .alongWith(ScheduleCommand(controller.alternatingRumbleCommand(0.1).withTimeout(2.0)))
+                            .onlyIf { Beambreak.hasNote }
                     ).finallyDo { _ -> RobotState.driverRequestedIntake = false }
                     .deadlineWith(pivotAimCommand(Pivot.Goal.INTAKE))
                     .withName("Teleop Intake")
             )
 
-        controller.start().whileTrue(rollers.runGoal(Rollers.Goal.FLOOR_EJECT).withName("Floor Eject").afterSimDelay(0.5) { Beambreaks.simClear(); noteSimulation?.clearNote() })
+        controller.start().whileTrue(rollers.runGoal(Rollers.Goal.FLOOR_EJECT).withName("Floor Eject").afterSimDelay(0.5) { Beambreak.simClear(); noteSimulation?.clearNote() })
 
         /**** Misc. ****/
         controller.back().onTrue(Commands.runOnce({ drive.setGyroAngle(allianceSwitch(blue = Rotation2d(), red = Rotation2d(Math.PI))) }).withName("Gyro Reset"))
+
+        controller.povDown().whileTrue(pivot.runGoal(Pivot.Goal.CUSTOM))
     }
 
     private fun loggerInit() {

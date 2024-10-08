@@ -17,7 +17,7 @@ interface PivotIO {
         var followerTempFahrenheit: Double = 0.0
     }
 
-    val reduction get() = (1.0 / 5.0) * (50.0 / 18.0) * (60.0 / 20.0)
+    val reduction get() = (5.0 / 1.0) * (50.0 / 18.0) * (60.0 / 20.0)
 
     fun updateInputs(inputs: PivotIOInputs) {}
 

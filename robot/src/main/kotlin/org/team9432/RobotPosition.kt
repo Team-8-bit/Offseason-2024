@@ -8,7 +8,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
-import org.littletonrobotics.junction.AutoLogOutput
+import org.littletonrobotics.junction.Logger
+import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.unit.Length
 import org.team9432.lib.unit.asRotation2d
 import org.team9432.lib.unit.inMeters
@@ -45,7 +46,6 @@ object RobotPosition {
         currentChassisSpeeds = velocity
     }
 
-    @get:AutoLogOutput(key = "RobotPosition/CurrentPose")
     val currentPose: Pose2d get() = poseEstimator.estimatedPosition
 
     fun getFutureRobotPose(timeSeconds: Double) = currentPose.transformBySpeeds(ChassisSpeeds.fromRobotRelativeSpeeds(currentChassisSpeeds, currentPose.rotation), timeSeconds)
@@ -81,4 +81,11 @@ object RobotPosition {
     fun resetOdometry(pose: Pose2d) = poseEstimator.resetPosition(pose.rotation, Array(4) { SwerveModulePosition() }, pose)
 
     fun velocityLessThan(metersPerSecond: Double, rotationsPerSecond: Double) = currentChassisSpeeds.velocityLessThan(metersPerSecond, rotationsPerSecond)
+
+    init {
+        RobotPeriodicManager.startPeriodic {
+            Logger.recordOutput("RobotPosition/CurrentPose", currentPose)
+            Logger.recordOutput("RobotPosition/PoseInShotTime", getFutureRobotPose(SHOT_TIME_SECONDS))
+        }
+    }
 }

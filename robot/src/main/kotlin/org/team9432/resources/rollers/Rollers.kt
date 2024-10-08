@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.littletonrobotics.junction.Logger
-import org.team9432.Beambreaks
+import org.team9432.Beambreak
 import org.team9432.resources.rollers.intake.Intake
 import org.team9432.resources.rollers.loader.Loader
 
@@ -38,7 +38,7 @@ class Rollers(
         when (goal) {
             Goal.IDLE -> {}
             Goal.INTAKE -> {
-                if (Beambreaks.upper.isTripped()) {
+                if (Beambreak.beambreak.isTripped()) {
                     intake.goal = Intake.Goal.FLOOR_EJECT
                     loader.goal = Loader.Goal.IDLE
                 } else {

@@ -15,20 +15,22 @@ import org.littletonrobotics.junction.AutoLogOutput
 import org.littletonrobotics.junction.Logger
 import org.team9432.Robot
 import org.team9432.RobotPosition
+import org.team9432.annotation.Logged
 import org.team9432.lib.dashboard.LoggedTunableNumber
 import org.team9432.lib.unit.inMeters
 import kotlin.math.abs
 
 class Pivot(private val io: PivotIO): SubsystemBase() {
-    private val kP = LoggedTunableNumber("Pivot/kP", 0.0)
-    private val kD = LoggedTunableNumber("Pivot/kD", 0.0)
+    private val kP = LoggedTunableNumber("Pivot/kP", 1.0)
+    private val kI = LoggedTunableNumber("Pivot/kI", 0.03)
+    private val kD = LoggedTunableNumber("Pivot/kD", 0.3)
     private val kS = LoggedTunableNumber("Pivot/kS", 0.0)
-    private val kG = LoggedTunableNumber("Pivot/kG", 0.0)
-    private val kV = LoggedTunableNumber("Pivot/kV", 0.0)
+    private val kG = LoggedTunableNumber("Pivot/kG", 0.175)
+    private val kV = LoggedTunableNumber("Pivot/kV", 1.0)
     private val kA = LoggedTunableNumber("Pivot/kA", 0.0)
 
-    private val maxVelocity = LoggedTunableNumber("Pivot/MaxVelocity", 0.0)
-    private val maxAcceleration = LoggedTunableNumber("Pivot/MaxAcceleration", 0.0)
+    private val maxVelocity = LoggedTunableNumber("Pivot/MaxVelocityDegreesPerSec", 0.0)
+    private val maxAcceleration = LoggedTunableNumber("Pivot/MaxAccelerationDegreesPerSecPerSec", 0.0)
 
     private companion object {
         val angleMap = InterpolatingDoubleTreeMap().apply {
@@ -46,7 +48,8 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
         INTAKE(LoggedTunableNumber("Pivot/IntakeAngleDegrees", 0.0)),
         SPEAKER_AIM({ angleMap.get(RobotPosition.distanceToSpeaker().inMeters) }),
         AMP(LoggedTunableNumber("Pivot/AmpAngleDegrees", 0.0)),
-        PODIUM(LoggedTunableNumber("Pivot/PodiumAngleDegrees", 0.0));
+        PODIUM(LoggedTunableNumber("Pivot/PodiumAngleDegrees", 0.0)),
+        CUSTOM(LoggedTunableNumber("Pivot/CustomGoal", 0.0));
 
         val angleRads get() = Units.degreesToRadians(angleSupplier.invoke())
     }
@@ -70,9 +73,9 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
         io.updateInputs(inputs)
         Logger.processInputs("Pivot", inputs)
 
-        LoggedTunableNumber.ifChanged(hashCode(), { (kP, kD) -> feedback.setPID(kP, 0.0, kD) }, kP, kD)
+        LoggedTunableNumber.ifChanged(hashCode(), { (kP, kI, kD) -> feedback.setPID(kP, kI, kD) }, kP, kI, kD)
         LoggedTunableNumber.ifChanged(hashCode(), { (kS, kG, kV, kA) -> feedforward = ArmFeedforward(kS, kG, kV, kA) }, kS, kG, kV, kA)
-        LoggedTunableNumber.ifChanged(hashCode(), { (maxVel, maxAcc) -> profile = TrapezoidProfile(TrapezoidProfile.Constraints(maxVel, maxAcc)) }, maxVelocity, maxAcceleration)
+        LoggedTunableNumber.ifChanged(hashCode(), { (maxVel, maxAcc) -> profile = TrapezoidProfile(TrapezoidProfile.Constraints(Units.degreesToRadians(maxVel), Units.degreesToRadians(maxAcc))) }, maxVelocity, maxAcceleration)
 
         val disabled = DriverStation.isDisabled()
         if (disabled) {
@@ -96,14 +99,16 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
                 )
             )
 
-            if (goal.angleRads == 0.0 && atGoal) {
-                io.runVoltage(0.0)
-            } else {
+//            if (goal == Goal.CUSTOM) setpointState = TrapezoidProfile.State(positionRadians, 0.0)
+
+//            if (goal.angleRads == 0.0 && atGoal) {
+//                io.runVoltage(0.0)
+//            } else {
                 io.runVoltage(
                     feedforward.calculate(setpointState.position, setpointState.velocity) +
                             feedback.calculate(positionRadians, setpointState.position)
                 )
-            }
+//            }
 
             Logger.recordOutput("Pivot/Mechanism/GoalAngle", *goal.angleRads.pivotAngleToMechanismPose3d())
         }

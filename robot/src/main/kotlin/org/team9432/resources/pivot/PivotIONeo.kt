@@ -17,11 +17,13 @@ class PivotIONeo: PivotIO {
     init {
         leaderMotor.enableVoltageCompensation(11.0)
         leaderMotor.setSmartCurrentLimit(30)
+        leaderMotor.inverted = true
         leaderMotor.idleMode = CANSparkBase.IdleMode.kBrake
         leaderMotor.burnFlash()
 
         followerMotor.enableVoltageCompensation(11.0)
         followerMotor.setSmartCurrentLimit(30)
+        followerMotor.inverted = true
         followerMotor.idleMode = CANSparkBase.IdleMode.kBrake
         followerMotor.burnFlash()
 

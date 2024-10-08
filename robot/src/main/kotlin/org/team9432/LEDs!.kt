@@ -47,7 +47,7 @@ object `LEDs!` {
             }.ElseIf({ Robot.mode.isAutonomous }) {
                 setAnimation(leds.strobe(Color.Red, period = 0.5.seconds))
             }.ElseIf({ Robot.mode.isTeleop }) {
-                If ({Beambreaks.hasNote}) {
+                If ({Beambreak.hasNote}) {
                     setAnimation(leds.breath(Color.RainbowColors, colorDuration = 0.1.seconds, speed = 10))
                 }.Else {
                     If({ Robot.alliance == Alliance.Red }) {
