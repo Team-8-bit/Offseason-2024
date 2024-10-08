@@ -8,12 +8,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.littletonrobotics.junction.Logger
 import org.team9432.Robot
 import org.team9432.RobotPosition
 import org.team9432.lib.simulation.competitionfield.simulations.SwerveDriveSimulation
+import org.team9432.lib.util.SwerveSetpointGenerator
 import org.team9432.lib.util.SwerveUtil
 import org.team9432.resources.drive.DrivetrainConstants.DRIVE_KINEMATICS
 import org.team9432.resources.drive.controllers.ChoreoTrajectoryController
@@ -64,6 +66,15 @@ class Drive(
     private var trajectoryController: ChoreoTrajectoryController? = null
     private var teleopDriveController = TeleopDriveController()
 
+    private val setpointGenerator = SwerveSetpointGenerator(DRIVE_KINEMATICS, DrivetrainConstants.MODULE_TRANSLATIONS.toTypedArray())
+    private var currentSetpoint = SwerveSetpointGenerator.SwerveSetpoint(ChassisSpeeds(), Array(4) { SwerveModuleState() })
+
+    private val swerveLimits = SwerveSetpointGenerator.ModuleLimits(
+        maxDriveVelocity = 4.0,
+        maxDriveAcceleration = 20.0,
+        maxSteeringVelocity = Units.degreesToRadians(1080.0)
+    )
+
     private var desiredChassisSpeeds = ChassisSpeeds()
 
     companion object {
@@ -80,16 +91,21 @@ class Drive(
         updateOdometry()
         updateControl()
 
-        val speeds = ChassisSpeeds.discretize(SwerveUtil.correctForDynamics(desiredChassisSpeeds, Robot.period), 0.02)
-        val setpointStates: Array<SwerveModuleState> = DRIVE_KINEMATICS.toSwerveModuleStates(speeds)
-        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, 4.0)
+        currentSetpoint = setpointGenerator.generateSetpoint(
+            limits = swerveLimits,
+            prevSetpoint = currentSetpoint,
+            desiredState = desiredChassisSpeeds,
+            dt = Robot.periodSeconds
+        )
 
-        // Send setpoints to modules
-        val optimizedSetpointStates = Array(4) { index -> modules[index].runSetpoint(setpointStates[index]) }
+        for (i in modules.indices) {
+            modules[i].runSetpoint(currentSetpoint.moduleStates[i])
+        }
 
-        Logger.recordOutput("Drive/Setpoints", *setpointStates)
-        Logger.recordOutput("Drive/SetpointsOptimized", *optimizedSetpointStates)
+        Logger.recordOutput("Drive/Un254dSetpoints", *DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds))
+        Logger.recordOutput("Drive/Setpoints", *currentSetpoint.moduleStates)
         Logger.recordOutput("Drive/DesiredSpeeds", desiredChassisSpeeds)
+        Logger.recordOutput("Drive/SetpointSpeeds", currentSetpoint.chassisSpeeds)
         Logger.recordOutput("Drive/ControlMode", currentControlMode)
     }
 

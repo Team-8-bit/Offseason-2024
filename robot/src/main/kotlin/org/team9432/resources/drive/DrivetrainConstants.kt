@@ -16,14 +16,14 @@ import kotlin.math.min
  * because we want an all-real simulation for the chassis, the numbers are required to be considerably precise
  */
 object DrivetrainConstants {
-    val ROBOT_TO_BUMPER_CENTER_OFFSET = Transform2d(Units.inchesToMeters(2.75), 0.0, Rotation2d())
+    private val ROBOT_TO_BUMPER_CENTER_OFFSET = Transform2d(Units.inchesToMeters(2.75), 0.0, Rotation2d())
 
     /**
      * numbers that needs to be changed to fit each robot
      * TODO: change these numbers to match your robot
      */
-    const val WHEEL_COEFFICIENT_OF_FRICTION: Double = 1.0
-    const val ROBOT_MASS_KG: Double = 74.0 // with bumpers
+    private const val WHEEL_COEFFICIENT_OF_FRICTION: Double = 1.0
+    private const val ROBOT_MASS_KG: Double = 74.0 // with bumpers
 
     /**
      * TODO: change motor type to match your robot
@@ -37,7 +37,7 @@ object DrivetrainConstants {
     val WHEEL_RADIUS_METERS: Double = Units.inchesToMeters(TunerConstants.kWheelRadiusInches)
     const val DRIVE_GEAR_RATIO: Double = TunerConstants.kDriveGearRatio
     const val STEER_GEAR_RATIO: Double = TunerConstants.kSteerGearRatio
-    const val TIME_ROBOT_STOP_ROTATING_SECONDS: Double = 0.06
+    private const val TIME_ROBOT_STOP_ROTATING_SECONDS: Double = 0.06
     const val STEER_FRICTION_VOLTAGE: Double = TunerConstants.kSteerFrictionVoltage
     const val DRIVE_FRICTION_VOLTAGE: Double = TunerConstants.kDriveFrictionVoltage
     const val STEER_INERTIA: Double = 0.004
@@ -86,7 +86,6 @@ object DrivetrainConstants {
         MAX_PROPELLING_FORCE_NEWTONS / ROBOT_MASS_KG
     )
     val CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC: Double = CHASSIS_MAX_VELOCITY / DRIVE_BASE_RADIUS
-    val CHASSIS_MAX_ANGULAR_ACCELERATION_RAD_PER_SEC_SQ: Double = CHASSIS_MAX_ACCELERATION_MPS_SQ / DRIVE_BASE_RADIUS
     val CHASSIS_FRICTIONAL_ANGULAR_ACCELERATION: Double = CHASSIS_MAX_ANGULAR_VELOCITY_RAD_PER_SEC / TIME_ROBOT_STOP_ROTATING_SECONDS
 
     val DRIVE_KINEMATICS: SwerveDriveKinematics = SwerveDriveKinematics(*MODULE_TRANSLATIONS.toTypedArray())
@@ -111,7 +110,6 @@ object DrivetrainConstants {
 
     const val ODOMETRY_FREQUENCY: Double = 250.0
     const val ODOMETRY_CACHE_CAPACITY: Int = 10
-    const val ODOMETRY_WAIT_TIMEOUT_SECONDS: Double = 0.02
 
     val simProfile = RobotSimulationProfile(
         moduleTranslations = MODULE_TRANSLATIONS,

@@ -69,13 +69,9 @@ class SwerveModule(private val io: ModuleIO, private val name: String) {
     /**
      * Runs the module with the specified setpoint state. Returns the optimized state.
      */
-    fun runSetpoint(state: SwerveModuleState): SwerveModuleState {
-        val optimizedSetpoint = SwerveModuleState.optimize(state, angle)
-
-        this.angleSetpoint = optimizedSetpoint.angle
-        this.speedSetpoint = optimizedSetpoint.speedMetersPerSecond
-
-        return optimizedSetpoint
+    fun runSetpoint(state: SwerveModuleState) {
+        this.angleSetpoint = state.angle
+        this.speedSetpoint = state.speedMetersPerSecond
     }
 
     /** The current turn angle of the module. */
