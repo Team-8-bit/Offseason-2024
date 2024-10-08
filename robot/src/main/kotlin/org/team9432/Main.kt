@@ -256,7 +256,7 @@ object Robot: LoggedCoroutineRobot() {
         // Prepare for a speaker shot
         controller
             .a()
-            .and { !RobotState.driverRequestedIntake } // Don't aim and stuff while trying to intake
+            .and(controller.leftBumper().negate()) // Don't aim and stuff while trying to intake
             .and(inSpeakerPrepareRange.or(RobotState::automationDisabled))
             .whileTrue(
                 driveAimCommand { RobotPosition.getStandardAimingParameters().drivetrainAngle }
@@ -294,7 +294,7 @@ object Robot: LoggedCoroutineRobot() {
         // Prepare for an amp shot
         controller
             .b()
-            .and { !RobotState.driverRequestedIntake } // Don't aim while trying to intake
+            .and(controller.leftBumper().negate()) // Don't aim while trying to intake
             .whileTrue(
                 driveAimCommand { 90.degrees.asRotation2d }
                     .alongWith(
@@ -327,23 +327,24 @@ object Robot: LoggedCoroutineRobot() {
 
         controller.leftBumper()
             .and(DriverStation::isEnabled) // I think this makes it so it runs if you are holding the button while it enables
-            .onTrue(Commands.runOnce({ RobotState.driverRequestedIntake = true }))
-
-        controller.y().onTrue(Commands.runOnce({ RobotState.driverRequestedIntake = false }))
-
-        Trigger { RobotState.driverRequestedIntake }
             .whileTrue(
-                rollers.runGoal(Rollers.Goal.INTAKE).until(Beambreak::hasNote).afterSimCondition({ noteSimulation!!.hasNote }, { Beambreak.beambreak.setSimTripped() })
-                    .andThen(
-                        Commands.sequence(
-                            Commands.runOnce({ noteSimulation?.animateAlign() }),
-                            rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).withTimeout(0.75).afterSimDelay(0.2) { Beambreak.beambreak.setSimTripped() },
-                            rollers.runGoal(Rollers.Goal.ALIGN_REVERSE).withTimeout(0.1)
-                        )
-                            .alongWith(ScheduleCommand(controller.rumbleCommand().withTimeout(2.0)))
-                            .onlyIf { Beambreak.hasNote }
-                    ).finallyDo { _ -> RobotState.driverRequestedIntake = false }
-                    .deadlineWith(pivotAimCommand(Pivot.Goal.INTAKE))
+                pivotAimCommand(Pivot.Goal.INTAKE)
+                    .alongWith(
+                        Commands.waitUntil(pivot::atGoal)
+                            .andThen(
+                                rollers.runGoal(Rollers.Goal.INTAKE)
+                                    .until(Beambreak::hasNote).afterSimCondition({ noteSimulation!!.hasNote }, { Beambreak.beambreak.setSimTripped() })
+                                    .andThen(
+                                        Commands.sequence(
+                                            Commands.runOnce({ noteSimulation?.animateAlign() }),
+                                            rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).withTimeout(0.75).afterSimDelay(0.2) { Beambreak.beambreak.setSimTripped() },
+                                            rollers.runGoal(Rollers.Goal.ALIGN_REVERSE).withTimeout(0.1)
+                                        )
+                                            .alongWith(ScheduleCommand(controller.rumbleCommand().withTimeout(2.0)))
+                                            .onlyIf { Beambreak.hasNote }
+                                    )
+                            )
+                    )
                     .withName("Teleop Intake")
             )
 
