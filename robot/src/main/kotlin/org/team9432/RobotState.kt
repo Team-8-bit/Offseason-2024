@@ -8,6 +8,7 @@ object RobotState {
     var automationDisabled: Boolean = false
     var driverRequestedIntake: Boolean = false
     var pivotEnabled: Boolean = true
+    var shootOnMoveEnabled: Boolean = true
 
     init {
         RobotPeriodicManager.startPeriodic { log() }

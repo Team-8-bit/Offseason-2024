@@ -31,7 +31,10 @@ import org.team9432.lib.simulation.competitionfield.simulations.CompetitionField
 import org.team9432.lib.simulation.competitionfield.simulations.Crescendo2024FieldSimulation
 import org.team9432.lib.simulation.competitionfield.simulations.IntakeSimulation
 import org.team9432.lib.simulation.competitionfield.simulations.SwerveDriveSimulation
-import org.team9432.lib.unit.*
+import org.team9432.lib.unit.Translation2d
+import org.team9432.lib.unit.asRotation2d
+import org.team9432.lib.unit.degrees
+import org.team9432.lib.unit.inches
 import org.team9432.lib.util.afterSimCondition
 import org.team9432.lib.util.afterSimDelay
 import org.team9432.lib.util.allianceSwitch
@@ -233,13 +236,19 @@ object Robot: LoggedCoroutineRobot() {
         fun pivotAimCommand(goal: Pivot.Goal) =
             pivot.runGoal(goal).onlyIf { !RobotState.automationDisabled && RobotState.pivotEnabled }
 
+        fun flywheelSpeakerSpeedCommand() =
+            Commands.either(
+                flywheels.runGoal(Flywheels.Goal.AMP),
+                flywheels.runGoal(Flywheels.Goal.DIFFY_SHOOT),
+                RobotState::pivotEnabled
+            )
+
         /**** Shooting ****/
-        val inSpeakerPrepareRange = Trigger { RobotPosition.distanceToSpeaker() < 10.meters }
+        val inSpeakerScoringRange = Trigger(RobotPosition::isInSpeakerScoringRange)
+        val inSpeakerPrepareRange = Trigger(RobotPosition::isInSpeakerPrepareRange)
 
         val readyToShoot = Trigger {
-            RobotPosition.velocityLessThan(metersPerSecond = 1.5, rotationsPerSecond = 0.25) &&
-                    RobotPosition.isAimedAtSpeaker() &&
-                    RobotPosition.isInScoringRangeOfSpeaker &&
+            drive.atAutoAimGoal() &&
                     pivot.atGoal &&
                     flywheels.atSpeed()
         }.debounce(0.3, Debouncer.DebounceType.kRising)
@@ -250,9 +259,9 @@ object Robot: LoggedCoroutineRobot() {
             .and { !RobotState.driverRequestedIntake } // Don't aim and stuff while trying to intake
             .and(inSpeakerPrepareRange.or(RobotState::automationDisabled))
             .whileTrue(
-                driveAimCommand { RobotPosition.getAngleToSpeaker() }
+                driveAimCommand { RobotPosition.getStandardAimingParameters().drivetrainAngle }
                     .alongWith(
-                        flywheels.runGoal(Flywheels.Goal.VISION_SHOOT),
+                        flywheels.runGoal(Flywheels.Goal.DIFFY_SHOOT),
                         pivotAimCommand(Pivot.Goal.SPEAKER_AIM)
                     )
                     .withName("Prepare Speaker")
@@ -263,15 +272,16 @@ object Robot: LoggedCoroutineRobot() {
             .rightBumper()
             .and(controller.a()) // Make sure we are trying to shoot speaker
             .and(readyToShoot)
+            .and(inSpeakerScoringRange.or(RobotState::automationDisabled))
             .onTrue(
                 Commands.parallel(
                     Commands.waitSeconds(0.5),
                     Commands.waitUntil(controller.rightBumper().negate())
                 ).deadlineWith( // Deadline runs the below commands until 0.5 second have passed or the button is released
                     rollers.runGoal(Rollers.Goal.SHOOTER_FEED),
-                    flywheels.runGoal(Flywheels.Goal.VISION_SHOOT),
+                    flywheels.runGoal(Flywheels.Goal.DIFFY_SHOOT),
                     pivotAimCommand(Pivot.Goal.SPEAKER_AIM),
-                    driveAimCommand { RobotPosition.getAngleToSpeaker() },
+                    driveAimCommand { RobotPosition.getStandardAimingParameters().drivetrainAngle },
                     Commands.runOnce({ noteSimulation?.animateShoot() })
                 )
                     .withName("Shoot Speaker")
@@ -279,7 +289,7 @@ object Robot: LoggedCoroutineRobot() {
                     .finallyDo { _ -> Beambreak.simClear() } // Remove note from the robot in sim
             )
 
-        controller.a().and(readyToShoot).whileTrue(controller.rumbleCommand())
+        controller.a().and(inSpeakerScoringRange).and(readyToShoot).whileTrue(controller.alternatingRumbleCommand(0.1))
 
         // Prepare for an amp shot
         controller
@@ -330,7 +340,7 @@ object Robot: LoggedCoroutineRobot() {
                             rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).withTimeout(0.75).afterSimDelay(0.2) { Beambreak.beambreak.setSimTripped() },
                             rollers.runGoal(Rollers.Goal.ALIGN_REVERSE).withTimeout(0.1)
                         )
-                            .alongWith(ScheduleCommand(controller.alternatingRumbleCommand(0.1).withTimeout(2.0)))
+                            .alongWith(ScheduleCommand(controller.rumbleCommand().withTimeout(2.0)))
                             .onlyIf { Beambreak.hasNote }
                     ).finallyDo { _ -> RobotState.driverRequestedIntake = false }
                     .deadlineWith(pivotAimCommand(Pivot.Goal.INTAKE))

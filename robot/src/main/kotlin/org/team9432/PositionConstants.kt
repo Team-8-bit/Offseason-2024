@@ -9,7 +9,7 @@ import org.team9432.lib.util.pointAt
 object PositionConstants {
     /** Position the robot aims at when shooting in the speaker. */
     val speakerAimPose
-        get() = Translation2d(0.35.meters, FieldConstants.speakerYCoordinate).applyFlip()
+        get() = Translation2d(0.22.meters, FieldConstants.speakerYCoordinate).applyFlip()
 
     /** Position the robot aims when feeding, it is in the amp corner of the field. */
     val feedAimPose
