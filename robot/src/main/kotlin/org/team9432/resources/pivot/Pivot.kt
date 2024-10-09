@@ -19,16 +19,16 @@ import org.team9432.lib.unit.inDegrees
 import kotlin.math.abs
 
 class Pivot(private val io: PivotIO): SubsystemBase() {
-    private val kP = LoggedTunableNumber("Pivot/kP", 1.0)
-    private val kI = LoggedTunableNumber("Pivot/kI", 0.03)
-    private val kD = LoggedTunableNumber("Pivot/kD", 0.3)
+    private val kP = LoggedTunableNumber("Pivot/kP", 15.0)
+    private val kI = LoggedTunableNumber("Pivot/kI", 0.0)
+    private val kD = LoggedTunableNumber("Pivot/kD", 0.1)
     private val kS = LoggedTunableNumber("Pivot/kS", 0.0)
-    private val kG = LoggedTunableNumber("Pivot/kG", 0.175)
+    private val kG = LoggedTunableNumber("Pivot/kG", 0.4)
     private val kV = LoggedTunableNumber("Pivot/kV", 1.0)
     private val kA = LoggedTunableNumber("Pivot/kA", 0.0)
 
-    private val maxVelocity = LoggedTunableNumber("Pivot/MaxVelocityDegreesPerSec", 0.0)
-    private val maxAcceleration = LoggedTunableNumber("Pivot/MaxAccelerationDegreesPerSecPerSec", 0.0)
+    private val maxVelocity = LoggedTunableNumber("Pivot/MaxVelocityDegreesPerSec", 600.0)
+    private val maxAcceleration = LoggedTunableNumber("Pivot/MaxAccelerationDegreesPerSecPerSec", 800.0)
 
     enum class Goal(private val angleSupplier: () -> Double) {
         // All angles are in degrees
