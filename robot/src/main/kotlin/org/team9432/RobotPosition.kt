@@ -65,8 +65,8 @@ object RobotPosition {
         val distanceToSpeaker = predictedFuturePose.distanceTo(targetPose)
 
         val pivotAngleTarget = pivotAngleMap.get(distanceToSpeaker.inMeters)
-        val shooterSpeedTarget = if (RobotState.pivotEnabled) {
-            ShooterSpeeds(upperRPM = 4000.0, lowerRPM = 4000.0)
+        val shooterSpeedTarget = if (RobotState.pivotEnabled && distanceToSpeaker > 1.5) {
+            ShooterSpeeds(upperRPM = 5000.0, lowerRPM = 5000.0)
         } else {
             differentialShooterSpeedsMap.getMapValue(distanceToSpeaker)
         }
@@ -88,10 +88,12 @@ object RobotPosition {
 
     private val pivotAngleMap = InterpolatingDoubleTreeMap().apply {
         // Meters to Degrees
-        put(1.0, 0.0)
-        put(2.0, 20.0)
-        put(3.0, 30.0)
-        put(4.0, 40.0)
+        put(1.5, 0.0)
+        put(2.0, 8.0)
+        put(2.5, 15.0)
+        put(3.0, 18.0)
+        put(3.5, 22.0)
+        put(4.0, 25.0)
     }
 
     private fun getFutureRobotPose(timeSeconds: Double) = currentPose.transformBySpeeds(ChassisSpeeds.fromRobotRelativeSpeeds(currentChassisSpeeds, currentPose.rotation), timeSeconds)
@@ -102,26 +104,24 @@ object RobotPosition {
         get() {
             val distance = currentPose.distanceTo(PositionConstants.speakerAimPose)
             return if (RobotState.pivotEnabled) {
-                distance > 1.5.meters && distance < 4.0.meters
+                distance > 1.meters && distance < 5.0.meters
             } else {
-                distance > 1.5.meters && distance < 2.5.meters
+                distance > 1.meters && distance < 2.5.meters
             }
         }
 
     val isInSpeakerPrepareRange: Boolean
         get() = currentPose.distanceTo(PositionConstants.speakerAimPose) < 10.0.meters
 
-    /** Return the distance from the robot to the speaker. */
-    fun distanceToSpeaker(): Length {
-        return getFutureRobotPose(SHOT_TIME_SECONDS).distanceTo(PositionConstants.speakerAimPose)
-    }
-
     fun resetOdometry(pose: Pose2d) = poseEstimator.resetPosition(pose.rotation, Array(4) { SwerveModulePosition() }, pose)
+
+    fun getRobotRelativeChassisSpeeds() = currentChassisSpeeds
 
     init {
         RobotPeriodicManager.startPeriodic {
             Logger.recordOutput("RobotPosition/CurrentPose", currentPose)
             Logger.recordOutput("RobotPosition/PoseInShotTime", getFutureRobotPose(SHOT_TIME_SECONDS))
+            Logger.recordOutput("RobotPosition/SpeakerTuningDistanceMeters", currentPose.distanceTo(PositionConstants.speakerAimPose).inMeters)
         }
     }
 }

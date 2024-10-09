@@ -236,7 +236,7 @@ object Robot: LoggedCoroutineRobot() {
         fun flywheelSpeakerSpeedCommand() =
             Commands.either(
                 flywheels.runGoal(Flywheels.Goal.AMP),
-                flywheels.runGoal(Flywheels.Goal.DIFFY_SHOOT),
+                flywheels.runGoal(Flywheels.Goal.SHOOT),
                 RobotState::pivotEnabled
             )
 
@@ -258,7 +258,7 @@ object Robot: LoggedCoroutineRobot() {
             .whileTrue(
                 driveAimCommand { RobotPosition.getStandardAimingParameters().drivetrainAngle }
                     .alongWith(
-                        flywheels.runGoal(Flywheels.Goal.DIFFY_SHOOT),
+                        flywheels.runGoal(Flywheels.Goal.SHOOT),
                         pivotAimCommand(Pivot.Goal.SPEAKER_AIM)
                     )
                     .withName("Prepare Speaker")
@@ -276,7 +276,7 @@ object Robot: LoggedCoroutineRobot() {
                     Commands.waitUntil(controller.rightBumper().negate())
                 ).deadlineWith( // Deadline runs the below commands until 0.5 second have passed or the button is released
                     rollers.runGoal(Rollers.Goal.SHOOTER_FEED),
-                    flywheels.runGoal(Flywheels.Goal.DIFFY_SHOOT),
+                    flywheels.runGoal(Flywheels.Goal.SHOOT),
                     pivotAimCommand(Pivot.Goal.SPEAKER_AIM),
                     driveAimCommand { RobotPosition.getStandardAimingParameters().drivetrainAngle },
                     Commands.runOnce({ noteSimulation?.animateShoot() })
@@ -321,29 +321,34 @@ object Robot: LoggedCoroutineRobot() {
             )
 
         /**** Intake ****/
-
         controller.leftBumper()
             .and(DriverStation::isEnabled) // I think this makes it so it runs if you are holding the button while it enables
             .whileTrue(
-                pivotAimCommand(Pivot.Goal.INTAKE)
-                    .alongWith(
-                        Commands.waitUntil(pivot::atGoal)
+                Commands.parallel(
+                    pivotAimCommand(Pivot.Goal.INTAKE),
+                    flywheels.runGoal(Flywheels.Goal.NOTE_ALIGN),
+                    Commands.waitUntil(pivot::atGoal).andThen(
+                        rollers.runGoal(Rollers.Goal.INTAKE)
+                            .until(Beambreak::hasNote).afterSimCondition({ noteSimulation!!.hasNote }, { Beambreak.lowerBeambreak.setSimTripped() })
                             .andThen(
-                                rollers.runGoal(Rollers.Goal.INTAKE)
-                                    .until(Beambreak.lowerBeambreak::isTripped).afterSimCondition({ noteSimulation!!.hasNote }, { Beambreak.lowerBeambreak.setSimTripped() })
-                                    .andThen(
-                                        ScheduleCommand(
-                                            Commands.sequence(
-                                                Commands.runOnce({ noteSimulation?.animateAlign() }),
-                                                rollers.runGoal(Rollers.Goal.INTAKE).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.2) { Beambreak.upperBeambreak.setSimTripped() },
-                                                rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).until(Beambreak.lowerBeambreak::isClear).afterSimDelay(0.2) { Beambreak.lowerBeambreak.setSimClear() },
-                                                rollers.runGoal(Rollers.Goal.ALIGN_REVERSE).until(Beambreak.lowerBeambreak::isTripped).afterSimDelay(0.2) { Beambreak.lowerBeambreak.setSimTripped() },
-                                            ).alongWith(controller.rumbleCommand().withTimeout(2.0))
-                                        ).onlyIf { Beambreak.hasNote }.withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming).withName("Note Align")
+                                ScheduleCommand(
+                                    Commands.sequence(
+                                        Commands.runOnce({ noteSimulation?.animateAlign() }),
+                                        rollers.runGoal(Rollers.Goal.INTAKE).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.2) { Beambreak.upperBeambreak.setSimTripped() },
+                                        rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).until(Beambreak.lowerBeambreak::isClear).afterSimDelay(0.2) { Beambreak.lowerBeambreak.setSimClear() },
+                                        rollers.runGoal(Rollers.Goal.ALIGN_REVERSE).until(Beambreak.lowerBeambreak::isTripped).afterSimDelay(0.2) { Beambreak.lowerBeambreak.setSimTripped() },
                                     )
+                                        .deadlineWith(flywheels.runGoal(Flywheels.Goal.NOTE_ALIGN))
+                                        .alongWith(ScheduleCommand(controller.rumbleCommand().withTimeout(2.0)))
+                                        .onlyIf { Beambreak.hasNote }
+                                        .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
+                                        .withTimeout(3.0)
+                                        .withName("Note Align")
+                                )
                             )
+
                     )
-                    .withName("Teleop Intake")
+                ).withName("Teleop Intake")
             )
 
         controller.start().whileTrue(rollers.runGoal(Rollers.Goal.FLOOR_EJECT).withName("Floor Eject").afterSimDelay(0.5) { Beambreak.simClear(); noteSimulation?.clearNote() })

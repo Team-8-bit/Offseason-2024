@@ -114,8 +114,8 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
 
     fun runGoal(newGoal: Goal): Command = startEnd({ this.goal = newGoal }, { goal = Goal.IDLE }).withName("Pivot $goal")
 
-    private val mechanismPositionRadians get() =
-        Units.rotationsToRadians(if (inputs.absoluteEncoderConnected) inputs.absolutePositionRotations else inputs.leaderPositionRotations)
+    private val mechanismPositionRadians
+        get() = Units.rotationsToRadians(if (inputs.absoluteEncoderConnected) inputs.absolutePositionRotations else inputs.leaderPositionRotations)
 
     @get:AutoLogOutput(key = "Pivot/AtGoal")
     val atGoal get() = abs(setpointState.position - goal.angleRads) < Units.degreesToRadians(.05)

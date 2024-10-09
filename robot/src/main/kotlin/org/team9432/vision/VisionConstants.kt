@@ -25,7 +25,7 @@ object VisionConstants {
         )
 
     val singleTagStdDevs: Matrix<N3, N1> = VecBuilder.fill(0.25, 0.25, 999.0)
-    val multiTagStdDevs: Matrix<N3, N1> = VecBuilder.fill(0.025, 0.025, 3.0)
+    val multiTagStdDevs: Matrix<N3, N1> = VecBuilder.fill(0.05, 0.05, 3.0)
     val maxStandardDeviations: Matrix<N3, N1> = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE)
 
     const val CAMERA_NAME = "Limelight" // It's not actually a limelight

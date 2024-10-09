@@ -17,8 +17,9 @@ class Flywheels(private val io: FlywheelIO): SubsystemBase() {
 
     enum class Goal(val getSpeeds: () -> ShooterSpeeds) {
         IDLE({ ShooterSpeeds(0.0, 0.0) }),
-        DIFFY_SHOOT({ RobotPosition.getStandardAimingParameters().shooterSpeeds }),
+        SHOOT({ RobotPosition.getStandardAimingParameters().shooterSpeeds }),
         SUBWOOFER({ ShooterSpeeds(2000.0, 5000.0) }),
+        NOTE_ALIGN({ ShooterSpeeds(-200.0, -200.0) }),
         FEED_SPEED({ ShooterSpeeds(4000.0, 4000.0) }),
         AMP({ ShooterSpeeds(110.0, 4600.0) });
     }
