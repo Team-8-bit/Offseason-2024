@@ -103,7 +103,7 @@ object Robot: LoggedCoroutineRobot() {
                     Intake(IntakeIONeo()),
                     Loader(LoaderIONeo())
                 )
-                pivot = Pivot(PivotIONeo(0.0.rotations))
+                pivot = Pivot(PivotIONeo(0.835.rotations))
 
                 fieldSimulation = null
                 noteSimulation = null

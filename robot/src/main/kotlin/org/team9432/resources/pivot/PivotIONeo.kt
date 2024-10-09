@@ -56,7 +56,7 @@ class PivotIONeo(private val absoluteEncoderOffset: Angle): PivotIO {
         inputs.followerSupplyCurrentAmps = followerMotor.outputCurrent
         inputs.followerTempFahrenheit = followerMotor.temperatureFahrenheit
 
-        inputs.absolutePositionRotations = absoluteEncoder.absolutePosition - absoluteEncoderOffset.inRotations
+        inputs.absolutePositionRotations = -(absoluteEncoder.absolutePosition - absoluteEncoderOffset.inRotations)
         inputs.absoluteEncoderConnected = absoluteEncoder.isConnected
     }
 }
