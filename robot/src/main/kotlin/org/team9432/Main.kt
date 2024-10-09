@@ -330,15 +330,16 @@ object Robot: LoggedCoroutineRobot() {
                         Commands.waitUntil(pivot::atGoal)
                             .andThen(
                                 rollers.runGoal(Rollers.Goal.INTAKE)
-                                    .until(Beambreak::hasNote).afterSimCondition({ noteSimulation!!.hasNote }, { Beambreak.beambreak.setSimTripped() })
+                                    .until(Beambreak.lowerBeambreak::isTripped).afterSimCondition({ noteSimulation!!.hasNote }, { Beambreak.lowerBeambreak.setSimTripped() })
                                     .andThen(
-                                        Commands.sequence(
-                                            Commands.runOnce({ noteSimulation?.animateAlign() }),
-                                            rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).withTimeout(0.75).afterSimDelay(0.2) { Beambreak.beambreak.setSimTripped() },
-                                            rollers.runGoal(Rollers.Goal.ALIGN_REVERSE).withTimeout(0.1)
-                                        )
-                                            .alongWith(ScheduleCommand(controller.rumbleCommand().withTimeout(2.0)))
-                                            .onlyIf { Beambreak.hasNote }
+                                        ScheduleCommand(
+                                            Commands.sequence(
+                                                Commands.runOnce({ noteSimulation?.animateAlign() }),
+                                                rollers.runGoal(Rollers.Goal.INTAKE).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.2) { Beambreak.upperBeambreak.setSimTripped() },
+                                                rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).until(Beambreak.lowerBeambreak::isClear).afterSimDelay(0.2) { Beambreak.lowerBeambreak.setSimClear() },
+                                                rollers.runGoal(Rollers.Goal.ALIGN_REVERSE).until(Beambreak.lowerBeambreak::isTripped).afterSimDelay(0.2) { Beambreak.lowerBeambreak.setSimTripped() },
+                                            ).alongWith(controller.rumbleCommand().withTimeout(2.0))
+                                        ).onlyIf { Beambreak.hasNote }.withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming).withName("Note Align")
                                     )
                             )
                     )
