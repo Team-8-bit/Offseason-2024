@@ -1,28 +1,44 @@
 package org.team9432.resources.drive.controllers
 
-import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.math.util.Units
 import org.littletonrobotics.junction.Logger
 import org.team9432.RobotPosition
+import org.team9432.RobotState
 import org.team9432.lib.dashboard.LoggedTunableNumber
+import org.team9432.lib.util.epsilonEquals
+import org.team9432.resources.drive.DrivetrainConstants
 
 class TeleopAutoAimController(private val goalSupplier: () -> Rotation2d): GenericDriveController<Double>() {
     companion object {
         private const val TABLE_KEY = "TeleopAutoAimController"
 
-        private val kP by LoggedTunableNumber("$TABLE_KEY/kP", 5.0)
-        private val kD by LoggedTunableNumber("$TABLE_KEY/kD", 0.0)
-        private val toleranceDegrees by LoggedTunableNumber("$TABLE_KEY/ToleranceDegrees", 2.0)
+        private val kP by LoggedTunableNumber("$TABLE_KEY/kP", 6.0)
+        private val kD by LoggedTunableNumber("$TABLE_KEY/kD", 0.4)
+        private val maxVelocityMultiplier by LoggedTunableNumber("$TABLE_KEY/MaxVelocityPercent", 0.8)
+        private val maxAccelerationMultiplier by LoggedTunableNumber("$TABLE_KEY/MaxAccelerationPercent", 0.7)
+        private val toleranceDegrees by LoggedTunableNumber("$TABLE_KEY/ToleranceDegrees", 1.0)
     }
 
-    private val controller = PIDController(5.0, 0.0, 0.0).apply {
+    private val controller = ProfiledPIDController(0.0, 0.0, 0.0, TrapezoidProfile.Constraints(0.0, 0.0)).apply {
         enableContinuousInput(-Math.PI, Math.PI)
         setTolerance(Units.degreesToRadians(toleranceDegrees))
+
+        reset(
+            RobotPosition.currentPose.rotation.radians,
+            RobotPosition.getRobotRelativeChassisSpeeds().omegaRadiansPerSecond
+        )
     }
 
     override fun calculate(): Double {
         controller.setPID(kP, 0.0, kD)
+        controller.setTolerance(toleranceDegrees)
+
+        val maxAngularVelocity = (RobotState.swerveLimits.maxDriveVelocity / DrivetrainConstants.DRIVE_BASE_RADIUS) * maxVelocityMultiplier
+        val maxAngularAcceleration = (RobotState.swerveLimits.maxDriveAcceleration / DrivetrainConstants.DRIVE_BASE_RADIUS) * maxAccelerationMultiplier
+        controller.setConstraints(TrapezoidProfile.Constraints(maxAngularVelocity, maxAngularAcceleration))
 
         val output = controller.calculate(
             RobotPosition.currentPose.rotation.radians,
@@ -35,7 +51,9 @@ class TeleopAutoAimController(private val goalSupplier: () -> Rotation2d): Gener
         return output
     }
 
-    override fun atGoal(): Boolean {
-        return controller.atSetpoint()
-    }
+    override fun atGoal() = epsilonEquals(
+        controller.setpoint.position,
+        controller.goal.position,
+        Units.degreesToRadians(toleranceDegrees)
+    )
 }

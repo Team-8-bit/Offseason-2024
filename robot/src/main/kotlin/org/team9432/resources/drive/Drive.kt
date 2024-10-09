@@ -5,18 +5,16 @@ import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.littletonrobotics.junction.Logger
 import org.team9432.Robot
 import org.team9432.RobotPosition
+import org.team9432.RobotState
 import org.team9432.lib.simulation.competitionfield.simulations.SwerveDriveSimulation
 import org.team9432.lib.util.SwerveSetpointGenerator
-import org.team9432.lib.util.SwerveUtil
 import org.team9432.resources.drive.DrivetrainConstants.DRIVE_KINEMATICS
 import org.team9432.resources.drive.controllers.ChoreoTrajectoryController
 import org.team9432.resources.drive.controllers.TeleopAutoAimController
@@ -69,12 +67,6 @@ class Drive(
     private val setpointGenerator = SwerveSetpointGenerator(DRIVE_KINEMATICS, DrivetrainConstants.MODULE_TRANSLATIONS.toTypedArray())
     private var currentSetpoint = SwerveSetpointGenerator.SwerveSetpoint(ChassisSpeeds(), Array(4) { SwerveModuleState() })
 
-    private val swerveLimits = SwerveSetpointGenerator.ModuleLimits(
-        maxDriveVelocity = 4.0,
-        maxDriveAcceleration = 20.0,
-        maxSteeringVelocity = Units.degreesToRadians(1080.0)
-    )
-
     private var desiredChassisSpeeds = ChassisSpeeds()
 
     companion object {
@@ -92,7 +84,7 @@ class Drive(
         updateControl()
 
         currentSetpoint = setpointGenerator.generateSetpoint(
-            limits = swerveLimits,
+            limits = RobotState.swerveLimits,
             prevSetpoint = currentSetpoint,
             desiredState = desiredChassisSpeeds,
             dt = Robot.periodSeconds
