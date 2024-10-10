@@ -247,7 +247,7 @@ object Robot: LoggedCoroutineRobot() {
         val readyToShoot = Trigger {
             drive.atAutoAimGoal() &&
                     pivot.atGoal &&
-                    flywheels.atSpeed()
+                    flywheels.atGoal
         }.debounce(0.3, Debouncer.DebounceType.kRising)
 
         // Prepare for a speaker shot

@@ -3,7 +3,6 @@ package org.team9432.resources.flywheels
 import com.revrobotics.CANSparkBase
 import com.revrobotics.CANSparkFlex
 import com.revrobotics.CANSparkLowLevel
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import org.team9432.lib.util.temperatureFahrenheit
 
 class FlywheelIONeo: FlywheelIO {
@@ -11,8 +10,6 @@ class FlywheelIONeo: FlywheelIO {
     private val lowerMotor = CANSparkFlex(14, CANSparkLowLevel.MotorType.kBrushless)
     private val upperEncoder = upperMotor.encoder
     private val lowerEncoder = lowerMotor.encoder
-
-    private val ff = SimpleMotorFeedforward(0.0, 0.0021, 0.0)
 
     init {
         upperMotor.inverted = false
@@ -33,11 +30,6 @@ class FlywheelIONeo: FlywheelIO {
     override fun runVoltage(upperVoltage: Double, lowerVoltage: Double) {
         upperMotor.setVoltage(upperVoltage)
         lowerMotor.setVoltage(lowerVoltage)
-    }
-
-    override fun runVelocity(upperRPM: Double, lowerRPM: Double) {
-        upperMotor.setVoltage(ff.calculate(upperRPM))
-        lowerMotor.setVoltage(ff.calculate(lowerRPM))
     }
 
     override fun updateInputs(inputs: FlywheelIO.FlywheelIOInputs) {

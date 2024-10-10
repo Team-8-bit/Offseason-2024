@@ -21,7 +21,5 @@ interface FlywheelIO {
 
     fun runVoltage(upperVoltage: Double, lowerVoltage: Double) {}
 
-    fun runVelocity(upperRPM: Double, lowerRPM: Double) {}
-
     fun updateInputs(inputs: FlywheelIOInputs) {}
 }

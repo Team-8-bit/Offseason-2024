@@ -1,7 +1,6 @@
 package org.team9432.resources.flywheels
 
 import edu.wpi.first.math.MathUtil
-import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.wpilibj.simulation.DCMotorSim
 import org.team9432.Robot
@@ -9,8 +8,6 @@ import org.team9432.Robot
 class FlywheelIOSim: FlywheelIO {
     private val upperSim = DCMotorSim(DCMotor.getNeoVortex(1), reduction, 0.001)
     private val lowerSim = DCMotorSim(DCMotor.getNeoVortex(1), reduction, 0.001)
-
-    private val ff = SimpleMotorFeedforward(0.0, 0.0021, 0.0)
 
     private var upperAppliedVoltage = 0.0
     private var lowerAppliedVoltage = 0.0
@@ -21,14 +18,6 @@ class FlywheelIOSim: FlywheelIO {
 
         upperSim.setInputVoltage(upperAppliedVoltage)
         lowerSim.setInputVoltage(lowerAppliedVoltage)
-    }
-
-    override fun runVelocity(upperRPM: Double, lowerRPM: Double) {
-        upperAppliedVoltage = MathUtil.clamp(ff.calculate(upperRPM), -12.0, 12.0)
-        lowerAppliedVoltage = MathUtil.clamp(ff.calculate(lowerRPM), -12.0, 12.0)
-
-        upperSim.setInputVoltage(upperAppliedVoltage)
-        lowerSim.setInputVoltage(upperAppliedVoltage)
     }
 
     override fun updateInputs(inputs: FlywheelIO.FlywheelIOInputs) {
