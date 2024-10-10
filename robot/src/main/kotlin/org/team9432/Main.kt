@@ -191,7 +191,7 @@ object Robot: LoggedCoroutineRobot() {
         PortForwarder.add(5800, "10.94.32.12", 5800)
         PortForwarder.add(5800, "photonvision.local", 5800)
 
-        `LEDs!`
+//        `LEDs!`
 
         AutoChooser
 
@@ -356,7 +356,7 @@ object Robot: LoggedCoroutineRobot() {
         /**** Misc. ****/
         controller.back().onTrue(Commands.runOnce({ drive.setGyroAngle(allianceSwitch(blue = Rotation2d(), red = Rotation2d(Math.PI))) }).withName("Gyro Reset"))
 
-        controller.povDown().whileTrue(pivot.runGoal(Pivot.Goal.CUSTOM))
+        controller.povDown().whileTrue(flywheels.runGoal(Flywheels.Goal.CUSTOM))
     }
 
     private fun loggerInit() {
