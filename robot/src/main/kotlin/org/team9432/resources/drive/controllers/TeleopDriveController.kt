@@ -17,6 +17,13 @@ import kotlin.math.pow
 import kotlin.math.withSign
 
 class TeleopDriveController: GenericDriveController<ChassisSpeeds>() {
+    private var controllerX = 0.0
+    private var controllerY = 0.0
+    private var controllerR = 0.0
+
+    private val ratelimitX = SlewRateLimiter(20.0)
+    private val ratelimitY = SlewRateLimiter(20.0)
+
     companion object {
         private const val TABLE_KEY = "TeleopDriveController"
 
@@ -25,13 +32,6 @@ class TeleopDriveController: GenericDriveController<ChassisSpeeds>() {
         private val maxLinearVelocity by LoggedTunableNumber("$TABLE_KEY/MaxLinearVelocity", 5.0)
         private val maxRotationVelocityDegPerSec by LoggedTunableNumber("$TABLE_KEY/MaxRotationVelocityDegPerSec", 270.0)
     }
-
-    private var controllerX = 0.0
-    private var controllerY = 0.0
-    private var controllerR = 0.0
-
-    private val ratelimitX = SlewRateLimiter(20.0)
-    private val ratelimitY = SlewRateLimiter(20.0)
 
     fun acceptControllerInput(x: Double, y: Double, r: Double) {
         controllerX = x

@@ -14,6 +14,14 @@ import org.team9432.lib.util.applyFlip
 import org.team9432.lib.util.distanceTo
 
 class ChoreoTrajectoryController(private val trajectory: ChoreoTrajectory): GenericDriveController<ChassisSpeeds>() {
+    private val xController = PIDController(translationkP, 0.0, translationkD)
+    private val yController = PIDController(translationkP, 0.0, translationkD)
+    private val rController = PIDController(rotationkP, 0.0, rotationkD).apply {
+        enableContinuousInput(-Math.PI, Math.PI)
+    }
+
+    private val timer = Timer()
+
     companion object {
         private const val TABLE_KEY = "ChoreoTrajectoryController"
 
@@ -22,14 +30,6 @@ class ChoreoTrajectoryController(private val trajectory: ChoreoTrajectory): Gene
         private val rotationkP by LoggedTunableNumber("$TABLE_KEY/rotationkP", 1.0)
         private val rotationkD by LoggedTunableNumber("$TABLE_KEY/rotationkD", 0.0)
     }
-
-    private val xController = PIDController(translationkP, 0.0, translationkD)
-    private val yController = PIDController(translationkP, 0.0, translationkD)
-    private val rController = PIDController(rotationkP, 0.0, rotationkD).apply {
-        enableContinuousInput(-Math.PI, Math.PI)
-    }
-
-    private val timer = Timer()
 
     init {
         Logger.recordOutput("Trajectory/Poses", *trajectory.poses.map { it.applyFlip() }.toTypedArray())

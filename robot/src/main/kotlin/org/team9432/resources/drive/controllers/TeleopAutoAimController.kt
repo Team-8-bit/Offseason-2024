@@ -12,16 +12,6 @@ import org.team9432.lib.util.epsilonEquals
 import org.team9432.resources.drive.DrivetrainConstants
 
 class TeleopAutoAimController(private val goalSupplier: () -> Rotation2d): GenericDriveController<Double>() {
-    companion object {
-        private const val TABLE_KEY = "TeleopAutoAimController"
-
-        private val kP by LoggedTunableNumber("$TABLE_KEY/kP", 6.0)
-        private val kD by LoggedTunableNumber("$TABLE_KEY/kD", 0.4)
-        private val maxVelocityMultiplier by LoggedTunableNumber("$TABLE_KEY/MaxVelocityPercent", 0.8)
-        private val maxAccelerationMultiplier by LoggedTunableNumber("$TABLE_KEY/MaxAccelerationPercent", 0.7)
-        private val toleranceDegrees by LoggedTunableNumber("$TABLE_KEY/ToleranceDegrees", 1.0)
-    }
-
     private val controller = ProfiledPIDController(0.0, 0.0, 0.0, TrapezoidProfile.Constraints(0.0, 0.0)).apply {
         enableContinuousInput(-Math.PI, Math.PI)
         setTolerance(Units.degreesToRadians(toleranceDegrees))
@@ -30,6 +20,16 @@ class TeleopAutoAimController(private val goalSupplier: () -> Rotation2d): Gener
             RobotPosition.currentPose.rotation.radians,
             RobotPosition.getRobotRelativeChassisSpeeds().omegaRadiansPerSecond
         )
+    }
+
+    companion object {
+        private const val TABLE_KEY = "TeleopAutoAimController"
+
+        private val kP by LoggedTunableNumber("$TABLE_KEY/kP", 6.0)
+        private val kD by LoggedTunableNumber("$TABLE_KEY/kD", 0.4)
+        private val maxVelocityMultiplier by LoggedTunableNumber("$TABLE_KEY/MaxVelocityPercent", 0.8)
+        private val maxAccelerationMultiplier by LoggedTunableNumber("$TABLE_KEY/MaxAccelerationPercent", 0.7)
+        private val toleranceDegrees by LoggedTunableNumber("$TABLE_KEY/ToleranceDegrees", 1.0)
     }
 
     override fun calculate(): Double {
