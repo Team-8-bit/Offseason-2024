@@ -209,9 +209,7 @@ class Drive(
         currentControlMode = ControlMode.TELEOP
     }
 
-    fun getWheelRadiusCharacterizationPositions(): List<Double> {
-        return modules.map { it.drivePositionRads }
-    }
+    fun getWheelRadiusCharacterizationPositions() = modules.map { it.drivePositionRads }
 
     private val xChoreoPid = PIDController(1.0, 0.0, 0.0)
     private val yChoreoPid = PIDController(1.0, 0.0, 0.0)
