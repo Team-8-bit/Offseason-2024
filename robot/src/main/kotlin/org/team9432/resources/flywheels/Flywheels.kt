@@ -16,11 +16,14 @@ class Flywheels(private val io: FlywheelIO): SubsystemBase() {
     private val kP = LoggedTunableNumber("Flywheels/kP", 0.0)
     private val kI = LoggedTunableNumber("Flywheels/kI", 0.0)
     private val kD = LoggedTunableNumber("Flywheels/kD", 0.0)
-    private val kS = LoggedTunableNumber("Flywheels/kS", 0.0)
-    private val kV = LoggedTunableNumber("Flywheels/kV", 0.0021)
+    private val kS = LoggedTunableNumber("Flywheels/kS", 0.15)
+    private val kV = LoggedTunableNumber("Flywheels/kV", 0.00209)
     private val kA = LoggedTunableNumber("Flywheels/kA", 0.0)
-    private val maxAcceleration = LoggedTunableNumber("Flywheels/MaxAccelerationRPMPerSec", 0.0)
+    private val maxAcceleration = LoggedTunableNumber("Flywheels/MaxAccelerationRPMPerSec", 8000.0)
     private val prepareShootPercentage by LoggedTunableNumber("Flywheels/PrepareShootPercentage", 0.75)
+
+    private val customUpperSpeed by LoggedTunableNumber("Flywheels/CustomUpperSpeed", 0.0)
+    private val customLowerSpeed by LoggedTunableNumber("Flywheels/CustomLowerSpeed", 0.0)
 
     private val inputs = LoggedFlywheelIOInputs()
 
@@ -41,6 +44,7 @@ class Flywheels(private val io: FlywheelIO): SubsystemBase() {
         SUBWOOFER({ ShooterSpeeds(2000.0, 5000.0) }),
         NOTE_ALIGN({ ShooterSpeeds(-200.0, -200.0) }),
         FEED_SPEED({ ShooterSpeeds(4000.0, 4000.0) }),
+        CUSTOM({ ShooterSpeeds(0.0, 0.0) }),
         AMP({ ShooterSpeeds(110.0, 4600.0) });
     }
 
@@ -85,15 +89,20 @@ class Flywheels(private val io: FlywheelIO): SubsystemBase() {
             lowerGoal = shootSpeeds.lowerRPM * prepareShootPercentage
         }
 
-        upperProfile.setGoal(upperGoal, inputs.upperVelocityRPM)
-        lowerProfile.setGoal(lowerGoal, inputs.lowerVelocityRPM)
+        if (goal == Goal.CUSTOM) {
+            upperGoal = customUpperSpeed
+            lowerGoal = customLowerSpeed
+        }
+
+        upperProfile.goal = upperGoal
+        lowerProfile.goal = lowerGoal
 
         val upperSetpoint = upperProfile.calculateSetpoint()
         val lowerSetpoint = lowerProfile.calculateSetpoint()
 
         io.runVoltage(
             upperVoltage = feedforward.calculate(upperSetpoint) + upperFeedback.calculate(inputs.upperVelocityRPM, upperSetpoint),
-            lowerVoltage = feedforward.calculate(upperSetpoint) + lowerFeedback.calculate(inputs.lowerVelocityRPM, lowerSetpoint),
+            lowerVoltage = feedforward.calculate(lowerSetpoint) + lowerFeedback.calculate(inputs.lowerVelocityRPM, lowerSetpoint),
         )
 
         Logger.recordOutput("Flywheels/UpperSetpointRPM", upperSetpoint)
@@ -105,10 +114,7 @@ class Flywheels(private val io: FlywheelIO): SubsystemBase() {
     }
 
     private fun setGoal(goal: Goal) {
-        currentTargetSpeeds = goal.getSpeeds()
-        val (upperRPM, lowerRPM) = currentTargetSpeeds
-        upperProfile.setGoal(upperRPM, inputs.upperVelocityRPM)
-        lowerProfile.setGoal(lowerRPM, inputs.lowerVelocityRPM)
+        this.goal = goal
     }
 
     fun runGoal(newGoal: Goal): Command = startEnd({ setGoal(newGoal) }, { setGoal(Goal.IDLE) })
