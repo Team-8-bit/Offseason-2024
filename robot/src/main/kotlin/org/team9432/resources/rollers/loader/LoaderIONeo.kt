@@ -12,7 +12,7 @@ class LoaderIONeo: LoaderIO {
     init {
         motor.inverted = false
         motor.enableVoltageCompensation(11.0)
-        motor.setSmartCurrentLimit(20)
+        motor.setSmartCurrentLimit(25)
         motor.idleMode = CANSparkBase.IdleMode.kBrake
         motor.burnFlash()
     }
