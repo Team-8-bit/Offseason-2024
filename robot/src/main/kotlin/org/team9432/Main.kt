@@ -32,10 +32,7 @@ import org.team9432.lib.simulation.competitionfield.simulations.Crescendo2024Fie
 import org.team9432.lib.simulation.competitionfield.simulations.IntakeSimulation
 import org.team9432.lib.simulation.competitionfield.simulations.SwerveDriveSimulation
 import org.team9432.lib.unit.*
-import org.team9432.lib.util.afterSimCondition
-import org.team9432.lib.util.afterSimDelay
-import org.team9432.lib.util.allianceSwitch
-import org.team9432.lib.util.applyFlip
+import org.team9432.lib.util.*
 import org.team9432.resources.drive.Drive
 import org.team9432.resources.drive.DrivetrainConstants.simProfile
 import org.team9432.resources.drive.TunerConstants
@@ -226,8 +223,8 @@ object Robot: LoggedCoroutineRobot() {
             )
         }.withName("Teleop Drive")
 
-        fun driveAimCommand(target: () -> Rotation2d) =
-            Commands.startEnd({ drive.setAutoAimGoal(target) }, { drive.clearAutoAimGoal() })
+        fun driveAimCommand(target: () -> Rotation2d, toleranceSupplier: () -> Double) =
+            Commands.startEnd({ drive.setAutoAimGoal(target, toleranceSupplier) }, { drive.clearAutoAimGoal() })
                 .onlyIf { !RobotState.automationDisabled }
 
         fun pivotAimCommand(goal: Pivot.Goal) =
@@ -248,7 +245,12 @@ object Robot: LoggedCoroutineRobot() {
             drive.atAutoAimGoal() &&
                     pivot.atGoal &&
                     flywheels.atGoal
-        }.debounce(0.3, Debouncer.DebounceType.kRising)
+        }.debounce(0.4, Debouncer.DebounceType.kRising)
+
+        val speakerToleranceSupplier = {
+            val goalDistance = RobotPosition.currentPose.distanceTo(PositionConstants.speakerAimPose).inMeters
+            0.8 / goalDistance
+        }
 
         // Prepare for a speaker shot
         controller
@@ -256,7 +258,7 @@ object Robot: LoggedCoroutineRobot() {
             .and(controller.leftBumper().negate()) // Don't aim and stuff while trying to intake
             .and(inSpeakerPrepareRange.or(RobotState::automationDisabled))
             .whileTrue(
-                driveAimCommand { RobotPosition.getStandardAimingParameters().drivetrainAngle }
+                driveAimCommand({ RobotPosition.getStandardAimingParameters().drivetrainAngle }, speakerToleranceSupplier)
                     .alongWith(
                         flywheels.runGoal(Flywheels.Goal.SHOOT),
                         pivotAimCommand(Pivot.Goal.SPEAKER_AIM)
@@ -278,7 +280,7 @@ object Robot: LoggedCoroutineRobot() {
                     rollers.runGoal(Rollers.Goal.SHOOTER_FEED),
                     flywheels.runGoal(Flywheels.Goal.SHOOT),
                     pivotAimCommand(Pivot.Goal.SPEAKER_AIM),
-                    driveAimCommand { RobotPosition.getStandardAimingParameters().drivetrainAngle },
+                    driveAimCommand({ RobotPosition.getStandardAimingParameters().drivetrainAngle }, speakerToleranceSupplier),
                     Commands.runOnce({ noteSimulation?.animateShoot() })
                 )
                     .withName("Shoot Speaker")
@@ -293,7 +295,7 @@ object Robot: LoggedCoroutineRobot() {
             .b()
             .and(controller.leftBumper().negate()) // Don't aim while trying to intake
             .whileTrue(
-                driveAimCommand { 90.degrees.asRotation2d }
+                driveAimCommand({ 90.degrees.asRotation2d }, toleranceSupplier = {1.0})
                     .alongWith(
                         flywheels.runGoal(Flywheels.Goal.AMP),
                         pivotAimCommand(Pivot.Goal.AMP)
@@ -313,7 +315,7 @@ object Robot: LoggedCoroutineRobot() {
                     rollers.runGoal(Rollers.Goal.SHOOTER_FEED),
                     flywheels.runGoal(Flywheels.Goal.AMP),
                     pivotAimCommand(Pivot.Goal.AMP),
-                    driveAimCommand { 90.degrees.asRotation2d }
+                    driveAimCommand({ 90.degrees.asRotation2d }, toleranceSupplier = {1.0})
                 )
                     .withName("Shoot Amp")
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming) // Don't let this be interrupted
@@ -323,6 +325,7 @@ object Robot: LoggedCoroutineRobot() {
         /**** Intake ****/
         controller.leftBumper()
             .and(DriverStation::isEnabled) // I think this makes it so it runs if you are holding the button while it enables
+            .and(Beambreak.upperBeambreak::isClear)
             .whileTrue(
                 Commands.parallel(
                     pivotAimCommand(Pivot.Goal.INTAKE),

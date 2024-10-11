@@ -190,8 +190,8 @@ class Drive(
         currentControlMode = ControlMode.TELEOP
     }
 
-    fun setAutoAimGoal(goal: () -> Rotation2d) {
-        teleopAutoAimController = TeleopAutoAimController(goal)
+    fun setAutoAimGoal(goal: () -> Rotation2d, toleranceSupplier: () -> Double) {
+        teleopAutoAimController = TeleopAutoAimController(goal, toleranceSupplier)
     }
 
     fun atAutoAimGoal() = teleopAutoAimController == null || teleopAutoAimController?.atGoal() == true
