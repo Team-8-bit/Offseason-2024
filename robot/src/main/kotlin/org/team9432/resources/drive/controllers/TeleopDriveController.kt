@@ -27,7 +27,7 @@ class TeleopDriveController: GenericDriveController<ChassisSpeeds>() {
     companion object {
         private const val TABLE_KEY = "TeleopDriveController"
 
-        private val linearDeadband by LoggedTunableNumber("$TABLE_KEY/LinearDeadband", 0.15)
+        private val linearDeadband by LoggedTunableNumber("$TABLE_KEY/LinearDeadband", 0.075)
         private val rotationDeadband by LoggedTunableNumber("$TABLE_KEY/RotationDeadband", 0.0)
         private val maxLinearVelocity by LoggedTunableNumber("$TABLE_KEY/MaxLinearVelocity", 5.0)
         private val maxRotationVelocityDegPerSec by LoggedTunableNumber("$TABLE_KEY/MaxRotationVelocityDegPerSec", 270.0)

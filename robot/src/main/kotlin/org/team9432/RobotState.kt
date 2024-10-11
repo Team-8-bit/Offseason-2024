@@ -10,6 +10,7 @@ object RobotState {
     var automationDisabled: Boolean = false
     var pivotEnabled: Boolean = true
     var shootOnMoveEnabled: Boolean = true
+    var ampAlignEnabled: Boolean = true
 
     val swerveLimits = SwerveSetpointGenerator.ModuleLimits(
         maxDriveVelocity = 4.0,
