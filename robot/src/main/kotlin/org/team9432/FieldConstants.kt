@@ -37,19 +37,5 @@ object FieldConstants {
     val centerNoteFour = Translation2d(centerX, centerY + (centerNoteYSpacing * -1))
     val centerNoteFive = Translation2d(centerX, centerY + (centerNoteYSpacing * -2))
 
-    val allNotes = setOf(
-        blueAmpSpikeNote,
-        blueCenterSpikeNote,
-        blueStageSpikeNote,
-        redAmpSpikeNote,
-        redCenterSpikeNote,
-        redStageSpikeNote,
-        centerNoteOne,
-        centerNoteTwo,
-        centerNoteThree,
-        centerNoteFour,
-        centerNoteFive
-    )
-
     val speakerYCoordinate = centerY + spikeNoteYSpacing
 }

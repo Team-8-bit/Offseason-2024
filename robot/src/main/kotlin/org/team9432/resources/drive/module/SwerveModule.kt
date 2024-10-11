@@ -1,15 +1,15 @@
 package org.team9432.resources.drive.module
 
-import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.util.Units
 import org.littletonrobotics.junction.Logger
-import org.team9432.lib.util.simSwitch
+import org.team9432.lib.dashboard.LoggedTunableNumber
 import org.team9432.resources.drive.DrivetrainConstants.WHEEL_RADIUS_METERS
-import kotlin.math.cos
+import org.team9432.resources.drive.TunerConstants
 
 
 class SwerveModule(private val io: ModuleIO, private val name: String) {
@@ -18,10 +18,20 @@ class SwerveModule(private val io: ModuleIO, private val name: String) {
     private var angleSetpoint: Rotation2d? = null
     private var speedSetpoint: Double? = null
 
-    private val driveFeedforward = SimpleMotorFeedforward(0.1, 0.13)
+    private var driveFeedforward = SimpleMotorFeedforward(0.0, 0.0)
 
     var odometryPositions: Array<SwerveModulePosition> = emptyArray()
         private set
+
+    companion object {
+        val drivekP: LoggedTunableNumber = LoggedTunableNumber("Drive/Module/DrivekP", 35.0)
+        val drivekD: LoggedTunableNumber = LoggedTunableNumber("Drive/Module/DrivekD", 0.0)
+        val drivekS: LoggedTunableNumber = LoggedTunableNumber("Drive/Module/DrivekS", 5.0)
+        val drivekV: LoggedTunableNumber = LoggedTunableNumber("Drive/Module/DrivekV", 0.0)
+        val kT = 1.0 / DCMotor.getKrakenX60Foc(1).KtNMPerAmp
+//        val turnkP: LoggedTunableNumber = LoggedTunableNumber("Drive/Module/TurnkP", moduleConstants.turnkP())
+//        val turnkD: LoggedTunableNumber = LoggedTunableNumber("Drive/Module/TurnkD", moduleConstants.turnkD())
+    }
 
     init {
         io.setDriveBrake(true)
@@ -33,6 +43,16 @@ class SwerveModule(private val io: ModuleIO, private val name: String) {
     fun periodic() {
         Logger.processInputs("Drive/Module-$name", inputs)
 
+        LoggedTunableNumber.ifChanged(
+            hashCode(),
+            { driveFeedforward = SimpleMotorFeedforward(drivekS.get(), drivekV.get(), 0.0) },
+            drivekS,
+            drivekV
+        )
+        LoggedTunableNumber.ifChanged(
+            hashCode(), { io.setDrivePID(drivekP.get(), 0.0, drivekD.get()) }, drivekP, drivekD
+        )
+
         trackClosedLoopStates()
 
         odometryPositions = Array(inputs.odometryDrivePositionsRotations.size) { i ->
@@ -43,35 +63,44 @@ class SwerveModule(private val io: ModuleIO, private val name: String) {
     }
 
     private fun trackClosedLoopStates() {
-        val angleTarget = angleSetpoint
-        val speedTarget = speedSetpoint
-        // Run closed loop turn control
-        if (angleTarget != null) {
-            io.runSteerPosition(angleTarget)
-
-            // Run closed loop drive control
-            // Only if closed loop turn control is running
-            if (speedTarget != null) {
-                // Scale velocity based on turn error
-
-                // When the error is 90°, the velocity setpoint should be 0. As the wheel turns
-                // towards the setpoint, its velocity should increase. This is achieved by
-                // taking the component of the velocity in the direction of the setpoint.
-                val angleAdjustedTarget = speedTarget * cos(angleTarget.minus(inputs.steerAbsolutePosition).radians)
-                val deadbandedTarget = MathUtil.applyDeadband(angleAdjustedTarget, .025)
-
-                // Run drive controller
-                io.runDriveVelocity(deadbandedTarget, simSwitch(real = 0.0, sim = driveFeedforward.calculate(deadbandedTarget / WHEEL_RADIUS_METERS)))
-            }
-        }
+//        val angleTarget = angleSetpoint
+//        val speedTarget = speedSetpoint
+//        // Run closed loop turn control
+//        if (angleTarget != null) {
+//            io.runSteerPosition(angleTarget)
+//
+//            // Run closed loop drive control
+//            // Only if closed loop turn control is running
+//            if (speedTarget != null) {
+//                // Scale velocity based on turn error
+//
+//                // When the error is 90°, the velocity setpoint should be 0. As the wheel turns
+//                // towards the setpoint, its velocity should increase. This is achieved by
+//                // taking the component of the velocity in the direction of the setpoint.
+//                val angleAdjustedTarget = speedTarget * cos(angleTarget.minus(inputs.steerAbsolutePosition).radians)
+//                val deadbandedTarget = MathUtil.applyDeadband(angleAdjustedTarget, .025)
+//
+//                // Run drive controller
+//                io.runDriveVelocity(deadbandedTarget, simSwitch(real = 0.0, sim = driveFeedforward.calculate(deadbandedTarget / WHEEL_RADIUS_METERS)))
+//            }
+//        }
     }
 
     /**
      * Runs the module with the specified setpoint state. Returns the optimized state.
      */
-    fun runSetpoint(state: SwerveModuleState) {
-        this.angleSetpoint = state.angle
-        this.speedSetpoint = state.speedMetersPerSecond
+    fun runSetpoint(setpoint: SwerveModuleState, torqueFF: SwerveModuleState) {
+        this.angleSetpoint = setpoint.angle
+        this.speedSetpoint = setpoint.speedMetersPerSecond
+
+        val wheelTorqueNm = torqueFF.speedMetersPerSecond
+        io.runDriveVelocitySetpoint(
+            setpoint.speedMetersPerSecond / Units.inchesToMeters(TunerConstants.kWheelRadiusInches),
+            driveFeedforward.calculate(setpoint.speedMetersPerSecond / Units.inchesToMeters(TunerConstants.kWheelRadiusInches))
+                    + ((wheelTorqueNm / TunerConstants.kDriveGearRatio) * kT)
+        )
+
+        io.runSteerPosition(setpoint.angle)
     }
 
     /** The current turn angle of the module. */

@@ -36,7 +36,7 @@ interface ModuleIO {
 
     fun runSteerVoltage(volts: Double) {}
 
-    fun runDriveVelocity(metersPerSecond: Double, feedforwardVolts: Double) {}
+    fun runDriveVelocitySetpoint(velocityRadPerSec: Double, feedforward: Double) {}
 
     fun runSteerPosition(angle: Rotation2d) {}
 

@@ -1,26 +1,21 @@
 package org.team9432.resources.drive.controllers
 
-import com.choreo.lib.ChoreoTrajectory
+import choreo.trajectory.SwerveSample
 import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
-import edu.wpi.first.wpilibj.DriverStation.Alliance
-import edu.wpi.first.wpilibj.Timer
 import org.littletonrobotics.junction.Logger
-import org.team9432.Robot
 import org.team9432.RobotPosition
 import org.team9432.lib.dashboard.LoggedTunableNumber
 import org.team9432.lib.unit.inMeters
-import org.team9432.lib.util.applyFlip
 import org.team9432.lib.util.distanceTo
 
-class ChoreoTrajectoryController(private val trajectory: ChoreoTrajectory): GenericDriveController<ChassisSpeeds>() {
+class ChoreoTrajectoryController {
     private val xController = PIDController(translationkP, 0.0, translationkD)
     private val yController = PIDController(translationkP, 0.0, translationkD)
     private val rController = PIDController(rotationkP, 0.0, rotationkD).apply {
         enableContinuousInput(-Math.PI, Math.PI)
     }
-
-    private val timer = Timer()
 
     companion object {
         private const val TABLE_KEY = "ChoreoTrajectoryController"
@@ -31,23 +26,16 @@ class ChoreoTrajectoryController(private val trajectory: ChoreoTrajectory): Gene
         private val rotationkD by LoggedTunableNumber("$TABLE_KEY/rotationkD", 0.0)
     }
 
-    init {
-        Logger.recordOutput("Trajectory/Poses", *trajectory.poses.map { it.applyFlip() }.toTypedArray())
-        timer.start()
-    }
-
-    override fun calculate(): ChassisSpeeds {
+    fun calculate(targetPose: Pose2d, sample: SwerveSample): ChassisSpeeds {
         val currentPose = RobotPosition.currentPose
 
-        val targetState = trajectory.sample(timer.get(), Robot.alliance == Alliance.Red)
+        val xFF = sample.vx
+        val yFF = sample.vy
+        val rotationFF = sample.omega
 
-        val xFF = targetState.velocityX
-        val yFF = targetState.velocityY
-        val rotationFF = targetState.angularVelocity
-
-        val xFeedback = xController.calculate(currentPose.x, targetState.x)
-        val yFeedback = yController.calculate(currentPose.y, targetState.y)
-        val rotationFeedback = rController.calculate(currentPose.rotation.radians, targetState.heading)
+        val xFeedback = xController.calculate(currentPose.x, sample.x)
+        val yFeedback = yController.calculate(currentPose.y, sample.y)
+        val rotationFeedback = rController.calculate(currentPose.rotation.radians, sample.heading)
 
         val output = ChassisSpeeds.fromFieldRelativeSpeeds(
             xFF + xFeedback,
@@ -56,17 +44,12 @@ class ChoreoTrajectoryController(private val trajectory: ChoreoTrajectory): Gene
             currentPose.rotation
         )
 
-        Logger.recordOutput("$TABLE_KEY/SetpointPose", targetState.pose)
-        Logger.recordOutput("$TABLE_KEY/SetpointSpeeds", targetState.chassisSpeeds)
+        Logger.recordOutput("$TABLE_KEY/SetpointPose", sample.pose)
+        Logger.recordOutput("$TABLE_KEY/SetpointSpeeds", sample.chassisSpeeds)
         Logger.recordOutput("$TABLE_KEY/OutputSpeeds", output)
-        Logger.recordOutput("$TABLE_KEY/TranslationErrorMeters", currentPose.distanceTo(targetState.pose).inMeters)
-        Logger.recordOutput("$TABLE_KEY/RotationErrorDegrees", currentPose.rotation.minus(targetState.pose.rotation).degrees)
-        Logger.recordOutput("$TABLE_KEY/Finished", atGoal())
+        Logger.recordOutput("$TABLE_KEY/TranslationErrorMeters", currentPose.distanceTo(sample.pose).inMeters)
+        Logger.recordOutput("$TABLE_KEY/RotationErrorDegrees", currentPose.rotation.minus(sample.pose.rotation).degrees)
 
         return output
-    }
-
-    override fun atGoal(): Boolean {
-        return timer.hasElapsed(trajectory.totalTime)
     }
 }

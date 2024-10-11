@@ -1,12 +1,15 @@
 package org.team9432.resources.drive
 
-import com.choreo.lib.ChoreoTrajectory
+import edu.wpi.first.math.VecBuilder
+import edu.wpi.first.math.Vector
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.math.numbers.N2
+import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.littletonrobotics.junction.Logger
@@ -16,7 +19,6 @@ import org.team9432.RobotState
 import org.team9432.lib.simulation.competitionfield.simulations.SwerveDriveSimulation
 import org.team9432.lib.util.SwerveSetpointGenerator
 import org.team9432.resources.drive.DrivetrainConstants.DRIVE_KINEMATICS
-import org.team9432.resources.drive.controllers.ChoreoTrajectoryController
 import org.team9432.resources.drive.controllers.TeleopAutoAimController
 import org.team9432.resources.drive.controllers.TeleopDriveController
 import org.team9432.resources.drive.gyro.GyroIO
@@ -61,7 +63,8 @@ class Drive(
 
     private var characterizationInput = 0.0
     private var teleopAutoAimController: TeleopAutoAimController? = null
-    private var trajectoryController: ChoreoTrajectoryController? = null
+    private var currentTrajectorySpeeds: ChassisSpeeds? = null
+    private var currentTrajectoryModuleForces: List<Vector<N2>>? = null
     private var teleopDriveController = TeleopDriveController()
 
     private val setpointGenerator = SwerveSetpointGenerator(DRIVE_KINEMATICS, DrivetrainConstants.MODULE_TRANSLATIONS.toTypedArray())
@@ -90,9 +93,28 @@ class Drive(
             dt = Robot.periodSeconds
         )
 
+        val optimizedSetpointStates = arrayOfNulls<SwerveModuleState>(4)
+        val optimizedSetpointTorques = arrayOfNulls<SwerveModuleState>(4)
+
         for (i in modules.indices) {
-            modules[i].runSetpoint(currentSetpoint.moduleStates[i])
+            optimizedSetpointStates[i] = SwerveModuleState.optimize(currentSetpoint.moduleStates[i], modules[i].angle)
+
+            val finalModuleForces = currentTrajectoryModuleForces
+            if (currentControlMode == ControlMode.TRAJECTORY && finalModuleForces != null) {
+                // Only do torque FF in trajectory mode
+                val wheelDirection = VecBuilder.fill(
+                    optimizedSetpointStates[i]!!.angle.cos,
+                    optimizedSetpointStates[i]!!.angle.sin
+                )
+                val wheelForces = finalModuleForces[i]
+                val wheelTorque = wheelForces.dot(wheelDirection) * Units.inchesToMeters(TunerConstants.kWheelRadiusInches)
+                optimizedSetpointTorques[i] = SwerveModuleState(wheelTorque, optimizedSetpointStates[i]!!.angle)
+            } else {
+                optimizedSetpointTorques[i] = SwerveModuleState(0.0, optimizedSetpointStates[i]!!.angle)
+            }
+            modules[i].runSetpoint(optimizedSetpointStates[i]!!, optimizedSetpointTorques[i]!!)
         }
+//        modules[i].runSetpoint(currentSetpoint.moduleStates[i])
 
         Logger.recordOutput("Drive/Un254dSetpoints", *DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds))
         Logger.recordOutput("Drive/Setpoints", *currentSetpoint.moduleStates)
@@ -114,7 +136,7 @@ class Drive(
             }
 
             ControlMode.TRAJECTORY -> {
-                desiredChassisSpeeds = trajectoryController?.calculate() ?: ChassisSpeeds()
+                desiredChassisSpeeds = currentTrajectorySpeeds ?: ChassisSpeeds()
             }
 
             ControlMode.WHEEL_RADIUS_CHARACTERIZATION -> {
@@ -178,15 +200,15 @@ class Drive(
         }
     }
 
-    fun setTrajectory(trajectory: ChoreoTrajectory) {
+    fun acceptTrajectoryInput(speeds: ChassisSpeeds) {
         if (DriverStation.isAutonomousEnabled()) {
             currentControlMode = ControlMode.TRAJECTORY
-            trajectoryController = ChoreoTrajectoryController(trajectory)
+            currentTrajectorySpeeds = speeds
         }
     }
 
-    fun clearTrajectory() {
-        trajectoryController = null
+    fun clearTrajectoryInput() {
+        currentTrajectorySpeeds = null
         currentControlMode = ControlMode.TELEOP
     }
 

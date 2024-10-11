@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.MotionMagicExpoVoltage
 import com.ctre.phoenix6.controls.NeutralOut
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
 import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.hardware.CANcoder
 import com.ctre.phoenix6.hardware.TalonFX
@@ -20,6 +21,7 @@ import org.team9432.resources.drive.DrivetrainConstants.DRIVE_CURRENT_LIMIT
 import org.team9432.resources.drive.DrivetrainConstants.DRIVE_GEAR_RATIO
 import org.team9432.resources.drive.DrivetrainConstants.ODOMETRY_FREQUENCY
 import org.team9432.resources.drive.DrivetrainConstants.STEER_CURRENT_LIMIT
+import org.team9432.resources.drive.TunerConstants
 import org.team9432.resources.drive.module.ModuleIO.ModuleIOInputs
 import org.team9432.resources.drive.odometrythread.OdometryThreadReal
 import java.util.*
@@ -61,6 +63,7 @@ class ModuleIOKraken(private val moduleConstants: SwerveModuleConstants, canbusN
 
     private val rotationsPerWheelRotation: Double = moduleConstants.DriveMotorGearRatio
     private val metersPerWheelRotation: Double = Math.PI * 2 * Units.inchesToMeters(moduleConstants.WheelRadius)
+    private val velocityTorqueCurrentFOC = VelocityTorqueCurrentFOC(0.0).withUpdateFreqHz(0.0)
     private val driveRotationsPerMeter = rotationsPerWheelRotation / metersPerWheelRotation
 
     private val driveConfig = getDriveConfig(moduleConstants)
@@ -116,8 +119,13 @@ class ModuleIOKraken(private val moduleConstants: SwerveModuleConstants, canbusN
         steerMotor.setControl(steerVoltageMotionMagicControl.withPosition(angle.rotations))
     }
 
-    override fun runDriveVelocity(metersPerSecond: Double, feedforwardVolts: Double) {
-        driveMotor.setControl(driveVoltageOpenLoopControl.withOutput(metersPerSecond / moduleConstants.SpeedAt12VoltsMps * 12.0))
+    override fun runDriveVelocitySetpoint(velocityRadPerSec: Double, feedforward: Double) {
+        driveMotor.setControl(
+            velocityTorqueCurrentFOC
+                .withVelocity(Units.radiansToRotations(velocityRadPerSec))
+                .withFeedForward(feedforward)
+        )
+//        driveMotor.setControl(driveVoltageOpenLoopControl.withOutput(metersPerSecond / moduleConstants.SpeedAt12VoltsMps * 12.0))
     }
 
     override fun setDrivePID(p: Double, i: Double, d: Double) {
@@ -156,6 +164,7 @@ class ModuleIOKraken(private val moduleConstants: SwerveModuleConstants, canbusN
         CurrentLimits.SupplyCurrentLimitEnable = true
         MotorOutput.Inverted = if (moduleConstants.DriveMotorInverted) InvertedValue.Clockwise_Positive else InvertedValue.CounterClockwise_Positive
         MotorOutput.NeutralMode = NeutralModeValue.Brake
+        Feedback.SensorToMechanismRatio = TunerConstants.kDriveGearRatio
         TorqueCurrent.PeakForwardTorqueCurrent = 60.0
         TorqueCurrent.PeakReverseTorqueCurrent = -60.0
         CurrentLimits.StatorCurrentLimit = 60.0

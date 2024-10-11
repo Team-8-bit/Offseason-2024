@@ -1,6 +1,7 @@
 @file:JvmName("Main") // set the compiled Java class name to "Main" rather than "MainKt"
 package org.team9432
 
+import choreo.auto.AutoChooser
 import com.ctre.phoenix6.CANBus
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.math.geometry.Pose2d
@@ -23,7 +24,6 @@ import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.networktables.NT4Publisher
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
-import org.team9432.auto.AutoChooser
 import org.team9432.lib.Library
 import org.team9432.lib.coroutines.LoggedCoroutineRobot
 import org.team9432.lib.coroutines.Team8BitRobot.Runtime.*
@@ -192,8 +192,6 @@ object Robot: LoggedCoroutineRobot() {
         PortForwarder.add(5800, "photonvision.local", 5800)
 
         `LEDs!`
-
-        AutoChooser
 
         DriverStation.silenceJoystickConnectionWarning(true)
     }
@@ -431,6 +429,7 @@ object Robot: LoggedCoroutineRobot() {
     }
 
     override suspend fun autonomous() {
+        Autos(drive, pivot, rollers, flywheels, noteSimulation).farsideTriple().schedule()
 //        RobotController.setAction {
 //            val trajectoryGroup = Choreo.getTrajectoryGroup("testing")
 //            Swerve.resetOdometry(trajectoryGroup.first().getAutoFlippedInitialPose())

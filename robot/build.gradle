@@ -38,12 +38,6 @@ deploy {
     }
 }
 
-tasks.register('generateTrajectories', JavaExec) {
-    dependsOn "classes"
-    mainClass = "org.team9432.auto.paths.MainKt"
-    classpath = sourceSets.main.runtimeClasspath
-}
-
 project.compileKotlin.dependsOn(createVersionFile)
 gversion {
     srcDir       = "src/main/kotlin/"
@@ -89,7 +83,6 @@ def includeDesktopSupport = false
 dependencies {
     // Team libraries
     implementation("org.team9432.lib:robot-lib")
-    implementation("org.team9432.lib:choreo-generator")
     implementation("org.team9432.lib:annotation")
     ksp("org.team9432.lib:annotation")
 
@@ -124,7 +117,7 @@ dependencies {
     nativeRelease("org.littletonrobotics.akit.conduit:conduit-wpilibio:3.2.1")
 
     // Choreolib
-    implementation("com.choreo.lib:ChoreoLib-java:2024.2.3")
+    implementation("choreo:ChoreoLib-java:2025.0.0-beta-2")
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Phoenix 6
