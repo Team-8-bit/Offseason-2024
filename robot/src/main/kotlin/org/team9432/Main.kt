@@ -230,13 +230,6 @@ object Robot: LoggedCoroutineRobot() {
         fun pivotAimCommand(goal: Pivot.Goal) =
             pivot.runGoal(goal).onlyIf { !RobotState.automationDisabled && RobotState.pivotEnabled }
 
-        fun flywheelSpeakerSpeedCommand() =
-            Commands.either(
-                flywheels.runGoal(Flywheels.Goal.AMP),
-                flywheels.runGoal(Flywheels.Goal.SHOOT),
-                RobotState::pivotEnabled
-            )
-
         /**** Shooting ****/
         val inSpeakerScoringRange = Trigger(RobotPosition::isInSpeakerScoringRange)
         val inSpeakerPrepareRange = Trigger(RobotPosition::isInSpeakerPrepareRange)
@@ -295,12 +288,11 @@ object Robot: LoggedCoroutineRobot() {
             .b()
             .and(controller.leftBumper().negate()) // Don't aim while trying to intake
             .whileTrue(
-                driveAimCommand({ 90.degrees.asRotation2d }, toleranceSupplier = {1.0})
-                    .alongWith(
-                        flywheels.runGoal(Flywheels.Goal.AMP),
-                        pivotAimCommand(Pivot.Goal.AMP)
-                    )
-                    .withName("Prepare Amp")
+                Commands.parallel(
+                    driveAimCommand({ 90.degrees.asRotation2d }, toleranceSupplier = { 1.0 }).onlyIf(RobotState::ampAlignEnabled),
+                    flywheels.runGoal(Flywheels.Goal.AMP),
+                    pivotAimCommand(Pivot.Goal.AMP)
+                ).withName("Prepare Amp")
             )
 
         // Execute amp shot
@@ -315,7 +307,7 @@ object Robot: LoggedCoroutineRobot() {
                     rollers.runGoal(Rollers.Goal.SHOOTER_FEED),
                     flywheels.runGoal(Flywheels.Goal.AMP),
                     pivotAimCommand(Pivot.Goal.AMP),
-                    driveAimCommand({ 90.degrees.asRotation2d }, toleranceSupplier = {1.0})
+                    driveAimCommand({ 90.degrees.asRotation2d }, toleranceSupplier = { 1.0 }).onlyIf(RobotState::ampAlignEnabled)
                 )
                     .withName("Shoot Amp")
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming) // Don't let this be interrupted
