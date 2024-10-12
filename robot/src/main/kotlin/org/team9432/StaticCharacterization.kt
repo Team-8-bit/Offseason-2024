@@ -1,4 +1,4 @@
-package org.team9432.commands
+package org.team9432
 
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.Command
