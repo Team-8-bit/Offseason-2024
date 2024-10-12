@@ -87,10 +87,10 @@ class ModuleIOSim: ModuleIO, SimulatedSwerveModule() {
         angleSetpoint = angle
     }
 
-    override fun runDriveVelocity(metersPerSecond: Double, feedforwardVolts: Double) {
-        speedFeedforward = feedforwardVolts
-        speedSetpoint = metersPerSecond
-    }
+//    override fun runDriveVelocity(metersPerSecond: Double, feedforwardVolts: Double) {
+//        speedFeedforward = feedforwardVolts
+//        speedSetpoint = metersPerSecond
+//    }
 
     override fun setDrivePID(p: Double, i: Double, d: Double) {
         driveFeedback.apply {

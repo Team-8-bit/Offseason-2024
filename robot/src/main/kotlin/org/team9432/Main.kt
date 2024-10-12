@@ -1,6 +1,7 @@
 @file:JvmName("Main") // set the compiled Java class name to "Main" rather than "MainKt"
 package org.team9432
 
+import choreo.Choreo
 import choreo.auto.AutoChooser
 import com.ctre.phoenix6.CANBus
 import edu.wpi.first.math.filter.Debouncer
@@ -24,6 +25,7 @@ import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.networktables.NT4Publisher
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
+import org.team9432.commands.StaticCharacterization
 import org.team9432.lib.Library
 import org.team9432.lib.coroutines.LoggedCoroutineRobot
 import org.team9432.lib.coroutines.Team8BitRobot.Runtime.*
@@ -86,6 +88,11 @@ object Robot: LoggedCoroutineRobot() {
 
         loggerInit()
 
+        // Run this a few times now so it isn't slow at the start of auto
+        for (i in 0..25) {
+            Choreo.loadTrajectory("Test Path")
+        }
+
         when (runtime) {
             REAL -> {
                 drive = Drive(
@@ -131,7 +138,7 @@ object Robot: LoggedCoroutineRobot() {
                     backLeft,
                     backRight,
                     startingPose = Pose2d(3.0, 2.0, Rotation2d()).applyFlip(),
-                    RobotPosition::resetOdometry
+                    drive::setPosition
                 )
 
                 val intakeWidth = 18.inches
@@ -155,7 +162,7 @@ object Robot: LoggedCoroutineRobot() {
                     intakeSim
                 )
 
-                vision = Vision(VisionIOSim(actualRobotPoseSupplier = { swerveSim.objectOnFieldPose2d }))
+                vision = Vision(object :VisionIO{}/*VisionIOSim(actualRobotPoseSupplier = { swerveSim.objectOnFieldPose2d })*/)
             }
 
             REPLAY -> {
@@ -424,7 +431,13 @@ object Robot: LoggedCoroutineRobot() {
     }
 
     override suspend fun autonomous() {
-        Autos(drive, pivot, rollers, flywheels, noteSimulation).farsideTriple().schedule()
+//        StaticCharacterization(
+//            drive,
+//            drive::runCharacterization,
+//            drive::getCharacterizationVelocity
+//        ).finallyDo(drive::endCharacterization).schedule()
+
+        Autos(drive, pivot, rollers, flywheels, noteSimulation).test().schedule()
 //        RobotController.setAction {
 //            val trajectoryGroup = Choreo.getTrajectoryGroup("testing")
 //            Swerve.resetOdometry(trajectoryGroup.first().getAutoFlippedInitialPose())

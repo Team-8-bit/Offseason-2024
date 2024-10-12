@@ -12,10 +12,8 @@ import edu.wpi.first.math.numbers.N3
 import org.littletonrobotics.junction.Logger
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.unit.*
-import org.team9432.lib.util.CachedValue
-import org.team9432.lib.util.angleTo
-import org.team9432.lib.util.distanceTo
-import org.team9432.lib.util.transformBySpeeds
+import org.team9432.lib.util.*
+import org.team9432.resources.drive.Drive
 import org.team9432.resources.drive.DrivetrainConstants.DRIVE_KINEMATICS
 import org.team9432.resources.flywheels.DifferentialFlywheelSpeedMap
 import org.team9432.resources.flywheels.DifferentialFlywheelSpeedMap.ShooterSpeeds
@@ -113,13 +111,17 @@ object RobotPosition {
     val isInSpeakerPrepareRange: Boolean
         get() = currentPose.distanceTo(PositionConstants.speakerAimPose) < 10.0.meters
 
-    fun resetOdometry(pose: Pose2d) = poseEstimator.resetPosition(pose.rotation, Array(4) { SwerveModulePosition() }, pose)
+    fun resetOdometry(pose: Pose2d, rawGyro: Rotation2d, modulePositions: Array<SwerveModulePosition>) {
+        poseEstimator.resetPosition(rawGyro, modulePositions, pose)
+    }
 
     fun getRobotRelativeChassisSpeeds() = currentChassisSpeeds
 
     init {
         RobotPeriodicManager.startPeriodic {
             Logger.recordOutput("RobotPosition/CurrentPose", currentPose)
+            Logger.recordOutput("RobotPosition/CurrentSpeeds", getRobotRelativeChassisSpeeds())
+            Logger.recordOutput("RobotPosition/CurrentFieldRelativeSpeeds", ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeChassisSpeeds(), currentPose.rotation))
             Logger.recordOutput("RobotPosition/PoseInShotTime", getFutureRobotPose(SHOT_TIME_SECONDS))
             Logger.recordOutput("RobotPosition/SpeakerTuningDistanceMeters", currentPose.distanceTo(PositionConstants.speakerAimPose).inMeters)
         }

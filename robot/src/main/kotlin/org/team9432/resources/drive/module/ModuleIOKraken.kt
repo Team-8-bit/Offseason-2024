@@ -4,10 +4,7 @@ import com.ctre.phoenix6.BaseStatusSignal
 import com.ctre.phoenix6.StatusSignal
 import com.ctre.phoenix6.configs.CANcoderConfiguration
 import com.ctre.phoenix6.configs.TalonFXConfiguration
-import com.ctre.phoenix6.controls.MotionMagicExpoVoltage
-import com.ctre.phoenix6.controls.NeutralOut
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC
-import com.ctre.phoenix6.controls.VoltageOut
+import com.ctre.phoenix6.controls.*
 import com.ctre.phoenix6.hardware.CANcoder
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants
@@ -58,6 +55,7 @@ class ModuleIOKraken(private val moduleConstants: SwerveModuleConstants, canbusN
 
     private val voltageControl = VoltageOut(0.0).withUpdateFreqHz(0.0)
     private val driveVoltageOpenLoopControl = VoltageOut(0.0).withUpdateFreqHz(0.0)
+    private val currentControl = TorqueCurrentFOC(0.0).withUpdateFreqHz(0.0)
     private val steerVoltageMotionMagicControl = MotionMagicExpoVoltage(0.0).withUpdateFreqHz(0.0)
     private val neutralControl = NeutralOut().withUpdateFreqHz(0.0)
 
@@ -79,6 +77,8 @@ class ModuleIOKraken(private val moduleConstants: SwerveModuleConstants, canbusN
 
         BaseStatusSignal.setUpdateFrequencyForAll(50.0, *lowFrequencyDriveSignals, *lowFrequencySteerSignals, *lowFrequencyCANCoderSignals)
 
+        steerMotor.setPosition(0.0)
+        driveMotor.setPosition(0.0)
 //        driveMotor.optimizeBusUtilization()
 //        steerMotor.optimizeBusUtilization()
 //        cancoder.optimizeBusUtilization()
@@ -89,8 +89,8 @@ class ModuleIOKraken(private val moduleConstants: SwerveModuleConstants, canbusN
         inputs.steerConnected = BaseStatusSignal.refreshAll(*lowFrequencySteerSignals, steerPosition).isOK
         inputs.cancoderConnected = BaseStatusSignal.refreshAll(*lowFrequencyCANCoderSignals).isOK
 
-        inputs.drivePositionRotations = drivePosition.valueAsDouble / DRIVE_GEAR_RATIO
-        inputs.driveVelocityRadPerSecond = Units.rotationsToRadians(driveVelocity.valueAsDouble) / DRIVE_GEAR_RATIO
+        inputs.drivePositionRotations = drivePosition.valueAsDouble
+        inputs.driveVelocityRadPerSecond = Units.rotationsToRadians(driveVelocity.valueAsDouble)
         inputs.driveAppliedVolts = driveAppliedVolts.valueAsDouble
         inputs.driveSupplyCurrentAmps = driveSupplyCurrent.valueAsDouble
 
@@ -100,7 +100,7 @@ class ModuleIOKraken(private val moduleConstants: SwerveModuleConstants, canbusN
         inputs.steerAppliedVolts = steerAppliedVolts.valueAsDouble
         inputs.steerSupplyCurrentAmps = steerSupplyCurrent.valueAsDouble
 
-        inputs.odometryDrivePositionsRotations = drivePositionQueue.map { it / DRIVE_GEAR_RATIO }.toDoubleArray()
+        inputs.odometryDrivePositionsRotations = drivePositionQueue.map { it }.toDoubleArray()
         inputs.odometrySteerPositions = steerPositionQueue.map { Rotation2d.fromRotations(it) }.toTypedArray()
 
         drivePositionQueue.clear()
@@ -117,6 +117,10 @@ class ModuleIOKraken(private val moduleConstants: SwerveModuleConstants, canbusN
 
     override fun runSteerPosition(angle: Rotation2d) {
         steerMotor.setControl(steerVoltageMotionMagicControl.withPosition(angle.rotations))
+    }
+
+    override fun runCharacterization(input: Double) {
+        driveMotor.setControl(currentControl.withOutput(input))
     }
 
     override fun runDriveVelocitySetpoint(velocityRadPerSec: Double, feedforward: Double) {
@@ -169,7 +173,7 @@ class ModuleIOKraken(private val moduleConstants: SwerveModuleConstants, canbusN
         TorqueCurrent.PeakReverseTorqueCurrent = -60.0
         CurrentLimits.StatorCurrentLimit = 60.0
         CurrentLimits.StatorCurrentLimitEnable = true
-        Slot0 = moduleConstants.DriveMotorGains
+//        Slot0 = moduleConstants.DriveMotorGains
     }
 
     private fun getSteerConfig(moduleConstants: SwerveModuleConstants) = TalonFXConfiguration().apply {
@@ -187,7 +191,7 @@ class ModuleIOKraken(private val moduleConstants: SwerveModuleConstants, canbusN
         MotionMagic.MotionMagicExpo_kV = 0.12 * moduleConstants.SteerMotorGearRatio
         MotionMagic.MotionMagicExpo_kA = 0.1
         ClosedLoopGeneral.ContinuousWrap = true
-        Slot0 = moduleConstants.SteerMotorGains
+//        Slot0 = moduleConstants.SteerMotorGains
     }
 
 

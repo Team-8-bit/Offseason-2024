@@ -44,6 +44,8 @@ interface ModuleIO {
 
     fun setSteerPID(p: Double, i: Double, d: Double) {}
 
+    fun runCharacterization(input: Double) {}
+
     /** Enable or disable brake mode on the drive motor. */
     fun setDriveBrake(enable: Boolean) {}
 

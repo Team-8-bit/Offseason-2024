@@ -29,8 +29,8 @@ class SwerveModule(private val io: ModuleIO, private val name: String) {
         val drivekS: LoggedTunableNumber = LoggedTunableNumber("Drive/Module/DrivekS", 5.0)
         val drivekV: LoggedTunableNumber = LoggedTunableNumber("Drive/Module/DrivekV", 0.0)
         val kT = 1.0 / DCMotor.getKrakenX60Foc(1).KtNMPerAmp
-//        val turnkP: LoggedTunableNumber = LoggedTunableNumber("Drive/Module/TurnkP", moduleConstants.turnkP())
-//        val turnkD: LoggedTunableNumber = LoggedTunableNumber("Drive/Module/TurnkD", moduleConstants.turnkD())
+        val steerkP: LoggedTunableNumber = LoggedTunableNumber("Drive/Module/SteerkP", TunerConstants.steerGains.kP)
+        val steerkD: LoggedTunableNumber = LoggedTunableNumber("Drive/Module/SteerkD", TunerConstants.steerGains.kD)
     }
 
     init {
@@ -52,6 +52,9 @@ class SwerveModule(private val io: ModuleIO, private val name: String) {
         LoggedTunableNumber.ifChanged(
             hashCode(), { io.setDrivePID(drivekP.get(), 0.0, drivekD.get()) }, drivekP, drivekD
         )
+        LoggedTunableNumber.ifChanged(
+            hashCode(), { io.setSteerPID(steerkP.get(), 0.0, steerkD.get()) }, steerkP, steerkD
+        )
 
         trackClosedLoopStates()
 
@@ -61,6 +64,13 @@ class SwerveModule(private val io: ModuleIO, private val name: String) {
             SwerveModulePosition(positionMeters, angle)
         }
     }
+
+    fun runCharacterization(turnSetpointDegrees: Double, input: Double) {
+        io.runSteerPosition(Rotation2d.fromDegrees(turnSetpointDegrees))
+        io.runCharacterization(input)
+    }
+
+    val characterizationVelocity get() = inputs.driveVelocityRadPerSecond
 
     private fun trackClosedLoopStates() {
 //        val angleTarget = angleSetpoint

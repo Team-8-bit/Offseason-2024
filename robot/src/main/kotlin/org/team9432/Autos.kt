@@ -3,10 +3,10 @@ package org.team9432
 import choreo.Choreo
 import choreo.auto.AutoFactory
 import choreo.trajectory.SwerveSample
+import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
-import org.team9432.lib.util.afterSimCondition
 import org.team9432.lib.util.afterSimDelay
 import org.team9432.resources.drive.Drive
 import org.team9432.resources.drive.controllers.ChoreoTrajectoryController
@@ -22,7 +22,7 @@ class Autos(
     private val flywheels: Flywheels,
     private val noteSimulation: NoteSimulation?,
 ) {
-    private val controller = ChoreoTrajectoryController()
+    private val controller = ChoreoTrajectoryController { drive.currentTrajectoryModuleForces = it }
 
     private val factory = AutoFactory(
         RobotPosition::currentPose,
@@ -34,6 +34,19 @@ class Autos(
         Optional.empty()
     )
 
+    fun test(): Command {
+        val loop = factory.newLoop("Test Auto")
+        val traj = factory.trajectory("Test Path", loop)
+
+        loop.enabled()
+            .onTrue(
+                Commands.runOnce({ drive.setPosition(traj.initialPose.get()) }).andThen(traj.cmd())
+                    .andThen(autoCleanup())
+            )
+
+        return loop.cmd()
+    }
+
     fun farsideTriple(): Command {
         val loop = factory.newLoop("FarsideTriple")
 
@@ -42,7 +55,7 @@ class Autos(
         loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
 
         loop.enabled().onTrue(
-            Commands.runOnce({ RobotPosition.resetOdometry(preload.initialPose.get()) })
+            Commands.runOnce({ drive.setPosition(preload.initialPose.get()) })
                 .andThen(
                     preload.cmd(),
 //                    aimAndScore(),
@@ -60,10 +73,15 @@ class Autos(
 //        c3.active().whileTrue(intake())
 //        c3.done().onTrue(aimAndScore())
 
-        loop.enabled().onFalse(Commands.runOnce({drive.clearTrajectoryInput()}))
+        loop.enabled().onFalse(autoCleanup())
 
         return loop.cmd()
     }
+
+    private fun autoCleanup(): Command = Commands.runOnce({
+        drive.clearTrajectoryInput()
+        drive.currentTrajectoryModuleForces = null
+    })
 
     fun aimAndScore() = Commands.parallel(
         Commands.waitSeconds(1.0)
@@ -73,7 +91,7 @@ class Autos(
 
     // To add to AutoCommands
     fun Drive.aimSpeaker() = Commands.startEnd(
-        { setAutoAimGoal { RobotPosition.getStandardAimingParameters().drivetrainAngle } },
+        { setAutoAimGoal({ RobotPosition.getStandardAimingParameters().drivetrainAngle }, { 0.3 }) },
         { clearAutoAimGoal() }
     )
 

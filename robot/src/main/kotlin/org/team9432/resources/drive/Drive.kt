@@ -2,7 +2,6 @@ package org.team9432.resources.drive
 
 import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.Vector
-import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
@@ -41,6 +40,7 @@ class Drive(
     enum class ControlMode {
         TELEOP,
         TRAJECTORY,
+        CHARACTERIZATION,
         WHEEL_RADIUS_CHARACTERIZATION
     }
 
@@ -64,7 +64,7 @@ class Drive(
     private var characterizationInput = 0.0
     private var teleopAutoAimController: TeleopAutoAimController? = null
     private var currentTrajectorySpeeds: ChassisSpeeds? = null
-    private var currentTrajectoryModuleForces: List<Vector<N2>>? = null
+    var currentTrajectoryModuleForces: List<Vector<N2>>? = null
     private var teleopDriveController = TeleopDriveController()
 
     private val setpointGenerator = SwerveSetpointGenerator(DRIVE_KINEMATICS, DrivetrainConstants.MODULE_TRANSLATIONS.toTypedArray())
@@ -96,25 +96,26 @@ class Drive(
         val optimizedSetpointStates = arrayOfNulls<SwerveModuleState>(4)
         val optimizedSetpointTorques = arrayOfNulls<SwerveModuleState>(4)
 
-        for (i in modules.indices) {
-            optimizedSetpointStates[i] = SwerveModuleState.optimize(currentSetpoint.moduleStates[i], modules[i].angle)
+        if (currentControlMode != ControlMode.CHARACTERIZATION) {
+            for (i in modules.indices) {
+                optimizedSetpointStates[i] = SwerveModuleState.optimize(currentSetpoint.moduleStates[i], modules[i].angle)
 
-            val finalModuleForces = currentTrajectoryModuleForces
-            if (currentControlMode == ControlMode.TRAJECTORY && finalModuleForces != null) {
-                // Only do torque FF in trajectory mode
-                val wheelDirection = VecBuilder.fill(
-                    optimizedSetpointStates[i]!!.angle.cos,
-                    optimizedSetpointStates[i]!!.angle.sin
-                )
-                val wheelForces = finalModuleForces[i]
-                val wheelTorque = wheelForces.dot(wheelDirection) * Units.inchesToMeters(TunerConstants.kWheelRadiusInches)
-                optimizedSetpointTorques[i] = SwerveModuleState(wheelTorque, optimizedSetpointStates[i]!!.angle)
-            } else {
-                optimizedSetpointTorques[i] = SwerveModuleState(0.0, optimizedSetpointStates[i]!!.angle)
+                val finalModuleForces = currentTrajectoryModuleForces
+                if (currentControlMode == ControlMode.TRAJECTORY && finalModuleForces != null) {
+                    // Only do torque FF in trajectory mode
+                    val wheelDirection = VecBuilder.fill(
+                        optimizedSetpointStates[i]!!.angle.cos,
+                        optimizedSetpointStates[i]!!.angle.sin
+                    )
+                    val wheelForces = finalModuleForces[i]
+                    val wheelTorque = wheelForces.dot(wheelDirection) * Units.inchesToMeters(TunerConstants.kWheelRadiusInches)
+                    optimizedSetpointTorques[i] = SwerveModuleState(wheelTorque, optimizedSetpointStates[i]!!.angle)
+                } else {
+                    optimizedSetpointTorques[i] = SwerveModuleState(0.0, optimizedSetpointStates[i]!!.angle)
+                }
+                modules[i].runSetpoint(optimizedSetpointStates[i]!!, optimizedSetpointTorques[i]!!)
             }
-            modules[i].runSetpoint(optimizedSetpointStates[i]!!, optimizedSetpointTorques[i]!!)
         }
-//        modules[i].runSetpoint(currentSetpoint.moduleStates[i])
 
         Logger.recordOutput("Drive/Un254dSetpoints", *DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds))
         Logger.recordOutput("Drive/Setpoints", *currentSetpoint.moduleStates)
@@ -124,10 +125,9 @@ class Drive(
     }
 
     private fun updateControl() {
-        val teleopSpeeds = teleopDriveController.calculate()
         when (currentControlMode) {
             ControlMode.TELEOP -> {
-                desiredChassisSpeeds = teleopSpeeds
+                desiredChassisSpeeds = teleopDriveController.calculate()
 
                 val autoAimRadPerSec = teleopAutoAimController?.calculate()
                 if (autoAimRadPerSec != null) {
@@ -137,6 +137,12 @@ class Drive(
 
             ControlMode.TRAJECTORY -> {
                 desiredChassisSpeeds = currentTrajectorySpeeds ?: ChassisSpeeds()
+            }
+
+            ControlMode.CHARACTERIZATION -> {
+                for (module in modules) {
+                    module.runCharacterization(0.0, characterizationInput)
+                }
             }
 
             ControlMode.WHEEL_RADIUS_CHARACTERIZATION -> {
@@ -193,6 +199,8 @@ class Drive(
         }
     }
 
+    fun setPosition(pose: Pose2d) = RobotPosition.resetOdometry(pose, rawGyroRotation, lastModulePositions)
+
     fun acceptTeleopInput(xInput: Double, yInput: Double, rInput: Double) {
         if (DriverStation.isTeleopEnabled()) {
             currentControlMode = ControlMode.TELEOP
@@ -208,6 +216,7 @@ class Drive(
     }
 
     fun clearTrajectoryInput() {
+        println("Clearing trajectory!")
         currentTrajectorySpeeds = null
         currentControlMode = ControlMode.TELEOP
     }
@@ -227,81 +236,29 @@ class Drive(
         characterizationInput = headingRadPerSec
     }
 
+    fun runCharacterization(input: Double) {
+        currentControlMode = ControlMode.CHARACTERIZATION
+        characterizationInput = input
+    }
+
+    fun getCharacterizationVelocity(): Double {
+        var driveVelocityAverage = 0.0
+        for (module in modules) {
+            driveVelocityAverage += module.characterizationVelocity
+        }
+        return driveVelocityAverage / 4.0
+    }
+
     fun endCharacterization() {
         currentControlMode = ControlMode.TELEOP
     }
 
     fun getWheelRadiusCharacterizationPositions() = modules.map { it.drivePositionRads }
 
-    private val xChoreoPid = PIDController(1.0, 0.0, 0.0)
-    private val yChoreoPid = PIDController(1.0, 0.0, 0.0)
-    private val rChoreoPid = PIDController(1.0, 0.0, 0.0)
-
-//    suspend fun followChoreo(trajectory: ChoreoTrajectory) {
-//        val controlFunction = ChoreoUtil.choreoSwerveController(xChoreoPid, yChoreoPid, rChoreoPid, ::getRobotPose)
-//
-//        Logger.recordOutput("Drive/CurrentTrajectory", *allianceSwitch(blue = trajectory.poses, red = trajectory.flipped().poses))
-//        Logger.recordOutput("Drive/TrajectoryEndPose", trajectory.finalPose.applyFlip())
-//
-//        ChoreoUtil.choreoSwerveAction(trajectory, controlFunction) { speedsToApply ->
-//            runRawChassisSpeeds(speedsToApply)
-//        }
-//        driveTo(trajectory.finalPose.applyFlip(), timeout = 1.0)
-//        runRawChassisSpeeds(ChassisSpeeds())
-//    }
-//
-//    private val xPid = PIDController(5.0, 0.0, 0.0)
-//    private val yPid = PIDController(5.0, 0.0, 0.0)
-//    private val rPid = PIDController(5.0, 0.0, 0.5).apply {
-//        enableContinuousInput(-Math.PI, Math.PI)
-//    }
-//
-//    suspend fun driveTo(targetPosition: Pose2d, timeout: Double? = null) = suspendCancellableCoroutine { cont ->
-//        val timer = if (timeout != null) Timer() else null
-//        timer?.restart()
-//
-//        val periodic = RobotPeriodicManager.startPeriodic {
-//            val pose = getRobotPose()
-//
-//            val xFeedback = xPid.calculate(pose.x, targetPosition.x)
-//            val yFeedback = yPid.calculate(pose.y, targetPosition.y)
-//            val rotationFeedback = rPid.calculate(pose.rotation.radians, targetPosition.rotation.radians)
-//
-//            runFieldRelativeChassisSpeeds(
-//                ChassisSpeeds(
-//                    xFeedback + pose.x - targetPosition.x,
-//                    yFeedback + pose.y - targetPosition.y,
-//                    rotationFeedback
-//                )
-//            )
-//
-//            if (pose.distanceTo(targetPosition) < 0.05.meters && abs(pose.rotation.degrees - targetPosition.rotation.degrees) < 2
-//                || timeout?.let { timer?.hasElapsed(it) } == true) {
-//                timer?.stop()
-//                runRawChassisSpeeds(ChassisSpeeds())
-//
-//                this.stopPeriodic()
-//                cont.resume(Unit)
-//            }
-//        }
-//
-//        cont.invokeOnCancellation {
-//            timer?.stop()
-//            runRawChassisSpeeds(ChassisSpeeds())
-//            periodic.stopPeriodic()
-//        }
-//    }
-
     /** Returns the module states (turn angles and drive velocities) for all the modules. */
     private val moduleStates: Array<SwerveModuleState>
         get() = Array(modules.size) { index -> modules[index].measuredState }
 
-    /** Returns the module positions (turn angles and drive positions) for all the modules. */
-    private val moduleLatestPositions: Array<SwerveModulePosition?>
-        get() = Array(modules.size) { index -> modules[index].latestPosition }
-
-    //    fun getRobotPose(): Pose2d = poseEstimator.estimatedPosition
-//    fun resetOdometry(pose: Pose2d) = poseEstimator.resetPosition(pose.rotation, moduleLatestPositions, pose)
     fun setActualSimPose(pose: Pose2d) = swerveSim.setSimulationWorldPose(pose)
 
     fun setGyroAngle(angle: Rotation2d) = gyroIO.setAngle(angle)

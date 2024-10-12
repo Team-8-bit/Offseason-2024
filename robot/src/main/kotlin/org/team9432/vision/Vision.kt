@@ -13,6 +13,7 @@ import org.team9432.RobotPosition
 import org.team9432.RobotState
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
+import kotlin.io.path.fileVisitor
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
@@ -32,14 +33,14 @@ class Vision(private val io: VisionIO) {
 
     private fun periodic() {
         io.updateInputs(inputs)
-        Logger.processInputs("Vision", inputs)
+//        Logger.processInputs("Vision", inputs)
 
         Logger.recordOutput("Vision/Connected", inputs.isConnected)
         Logger.recordOutput("Vision/TrackedTagIds", *inputs.results.targets.mapNotNull { apriltagFieldLayout.getTagPose(it.fiducialId).getOrNull() }.toTypedArray())
 
         RobotState.visionConnected = inputs.isConnected
 
-        applyToPoseEstimator(inputs.results)
+        if (inputs.isConnected) applyToPoseEstimator(inputs.results)
     }
 
     private fun applyToPoseEstimator(result: PhotonPipelineResult) {
@@ -70,6 +71,8 @@ class Vision(private val io: VisionIO) {
             tagPose.get().toPose2d().translation.getDistance(estimatedPose2d.translation)
         }.filterNotNull().average()
 
+        Logger.recordOutput("Vision/TagAvgDistance", avgDist)
+
         return when {
             numTags == 0 -> return VisionConstants.singleTagStdDevs
             numTags == 1 -> {
@@ -78,7 +81,7 @@ class Vision(private val io: VisionIO) {
             }
 
             numTags > 1 -> {
-                if (avgDist > 7) VisionConstants.maxStandardDeviations
+                if (avgDist > 3.5) VisionConstants.maxStandardDeviations
                 else VisionConstants.multiTagStdDevs
             }
 

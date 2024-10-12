@@ -32,6 +32,7 @@ class TeleopAutoAimController(private val goalSupplier: () -> Rotation2d, privat
 
     override fun calculate(): Double {
         controller.setPID(kP, 0.0, kD)
+        controller.setTolerance(Units.degreesToRadians(toleranceSupplierDegrees.invoke()))
 
         val maxAngularVelocity = (RobotState.swerveLimits.maxDriveVelocity / DrivetrainConstants.DRIVE_BASE_RADIUS) * maxVelocityMultiplier
         val maxAngularAcceleration = (RobotState.swerveLimits.maxDriveAcceleration / DrivetrainConstants.DRIVE_BASE_RADIUS) * maxAccelerationMultiplier
@@ -52,6 +53,6 @@ class TeleopAutoAimController(private val goalSupplier: () -> Rotation2d, privat
         epsilonEquals(
             controller.setpoint.position,
             controller.goal.position,
-            Units.degreesToRadians(toleranceSupplierDegrees.invoke())
+            controller.positionTolerance
         )
 }
