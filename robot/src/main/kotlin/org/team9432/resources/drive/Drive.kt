@@ -15,7 +15,6 @@ import org.littletonrobotics.junction.Logger
 import org.team9432.Robot
 import org.team9432.RobotPosition
 import org.team9432.RobotState
-import org.team9432.lib.simulation.competitionfield.simulations.SwerveDriveSimulation
 import org.team9432.lib.util.SwerveSetpointGenerator
 import org.team9432.resources.drive.DrivetrainConstants.DRIVE_KINEMATICS
 import org.team9432.resources.drive.controllers.TeleopAutoAimController
@@ -28,7 +27,6 @@ import org.team9432.resources.drive.odometrythread.LoggedOdometryThreadInputs
 import org.team9432.resources.drive.odometrythread.OdometryThread
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
-import kotlin.properties.Delegates
 
 class Drive(
     private val gyroIO: GyroIO,
@@ -75,8 +73,6 @@ class Drive(
     companion object {
         val odometryLock = ReentrantLock()
     }
-
-    private var swerveSim: SwerveDriveSimulation by Delegates.notNull() // This is only initialized when the robot is simulated
 
     init {
         odometryThread.start()
@@ -216,7 +212,7 @@ class Drive(
     }
 
     fun clearTrajectoryInput() {
-        println("Clearing trajectory!")
+        currentTrajectorySpeeds = null
         currentTrajectorySpeeds = null
         currentControlMode = ControlMode.TELEOP
     }
@@ -258,8 +254,6 @@ class Drive(
     /** Returns the module states (turn angles and drive velocities) for all the modules. */
     private val moduleStates: Array<SwerveModuleState>
         get() = Array(modules.size) { index -> modules[index].measuredState }
-
-    fun setActualSimPose(pose: Pose2d) = swerveSim.setSimulationWorldPose(pose)
 
     fun setGyroAngle(angle: Rotation2d) = gyroIO.setAngle(angle)
 }

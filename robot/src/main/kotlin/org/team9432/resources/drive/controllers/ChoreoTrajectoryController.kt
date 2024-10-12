@@ -12,9 +12,10 @@ import org.littletonrobotics.junction.Logger
 import org.team9432.lib.dashboard.LoggedTunableNumber
 import org.team9432.lib.unit.inMeters
 import org.team9432.lib.util.distanceTo
+import org.team9432.resources.drive.Drive
 
 
-class ChoreoTrajectoryController(private val moduleForcesOutput: (List<Vector<N2>>) -> Unit) {
+class ChoreoTrajectoryController(private val drive: Drive, private val moduleForcesOutput: (List<Vector<N2>>) -> Unit) {
     private val xController = PIDController(translationkP, 0.0, translationkD)
     private val yController = PIDController(translationkP, 0.0, translationkD)
     private val rController = PIDController(rotationkP, 0.0, rotationkD).apply {
@@ -30,7 +31,7 @@ class ChoreoTrajectoryController(private val moduleForcesOutput: (List<Vector<N2
         private val rotationkD by LoggedTunableNumber("$TABLE_KEY/rotationkD", 0.8)
     }
 
-    fun calculate(currentPose: Pose2d, sample: SwerveSample): ChassisSpeeds {
+    fun calculate(currentPose: Pose2d, sample: SwerveSample) {
         val xFF = sample.vx
         val yFF = sample.vy
         val rotationFF = sample.omega
@@ -55,13 +56,13 @@ class ChoreoTrajectoryController(private val moduleForcesOutput: (List<Vector<N2
         }
 
         moduleForcesOutput.invoke(outputForces)
+        drive.acceptTrajectoryInput(output)
+
 
         Logger.recordOutput("$TABLE_KEY/SetpointPose", sample.pose)
         Logger.recordOutput("$TABLE_KEY/SetpointSpeeds", sample.chassisSpeeds)
         Logger.recordOutput("$TABLE_KEY/OutputSpeeds", output)
         Logger.recordOutput("$TABLE_KEY/TranslationErrorMeters", currentPose.distanceTo(sample.pose).inMeters)
         Logger.recordOutput("$TABLE_KEY/RotationErrorDegrees", currentPose.rotation.minus(sample.pose.rotation).degrees)
-
-        return output
     }
 }

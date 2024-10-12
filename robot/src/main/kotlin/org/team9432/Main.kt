@@ -2,7 +2,6 @@
 package org.team9432
 
 import choreo.Choreo
-import choreo.auto.AutoChooser
 import com.ctre.phoenix6.CANBus
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.math.geometry.Pose2d
@@ -25,7 +24,6 @@ import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.networktables.NT4Publisher
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
-import org.team9432.commands.StaticCharacterization
 import org.team9432.lib.Library
 import org.team9432.lib.coroutines.LoggedCoroutineRobot
 import org.team9432.lib.coroutines.Team8BitRobot.Runtime.*
@@ -82,6 +80,7 @@ object Robot: LoggedCoroutineRobot() {
 
     private val fieldSimulation: CompetitionFieldSimulation?
     private val noteSimulation: NoteSimulation?
+    private val setSimulationPose: ((Pose2d) -> Unit)?
 
     init {
         Library.initialize(this, runtime)
@@ -111,6 +110,7 @@ object Robot: LoggedCoroutineRobot() {
 
                 fieldSimulation = null
                 noteSimulation = null
+                setSimulationPose = null
 
                 vision = Vision(VisionIOReal())
             }
@@ -141,6 +141,8 @@ object Robot: LoggedCoroutineRobot() {
                     drive::setPosition
                 )
 
+                setSimulationPose = { swerveSim.setSimulationWorldPose(it) }
+
                 val intakeWidth = 18.inches
                 val intakeX = -14.325.inches - 1.5.inches // The extra 1.5" is because the sim doesn't let notes go under the bumpers
 
@@ -162,7 +164,7 @@ object Robot: LoggedCoroutineRobot() {
                     intakeSim
                 )
 
-                vision = Vision(object :VisionIO{}/*VisionIOSim(actualRobotPoseSupplier = { swerveSim.objectOnFieldPose2d })*/)
+                vision = Vision(VisionIOSim(actualRobotPoseSupplier = { swerveSim.objectOnFieldPose2d }))
             }
 
             REPLAY -> {
@@ -182,6 +184,7 @@ object Robot: LoggedCoroutineRobot() {
 
                 fieldSimulation = null
                 noteSimulation = null
+                setSimulationPose = null
 
                 vision = Vision(object: VisionIO {})
             }
@@ -437,7 +440,7 @@ object Robot: LoggedCoroutineRobot() {
 //            drive::getCharacterizationVelocity
 //        ).finallyDo(drive::endCharacterization).schedule()
 
-        Autos(drive, pivot, rollers, flywheels, noteSimulation).test().schedule()
+        Autos(drive, pivot, rollers, flywheels, noteSimulation, setSimulationPose).farsideTriple().schedule()
 //        RobotController.setAction {
 //            val trajectoryGroup = Choreo.getTrajectoryGroup("testing")
 //            Swerve.resetOdometry(trajectoryGroup.first().getAutoFlippedInitialPose())

@@ -9,11 +9,11 @@ import org.photonvision.EstimatedRobotPose
 import org.photonvision.PhotonPoseEstimator
 import org.photonvision.targeting.PhotonPipelineResult
 import org.team9432.FieldConstants.apriltagFieldLayout
+import org.team9432.Robot
 import org.team9432.RobotPosition
 import org.team9432.RobotState
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
-import kotlin.io.path.fileVisitor
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
@@ -33,7 +33,7 @@ class Vision(private val io: VisionIO) {
 
     private fun periodic() {
         io.updateInputs(inputs)
-//        Logger.processInputs("Vision", inputs)
+        Logger.processInputs("Vision", inputs)
 
         Logger.recordOutput("Vision/Connected", inputs.isConnected)
         Logger.recordOutput("Vision/TrackedTagIds", *inputs.results.targets.mapNotNull { apriltagFieldLayout.getTagPose(it.fiducialId).getOrNull() }.toTypedArray())
@@ -81,7 +81,7 @@ class Vision(private val io: VisionIO) {
             }
 
             numTags > 1 -> {
-                if (avgDist > 3.5) VisionConstants.maxStandardDeviations
+                if (avgDist > 3.5 && !Robot.isSimulated) VisionConstants.maxStandardDeviations
                 else VisionConstants.multiTagStdDevs
             }
 

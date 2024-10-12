@@ -4,6 +4,7 @@ import edu.wpi.first.math.MathUtil
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.simulation.DCMotorSim
 import org.team9432.lib.simulation.SimulatedSwerveModule
 import org.team9432.resources.drive.DrivetrainConstants.CHASSIS_MAX_VELOCITY
@@ -37,7 +38,7 @@ class ModuleIOSim: ModuleIO, SimulatedSwerveModule() {
     }
 
     override fun updateInputs(inputs: ModuleIOInputs) {
-        speedSetpoint?.let { targetSpeedMPS -> setDriveMotor(driveFeedback.calculate(inputs.driveVelocityRadPerSecond, targetSpeedMPS / WHEEL_RADIUS_METERS) + speedFeedforward) }
+        speedSetpoint?.let { targetSpeed -> setDriveMotor(driveFeedback.calculate(inputs.driveVelocityRadPerSecond, targetSpeed) + speedFeedforward) }
         angleSetpoint?.let { targetAngle -> setSteerMotor(steerFeedback.calculate(inputs.steerAbsolutePosition.radians, targetAngle.radians)) }
 
         inputs.driveConnected = true
@@ -75,11 +76,11 @@ class ModuleIOSim: ModuleIO, SimulatedSwerveModule() {
     }
 
     private fun setDriveMotor(volts: Double) {
-        driveAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0)
+        driveAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0).takeUnless { DriverStation.isDisabled() } ?: 0.0
     }
 
     private fun setSteerMotor(volts: Double) {
-        steerAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0)
+        steerAppliedVolts = MathUtil.clamp(volts, -12.0, 12.0).takeUnless { DriverStation.isDisabled() } ?: 0.0
         steerSim.setInputVoltage(if (abs(steerAppliedVolts) > STEER_FRICTION_VOLTAGE) steerAppliedVolts else 0.0)
     }
 
@@ -87,25 +88,8 @@ class ModuleIOSim: ModuleIO, SimulatedSwerveModule() {
         angleSetpoint = angle
     }
 
-//    override fun runDriveVelocity(metersPerSecond: Double, feedforwardVolts: Double) {
-//        speedFeedforward = feedforwardVolts
-//        speedSetpoint = metersPerSecond
-//    }
-
-    override fun setDrivePID(p: Double, i: Double, d: Double) {
-        driveFeedback.apply {
-            this.p = p
-            this.i = i
-            this.d = d
-        }
-    }
-
-    override fun setSteerPID(p: Double, i: Double, d: Double) {
-        steerFeedback.apply {
-            this.p = p
-            this.i = i
-            this.d = d
-        }
+    override fun runDriveVelocitySetpoint(velocityRadPerSec: Double, feedforward: Double) {
+        speedSetpoint = velocityRadPerSec
     }
 
     /**** Simulation Methods ****/
