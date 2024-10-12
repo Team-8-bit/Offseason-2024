@@ -9,6 +9,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
+import edu.wpi.first.math.util.Units
 import org.littletonrobotics.junction.Logger
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.unit.*
@@ -52,18 +53,21 @@ object RobotPosition {
 
     private var latestAimingParameters = CachedValue<AimingParameters>()
 
+    var shouldDisableShootOnMove = { false }
+    var shouldUsePivotSetpoints = { true }
+
     fun getStandardAimingParameters(): AimingParameters {
         // Return the latest aiming parameters if they haven't changed
         latestAimingParameters.ifValid { cachedValue -> return cachedValue }
 
-        val predictedFuturePose = if (RobotState.shootOnMoveEnabled) getFutureRobotPose(SHOT_TIME_SECONDS) else currentPose
+        val predictedFuturePose = if (!shouldDisableShootOnMove()) getFutureRobotPose(SHOT_TIME_SECONDS) else currentPose
         val targetPose = PositionConstants.speakerAimPose
 
         val drivetrainAngleTarget = predictedFuturePose.angleTo(targetPose).asRotation2d
         val distanceToSpeaker = predictedFuturePose.distanceTo(targetPose)
 
         val pivotAngleTarget = pivotAngleMap.get(distanceToSpeaker.inMeters)
-        val shooterSpeedTarget = if (RobotState.pivotEnabled && distanceToSpeaker > 1.5) {
+        val shooterSpeedTarget = if (shouldUsePivotSetpoints.invoke() && distanceToSpeaker > 1.5) {
             ShooterSpeeds(upperRPM = 5000.0, lowerRPM = 5000.0)
         } else {
             differentialShooterSpeedsMap.getMapValue(distanceToSpeaker)
@@ -75,6 +79,12 @@ object RobotPosition {
             pivotAngle = pivotAngleTarget.degrees
         )
     }
+
+    val swerveLimits = SwerveSetpointGenerator.ModuleLimits(
+        maxDriveVelocity = 4.0,
+        maxDriveAcceleration = 20.0,
+        maxSteeringVelocity = Units.degreesToRadians(1080.0)
+    )
 
     private val differentialShooterSpeedsMap = DifferentialFlywheelSpeedMap().apply {
         addMapValue(2.25.meters, ShooterSpeeds(upperRPM = 5000.0, lowerRPM = 2000.0))
@@ -101,8 +111,8 @@ object RobotPosition {
     val isInSpeakerScoringRange: Boolean
         get() {
             val distance = currentPose.distanceTo(PositionConstants.speakerAimPose)
-            return if (RobotState.pivotEnabled) {
-                distance > 1.meters && distance < 5.0.meters
+            return if (shouldUsePivotSetpoints()) {
+                distance > 1.meters && distance < 4.0.meters
             } else {
                 distance > 1.meters && distance < 2.5.meters
             }

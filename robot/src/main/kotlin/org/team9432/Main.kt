@@ -71,6 +71,7 @@ object Robot: LoggedCoroutineRobot() {
     val runtime = if (RobotBase.isReal()) REAL else SIM
 
     private val controller = CommandXboxController(0)
+    private val overrides = Switchbox(1)
 
     private val drive: Drive
     private val flywheels: Flywheels
@@ -223,6 +224,15 @@ object Robot: LoggedCoroutineRobot() {
     ).finallyDo { _ -> hid.setRumble(RumbleType.kBothRumble, 0.0) }.asProxy()
 
     private fun bindButtons() {
+        val pivotDisabled = overrides.switchOne
+        val autoaimDisabled = overrides.switchTwo
+        val shootOnMoveDisabled = overrides.switchThree
+        val ampAlignDisabled = overrides.switchFour
+        val visionDisabled = overrides.switchFive.or { !vision.isConnected }
+
+        RobotPosition.shouldDisableShootOnMove = { shootOnMoveDisabled.asBoolean }
+        RobotPosition.shouldUsePivotSetpoints = { !pivotDisabled.asBoolean }
+
         drive.defaultCommand = drive.run {
             drive.acceptTeleopInput(
                 -controller.leftY,
@@ -232,19 +242,21 @@ object Robot: LoggedCoroutineRobot() {
         }.withName("Teleop Drive")
 
         fun driveAimCommand(target: () -> Rotation2d, toleranceSupplier: () -> Double) =
-            Commands.startEnd({ drive.setAutoAimGoal(target, toleranceSupplier) }, { drive.clearAutoAimGoal() })
-                .onlyIf { !RobotState.automationDisabled }
+            Commands.startEnd(
+                { drive.setAutoAimGoal(target, toleranceSupplier) },
+                { drive.clearAutoAimGoal() }
+            ).onlyIf(autoaimDisabled.negate())
 
         fun pivotAimCommand(goal: Pivot.Goal) =
-            pivot.runGoal(goal).onlyIf { !RobotState.automationDisabled && RobotState.pivotEnabled }
+            pivot.runGoal(goal).onlyIf(pivotDisabled.negate())
 
         /**** Shooting ****/
         val inSpeakerScoringRange = Trigger(RobotPosition::isInSpeakerScoringRange)
         val inSpeakerPrepareRange = Trigger(RobotPosition::isInSpeakerPrepareRange)
 
         val readyToShoot = Trigger {
-            drive.atAutoAimGoal() &&
-                    pivot.atGoal &&
+            (drive.atAutoAimGoal() || autoaimDisabled.asBoolean) &&
+                    (pivot.atGoal || pivotDisabled.asBoolean) &&
                     flywheels.atGoal
         }.debounce(0.4, Debouncer.DebounceType.kRising)
 
@@ -257,7 +269,7 @@ object Robot: LoggedCoroutineRobot() {
         controller
             .a()
             .and(controller.leftBumper().negate()) // Don't aim and stuff while trying to intake
-            .and(inSpeakerPrepareRange.or(RobotState::automationDisabled))
+            .and(inSpeakerPrepareRange.or(visionDisabled))
             .whileTrue(
                 driveAimCommand({ RobotPosition.getStandardAimingParameters().drivetrainAngle }, speakerToleranceSupplier)
                     .alongWith(
@@ -272,7 +284,7 @@ object Robot: LoggedCoroutineRobot() {
             .rightBumper()
             .and(controller.a()) // Make sure we are trying to shoot speaker
             .and(readyToShoot)
-            .and(inSpeakerScoringRange.or(RobotState::automationDisabled))
+            .and(inSpeakerScoringRange.or(visionDisabled))
             .onTrue(
                 Commands.parallel(
                     Commands.waitSeconds(0.5),
@@ -289,7 +301,12 @@ object Robot: LoggedCoroutineRobot() {
                     .finallyDo { _ -> Beambreak.simClear() } // Remove note from the robot in sim
             )
 
-        controller.a().and(inSpeakerScoringRange).and(readyToShoot).whileTrue(controller.alternatingRumbleCommand(0.1))
+        // Rumble controller on ready to shoot
+        controller
+            .a()
+            .and(inSpeakerScoringRange).or(visionDisabled)
+            .and(readyToShoot)
+            .whileTrue(controller.alternatingRumbleCommand(0.1))
 
         // Prepare for an amp shot
         controller
@@ -297,7 +314,7 @@ object Robot: LoggedCoroutineRobot() {
             .and(controller.leftBumper().negate()) // Don't aim while trying to intake
             .whileTrue(
                 Commands.parallel(
-                    driveAimCommand({ 90.degrees.asRotation2d }, toleranceSupplier = { 1.0 }).onlyIf(RobotState::ampAlignEnabled),
+                    driveAimCommand({ 90.degrees.asRotation2d }, toleranceSupplier = { 1.0 }).onlyIf(ampAlignDisabled.negate()),
                     flywheels.runGoal(Flywheels.Goal.AMP),
                     pivotAimCommand(Pivot.Goal.AMP)
                 ).withName("Prepare Amp")
@@ -315,7 +332,7 @@ object Robot: LoggedCoroutineRobot() {
                     rollers.runGoal(Rollers.Goal.SHOOTER_FEED),
                     flywheels.runGoal(Flywheels.Goal.AMP),
                     pivotAimCommand(Pivot.Goal.AMP),
-                    driveAimCommand({ 90.degrees.asRotation2d }, toleranceSupplier = { 1.0 }).onlyIf(RobotState::ampAlignEnabled)
+                    driveAimCommand({ 90.degrees.asRotation2d }, toleranceSupplier = { 1.0 }).onlyIf(ampAlignDisabled.negate())
                 )
                     .withName("Shoot Amp")
                     .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming) // Don't let this be interrupted

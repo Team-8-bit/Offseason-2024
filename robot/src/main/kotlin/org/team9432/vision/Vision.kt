@@ -11,7 +11,6 @@ import org.photonvision.targeting.PhotonPipelineResult
 import org.team9432.FieldConstants.apriltagFieldLayout
 import org.team9432.Robot
 import org.team9432.RobotPosition
-import org.team9432.RobotState
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
 import kotlin.jvm.optionals.getOrNull
@@ -37,8 +36,6 @@ class Vision(private val io: VisionIO) {
 
         Logger.recordOutput("Vision/Connected", inputs.isConnected)
         Logger.recordOutput("Vision/TrackedTagIds", *inputs.results.targets.mapNotNull { apriltagFieldLayout.getTagPose(it.fiducialId).getOrNull() }.toTypedArray())
-
-        RobotState.visionConnected = inputs.isConnected
 
         if (inputs.isConnected) applyToPoseEstimator(inputs.results)
     }
@@ -88,6 +85,8 @@ class Vision(private val io: VisionIO) {
             else -> VisionConstants.maxStandardDeviations
         }
     }
+
+    val isConnected get() = inputs.isConnected
 
     /** Check that the given position is close to the floor and within the field walls. */
     private fun Pose3d.isValid() = abs(z) < 0.25 && this.isOnField()

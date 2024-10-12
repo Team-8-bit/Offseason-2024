@@ -6,7 +6,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.math.util.Units
 import org.littletonrobotics.junction.Logger
 import org.team9432.RobotPosition
-import org.team9432.RobotState
 import org.team9432.lib.dashboard.LoggedTunableNumber
 import org.team9432.lib.util.epsilonEquals
 import org.team9432.resources.drive.DrivetrainConstants
@@ -34,8 +33,8 @@ class TeleopAutoAimController(private val goalSupplier: () -> Rotation2d, privat
         controller.setPID(kP, 0.0, kD)
         controller.setTolerance(Units.degreesToRadians(toleranceSupplierDegrees.invoke()))
 
-        val maxAngularVelocity = (RobotState.swerveLimits.maxDriveVelocity / DrivetrainConstants.DRIVE_BASE_RADIUS) * maxVelocityMultiplier
-        val maxAngularAcceleration = (RobotState.swerveLimits.maxDriveAcceleration / DrivetrainConstants.DRIVE_BASE_RADIUS) * maxAccelerationMultiplier
+        val maxAngularVelocity = (RobotPosition.swerveLimits.maxDriveVelocity / DrivetrainConstants.DRIVE_BASE_RADIUS) * maxVelocityMultiplier
+        val maxAngularAcceleration = (RobotPosition.swerveLimits.maxDriveAcceleration / DrivetrainConstants.DRIVE_BASE_RADIUS) * maxAccelerationMultiplier
         controller.setConstraints(TrapezoidProfile.Constraints(maxAngularVelocity, maxAngularAcceleration))
 
         val output = controller.calculate(

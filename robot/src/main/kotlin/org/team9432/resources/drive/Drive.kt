@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.littletonrobotics.junction.Logger
 import org.team9432.Robot
 import org.team9432.RobotPosition
-import org.team9432.RobotState
 import org.team9432.lib.util.SwerveSetpointGenerator
 import org.team9432.resources.drive.DrivetrainConstants.DRIVE_KINEMATICS
 import org.team9432.resources.drive.controllers.TeleopAutoAimController
@@ -83,7 +82,7 @@ class Drive(
         updateControl()
 
         currentSetpoint = setpointGenerator.generateSetpoint(
-            limits = RobotState.swerveLimits,
+            limits = RobotPosition.swerveLimits,
             prevSetpoint = currentSetpoint,
             desiredState = desiredChassisSpeeds,
             dt = Robot.periodSeconds
