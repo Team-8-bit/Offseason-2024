@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.littletonrobotics.junction.AutoLogOutput
 import org.littletonrobotics.junction.Logger
 import org.team9432.Robot
-import org.team9432.RobotPosition
+import org.team9432.RobotState
 import org.team9432.lib.dashboard.LoggedTunableNumber
 import org.team9432.lib.unit.inDegrees
 import kotlin.math.abs
@@ -34,7 +34,7 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
         // All angles are in degrees
         IDLE({ 0.0 }),
         INTAKE(LoggedTunableNumber("Pivot/IntakeAngleDegrees", 0.0)),
-        SPEAKER_AIM({ RobotPosition.getStandardAimingParameters().pivotAngle.inDegrees }),
+        SPEAKER_AIM({ RobotState.getStandardAimingParameters().pivotAngle.inDegrees }),
         AMP(LoggedTunableNumber("Pivot/AmpAngleDegrees", 0.0)),
         PODIUM(LoggedTunableNumber("Pivot/PodiumAngleDegrees", 0.0)),
         CUSTOM(LoggedTunableNumber("Pivot/CustomGoal", 0.0));

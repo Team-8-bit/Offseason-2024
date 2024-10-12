@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.littletonrobotics.junction.Logger
 import org.team9432.Robot
-import org.team9432.RobotPosition
+import org.team9432.RobotState
 import org.team9432.lib.LinearProfile
 import org.team9432.lib.dashboard.LoggedTunableNumber
 import org.team9432.resources.flywheels.DifferentialFlywheelSpeedMap.ShooterSpeeds
@@ -40,7 +40,7 @@ class Flywheels(private val io: FlywheelIO): SubsystemBase() {
 
     enum class Goal(val getSpeeds: () -> ShooterSpeeds) {
         IDLE({ ShooterSpeeds(0.0, 0.0) }),
-        SHOOT({ RobotPosition.getStandardAimingParameters().shooterSpeeds }),
+        SHOOT({ RobotState.getStandardAimingParameters().shooterSpeeds }),
         SUBWOOFER({ ShooterSpeeds(2000.0, 5000.0) }),
         NOTE_ALIGN({ ShooterSpeeds(-200.0, -200.0) }),
         FEED_SPEED({ ShooterSpeeds(4000.0, 4000.0) }),

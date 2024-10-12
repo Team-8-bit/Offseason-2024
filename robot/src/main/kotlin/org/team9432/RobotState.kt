@@ -14,13 +14,12 @@ import org.littletonrobotics.junction.Logger
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.unit.*
 import org.team9432.lib.util.*
-import org.team9432.resources.drive.Drive
 import org.team9432.resources.drive.DrivetrainConstants.DRIVE_KINEMATICS
 import org.team9432.resources.flywheels.DifferentialFlywheelSpeedMap
 import org.team9432.resources.flywheels.DifferentialFlywheelSpeedMap.ShooterSpeeds
 import kotlin.math.max
 
-object RobotPosition {
+object RobotState {
     private val poseEstimator: SwerveDrivePoseEstimator = SwerveDrivePoseEstimator(
         DRIVE_KINEMATICS,
         Rotation2d(),

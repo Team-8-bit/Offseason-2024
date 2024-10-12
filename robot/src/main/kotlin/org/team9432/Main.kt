@@ -230,8 +230,8 @@ object Robot: LoggedCoroutineRobot() {
         val ampAlignDisabled = overrides.switchFour
         val visionDisabled = overrides.switchFive.or { !vision.isConnected }
 
-        RobotPosition.shouldDisableShootOnMove = { shootOnMoveDisabled.asBoolean }
-        RobotPosition.shouldUsePivotSetpoints = { !pivotDisabled.asBoolean }
+        RobotState.shouldDisableShootOnMove = { shootOnMoveDisabled.asBoolean }
+        RobotState.shouldUsePivotSetpoints = { !pivotDisabled.asBoolean }
 
         drive.defaultCommand = drive.run {
             drive.acceptTeleopInput(
@@ -251,8 +251,8 @@ object Robot: LoggedCoroutineRobot() {
             pivot.runGoal(goal).onlyIf(pivotDisabled.negate())
 
         /**** Shooting ****/
-        val inSpeakerScoringRange = Trigger(RobotPosition::isInSpeakerScoringRange)
-        val inSpeakerPrepareRange = Trigger(RobotPosition::isInSpeakerPrepareRange)
+        val inSpeakerScoringRange = Trigger(RobotState::isInSpeakerScoringRange)
+        val inSpeakerPrepareRange = Trigger(RobotState::isInSpeakerPrepareRange)
 
         val readyToShoot = Trigger {
             (drive.atAutoAimGoal() || autoaimDisabled.asBoolean) &&
@@ -261,7 +261,7 @@ object Robot: LoggedCoroutineRobot() {
         }.debounce(0.4, Debouncer.DebounceType.kRising)
 
         val speakerToleranceSupplier = {
-            val goalDistance = RobotPosition.currentPose.distanceTo(PositionConstants.speakerAimPose).inMeters
+            val goalDistance = RobotState.currentPose.distanceTo(PositionConstants.speakerAimPose).inMeters
             0.8 / goalDistance
         }
 
@@ -271,7 +271,7 @@ object Robot: LoggedCoroutineRobot() {
             .and(controller.leftBumper().negate()) // Don't aim and stuff while trying to intake
             .and(inSpeakerPrepareRange.or(visionDisabled))
             .whileTrue(
-                driveAimCommand({ RobotPosition.getStandardAimingParameters().drivetrainAngle }, speakerToleranceSupplier)
+                driveAimCommand({ RobotState.getStandardAimingParameters().drivetrainAngle }, speakerToleranceSupplier)
                     .alongWith(
                         flywheels.runGoal(Flywheels.Goal.SHOOT),
                         pivotAimCommand(Pivot.Goal.SPEAKER_AIM)
@@ -293,7 +293,7 @@ object Robot: LoggedCoroutineRobot() {
                     rollers.runGoal(Rollers.Goal.SHOOTER_FEED),
                     flywheels.runGoal(Flywheels.Goal.SHOOT),
                     pivotAimCommand(Pivot.Goal.SPEAKER_AIM),
-                    driveAimCommand({ RobotPosition.getStandardAimingParameters().drivetrainAngle }, speakerToleranceSupplier),
+                    driveAimCommand({ RobotState.getStandardAimingParameters().drivetrainAngle }, speakerToleranceSupplier),
                     Commands.runOnce({ noteSimulation?.animateShoot() })
                 )
                     .withName("Shoot Speaker")

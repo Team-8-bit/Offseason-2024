@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.littletonrobotics.junction.Logger
 import org.team9432.Robot
-import org.team9432.RobotPosition
+import org.team9432.RobotState
 import org.team9432.lib.util.SwerveSetpointGenerator
 import org.team9432.resources.drive.DrivetrainConstants.DRIVE_KINEMATICS
 import org.team9432.resources.drive.controllers.TeleopAutoAimController
@@ -82,7 +82,7 @@ class Drive(
         updateControl()
 
         currentSetpoint = setpointGenerator.generateSetpoint(
-            limits = RobotPosition.swerveLimits,
+            limits = RobotState.swerveLimits,
             prevSetpoint = currentSetpoint,
             desiredState = desiredChassisSpeeds,
             dt = Robot.periodSeconds
@@ -184,17 +184,17 @@ class Drive(
                 rawGyroRotation += Rotation2d(twist.dtheta)
             }
 
-            RobotPosition.applyOdometryObservation(timestampSamples[timestampIndex], rawGyroRotation, modulePositions)
+            RobotState.applyOdometryObservation(timestampSamples[timestampIndex], rawGyroRotation, modulePositions)
 
             val robotRelativeSpeeds = DRIVE_KINEMATICS.toChassisSpeeds(*moduleStates)
             if (gyroInputs.connected) {
                 robotRelativeSpeeds.omegaRadiansPerSecond = gyroInputs.yawVelocityRadPerSec
             }
-            RobotPosition.addVelocityData(robotRelativeSpeeds)
+            RobotState.addVelocityData(robotRelativeSpeeds)
         }
     }
 
-    fun setPosition(pose: Pose2d) = RobotPosition.resetOdometry(pose, rawGyroRotation, lastModulePositions)
+    fun setPosition(pose: Pose2d) = RobotState.resetOdometry(pose, rawGyroRotation, lastModulePositions)
 
     fun acceptTeleopInput(xInput: Double, yInput: Double, rInput: Double) {
         if (DriverStation.isTeleopEnabled()) {

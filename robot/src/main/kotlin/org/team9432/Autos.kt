@@ -33,7 +33,7 @@ class Autos(
 
     val shouldMirror = { Robot.alliance == DriverStation.Alliance.Red }
     private val factory = AutoFactory(
-        RobotPosition::currentPose,
+        RobotState::currentPose,
         { pose, sample -> controller.calculate(pose, sample as SwerveSample) },
         shouldMirror,
         drive,
@@ -118,7 +118,7 @@ class Autos(
     fun Drive.aimSpeaker() = Commands.startEnd(
         {
             clearTrajectoryInput()
-            setAutoAimGoal({ RobotPosition.getStandardAimingParameters().drivetrainAngle }, { 0.3 })
+            setAutoAimGoal({ RobotState.getStandardAimingParameters().drivetrainAngle }, { 0.3 })
         },
         { clearAutoAimGoal() }
     )

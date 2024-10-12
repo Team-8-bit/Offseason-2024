@@ -10,7 +10,7 @@ import org.photonvision.PhotonPoseEstimator
 import org.photonvision.targeting.PhotonPipelineResult
 import org.team9432.FieldConstants.apriltagFieldLayout
 import org.team9432.Robot
-import org.team9432.RobotPosition
+import org.team9432.RobotState
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
 import kotlin.jvm.optionals.getOrNull
@@ -51,7 +51,7 @@ class Vision(private val io: VisionIO) {
         val timestamp = estimatedRobotPose.timestampSeconds
         val stdDevs: Matrix<N3, N1> = getEstimationStdDevs(estimatedRobotPose)
 
-        RobotPosition.applyVisionMeasurement(visionPose, timestamp, stdDevs)
+        RobotState.applyVisionMeasurement(visionPose, timestamp, stdDevs)
     }
 
     private fun getEstimationStdDevs(estimatedPose: EstimatedRobotPose): Matrix<N3, N1> {

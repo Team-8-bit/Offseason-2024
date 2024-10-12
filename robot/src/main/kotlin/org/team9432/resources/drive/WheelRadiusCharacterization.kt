@@ -7,7 +7,7 @@ import edu.wpi.first.math.filter.SlewRateLimiter
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj2.command.Command
 import org.littletonrobotics.junction.Logger
-import org.team9432.RobotPosition
+import org.team9432.RobotState
 import org.team9432.lib.dashboard.LoggedTunableNumber
 import kotlin.math.abs
 
@@ -37,7 +37,7 @@ class WheelRadiusCharacterization(private val drive: Drive, private val directio
         addRequirements(drive)
     }
 
-    private fun getYaw() = RobotPosition.currentPose.rotation.radians
+    private fun getYaw() = RobotState.currentPose.rotation.radians
 
     override fun initialize() {
         // Reset

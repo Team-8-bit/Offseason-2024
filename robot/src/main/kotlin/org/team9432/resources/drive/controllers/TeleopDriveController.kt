@@ -10,7 +10,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
 import org.team9432.Robot
-import org.team9432.RobotPosition
+import org.team9432.RobotState
 import org.team9432.lib.dashboard.LoggedTunableNumber
 import kotlin.math.hypot
 import kotlin.math.pow
@@ -49,7 +49,7 @@ class TeleopDriveController: GenericDriveController<ChassisSpeeds>() {
             ratelimitX.calculate(linearSpeed.x * maxLinearVelocity) * invert,
             ratelimitY.calculate(linearSpeed.y * maxLinearVelocity) * invert,
             rotationSpeed * Units.degreesToRadians(maxRotationVelocityDegPerSec),
-            RobotPosition.currentPose.rotation
+            RobotState.currentPose.rotation
         )
     }
 
