@@ -113,7 +113,7 @@ object TunerConstants {
     const val kFrontLeftDriveMotorId = 1
     const val kFrontLeftSteerMotorId = 2
     const val kFrontLeftEncoderId = 1
-    const val kFrontLeftEncoderOffset = 0.2470703125
+    const val kFrontLeftEncoderOffset = 0.24755859375
     const val kFrontLeftSteerInvert = true
 
     const val kFrontLeftXPosInches = 6.875
@@ -123,7 +123,7 @@ object TunerConstants {
     const val kFrontRightDriveMotorId = 3
     const val kFrontRightSteerMotorId = 4
     const val kFrontRightEncoderId = 2
-    const val kFrontRightEncoderOffset = 0.306884765625
+    const val kFrontRightEncoderOffset = 0.307373046875
     const val kFrontRightSteerInvert = true
 
     const val kFrontRightXPosInches = 6.875
@@ -133,7 +133,7 @@ object TunerConstants {
     const val kBackLeftDriveMotorId = 5
     const val kBackLeftSteerMotorId = 6
     const val kBackLeftEncoderId = 3
-    const val kBackLeftEncoderOffset = -0.056884765625
+    const val kBackLeftEncoderOffset = -0.058349609375
     const val kBackLeftSteerInvert = true
 
     const val kBackLeftXPosInches = -6.875
@@ -143,7 +143,7 @@ object TunerConstants {
     const val kBackRightDriveMotorId = 7
     const val kBackRightSteerMotorId = 8
     const val kBackRightEncoderId = 4
-    const val kBackRightEncoderOffset = 0.012798828125
+    const val kBackRightEncoderOffset = 0.007568359375
     const val kBackRightSteerInvert = true
 
     const val kBackRightXPosInches = -6.875
