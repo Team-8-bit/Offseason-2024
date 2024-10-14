@@ -36,7 +36,7 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
         INTAKE(LoggedTunableNumber("Pivot/IntakeAngleDegrees", 0.0)),
         SPEAKER_AIM({ RobotState.getStandardAimingParameters().pivotAngle.inDegrees }),
         AMP(LoggedTunableNumber("Pivot/AmpAngleDegrees", 0.0)),
-        PODIUM(LoggedTunableNumber("Pivot/PodiumAngleDegrees", 0.0)),
+        PODIUM(LoggedTunableNumber("Pivot/PodiumAngleDegrees", 19.0)),
         CUSTOM(LoggedTunableNumber("Pivot/CustomGoal", 0.0));
 
         val angleRads get() = Units.degreesToRadians(angleSupplier.invoke())
@@ -94,14 +94,10 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
 
 //            if (goal == Goal.CUSTOM) setpointState = TrapezoidProfile.State(positionRadians, 0.0)
 
-//            if (goal.angleRads == 0.0 && atGoal) {
-//                io.runVoltage(0.0)
-//            } else {
             io.runVoltage(
                 feedforward.calculate(setpointState.position, setpointState.velocity) +
                         feedback.calculate(mechanismPositionRadians, setpointState.position)
             )
-//            }
 
             Logger.recordOutput("Pivot/Mechanism/GoalAngle", *goal.angleRads.pivotAngleToMechanismPose3d())
         }
@@ -118,7 +114,7 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
         get() = Units.rotationsToRadians(if (inputs.absoluteEncoderConnected) inputs.absolutePositionRotations else inputs.leaderPositionRotations)
 
     @get:AutoLogOutput(key = "Pivot/AtGoal")
-    val atGoal get() = abs(setpointState.position - goal.angleRads) < Units.degreesToRadians(.05)
+    val atGoal get() = abs(setpointState.position - goal.angleRads) < Units.degreesToRadians(.5)
 
     fun runCharacterization(volts: Double) {
         runningCharacterization = true

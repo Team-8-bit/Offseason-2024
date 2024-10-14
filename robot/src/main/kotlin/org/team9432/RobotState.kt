@@ -111,7 +111,7 @@ object RobotState {
         get() {
             val distance = currentPose.distanceTo(PositionConstants.speakerAimPose)
             return if (shouldUsePivotSetpoints()) {
-                distance > 1.meters && distance < 4.0.meters
+                distance > 1.meters && distance < 5.0.meters
             } else {
                 distance > 1.meters && distance < 2.5.meters
             }

@@ -78,7 +78,7 @@ class Vision(private val io: VisionIO) {
             }
 
             numTags > 1 -> {
-                if (avgDist > 3.5 && !Robot.isSimulated) VisionConstants.maxStandardDeviations
+                if (avgDist > 7.0) VisionConstants.maxStandardDeviations
                 else VisionConstants.multiTagStdDevs
             }
 

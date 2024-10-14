@@ -229,6 +229,7 @@ object Robot: LoggedCoroutineRobot() {
         val shootOnMoveDisabled = overrides.switchThree
         val ampAlignDisabled = overrides.switchFour
         val visionDisabled = overrides.switchFive.or { !vision.isConnected }
+        val podiumOnly = overrides.switchEight
 
         RobotState.shouldDisableShootOnMove = { shootOnMoveDisabled.asBoolean }
         RobotState.shouldUsePivotSetpoints = { !pivotDisabled.asBoolean }
@@ -245,10 +246,14 @@ object Robot: LoggedCoroutineRobot() {
             Commands.startEnd(
                 { drive.setAutoAimGoal(target, toleranceSupplier) },
                 { drive.clearAutoAimGoal() }
-            ).onlyIf(autoaimDisabled.negate())
+            ).onlyIf(autoaimDisabled.negate().and(podiumOnly.negate()))
 
         fun pivotAimCommand(goal: Pivot.Goal) =
-            pivot.runGoal(goal).onlyIf(pivotDisabled.negate())
+            Commands.either(
+                pivot.runGoal(Pivot.Goal.PODIUM), // When podium only
+                pivot.runGoal(goal).onlyIf(pivotDisabled.negate()), // Default
+                { goal == Pivot.Goal.SPEAKER_AIM && podiumOnly.asBoolean }
+            )
 
         /**** Shooting ****/
         val inSpeakerScoringRange = Trigger(RobotState::isInSpeakerScoringRange)
@@ -457,7 +462,7 @@ object Robot: LoggedCoroutineRobot() {
 //            drive::getCharacterizationVelocity
 //        ).finallyDo(drive::endCharacterization).schedule()
 
-        Autos(drive, pivot, rollers, flywheels, noteSimulation, setSimulationPose).farsideTriple().schedule()
+        Autos(drive, pivot, rollers, flywheels, noteSimulation, setSimulationPose).ampsideTriple().schedule()
 //        RobotController.setAction {
 //            val trajectoryGroup = Choreo.getTrajectoryGroup("testing")
 //            Swerve.resetOdometry(trajectoryGroup.first().getAutoFlippedInitialPose())

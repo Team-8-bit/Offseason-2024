@@ -98,6 +98,39 @@ class Autos(
 
         return loop.cmd()
     }
+    fun ampsideTriple(): Command {
+        val loop = factory.newLoop("AmpsideTriple")
+
+        val trajName = "Ampside_Triple"
+        val preload = factory.trajectory(trajName, 0, loop)
+        val c1 = factory.trajectory(trajName, 1, loop)
+        val c2 = factory.trajectory(trajName, 2, loop)
+        val c3 = factory.trajectory(trajName, 3, loop)
+
+        loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
+
+        loop.enabled().onTrue(
+            Commands.runOnce({
+                whenSimulated { simulatedPoseConsumer?.accept(preload.initialPose.get()) }
+                drive.setPosition(preload.initialPose.get())
+            }).andThen(
+                ScheduleCommand(preload.cmd())
+            )
+        )
+
+        preload.done().onTrue(aimAndScore().andThen(ScheduleCommand(c1.cmd())))
+
+        c1.active().whileTrue(intake())
+        c1.done().onTrue(aimAndScore().andThen(ScheduleCommand(c2.cmd())))
+
+        c2.active().whileTrue(intake())
+        c2.done().onTrue(aimAndScore().andThen(ScheduleCommand(c3.cmd())))
+
+        c3.active().whileTrue(intake())
+        c3.done().onTrue(aimAndScore().andThen(autoCleanup()))
+
+        return loop.cmd()
+    }
 
     private fun autoCleanup(): Command = Commands.runOnce({ drive.clearTrajectoryInput() })
 
@@ -109,7 +142,7 @@ class Autos(
             rollers.runGoal(Rollers.Goal.SHOOTER_FEED),
         )
     )
-        .withTimeout(0.5)
+        .withTimeout(1.0)
         .withName("Auto Aim and Score")
         .finallyDo { _ -> Beambreak.simClear() } // Remove note from the robot in sim
 
