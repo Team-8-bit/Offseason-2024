@@ -1,6 +1,7 @@
 package org.team9432.vision
 
 import edu.wpi.first.math.Matrix
+import edu.wpi.first.math.VecBuilder
 import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
@@ -9,7 +10,6 @@ import org.photonvision.EstimatedRobotPose
 import org.photonvision.PhotonPoseEstimator
 import org.photonvision.targeting.PhotonPipelineResult
 import org.team9432.FieldConstants.apriltagFieldLayout
-import org.team9432.Robot
 import org.team9432.RobotState
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
@@ -54,6 +54,10 @@ class Vision(private val io: VisionIO) {
         RobotState.applyVisionMeasurement(visionPose, timestamp, stdDevs)
     }
 
+    // Just stolen from 8033
+    val visionPointBlankDevs: Matrix<N3, N1> = VecBuilder.fill(0.4, 0.4, 1.0)
+    val distanceFactor = 0.5
+
     private fun getEstimationStdDevs(estimatedPose: EstimatedRobotPose): Matrix<N3, N1> {
         // A count of the number of valid tags seen
         var numTags = 0
@@ -70,20 +74,27 @@ class Vision(private val io: VisionIO) {
 
         Logger.recordOutput("Vision/TagAvgDistance", avgDist)
 
-        return when {
-            numTags == 0 -> return VisionConstants.singleTagStdDevs
-            numTags == 1 -> {
-                if (avgDist > 5) VisionConstants.maxStandardDeviations
-                else VisionConstants.singleTagStdDevs.times(1 + (avgDist * avgDist) / 30)
-            }
 
-            numTags > 1 -> {
-                if (avgDist > 7.0) VisionConstants.maxStandardDeviations
-                else VisionConstants.multiTagStdDevs
-            }
-
-            else -> VisionConstants.maxStandardDeviations
+        var deviation = visionPointBlankDevs.times(avgDist * distanceFactor);
+        if (estimatedPose.targetsUsed.size == 1) {
+            deviation = deviation.times(2.0)
         }
+
+        return deviation
+//        when {
+//            numTags == 0 -> return VisionConstants.singleTagStdDevs
+//            numTags == 1 -> {
+//                if (avgDist > 5) VisionConstants.maxStandardDeviations
+//                else VisionConstants.singleTagStdDevs.times(1 + (avgDist * avgDist) / 30)
+//            }
+//
+//            numTags > 1 -> {
+//                if (avgDist > 7.0) VisionConstants.maxStandardDeviations
+//                else VisionConstants.multiTagStdDevs
+//            }
+//
+//            else -> VisionConstants.maxStandardDeviations
+//        }
     }
 
     val isConnected get() = inputs.isConnected
