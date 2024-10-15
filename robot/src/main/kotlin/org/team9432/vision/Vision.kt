@@ -55,7 +55,7 @@ class Vision(private val io: VisionIO) {
     }
 
     // Just stolen from 8033
-    val visionPointBlankDevs: Matrix<N3, N1> = VecBuilder.fill(0.4, 0.4, 1.0)
+    val visionPointBlankDevs: Matrix<N3, N1> = VecBuilder.fill(1.4, 1.4, 5.0)
     val distanceFactor = 0.5
 
     private fun getEstimationStdDevs(estimatedPose: EstimatedRobotPose): Matrix<N3, N1> {

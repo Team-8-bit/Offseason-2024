@@ -225,19 +225,21 @@ object Robot: LoggedCoroutineRobot() {
 
     private fun bindButtons() {
         val pivotDisabled = overrides.switchOne
-        val autoaimDisabled = overrides.switchTwo
+        val autoaimDisabled = overrides.switchTwo.or { !vision.isConnected }
         val shootOnMoveDisabled = overrides.switchThree
         val ampAlignDisabled = overrides.switchFour
         val visionDisabled = overrides.switchFive.or { !vision.isConnected }
+        val invertDrive = overrides.switchSeven.and { !DriverStation.isFMSAttached() }
         val podiumOnly = overrides.switchEight
 
         RobotState.shouldDisableShootOnMove = { shootOnMoveDisabled.asBoolean }
         RobotState.shouldUsePivotSetpoints = { !pivotDisabled.asBoolean }
 
         drive.defaultCommand = drive.run {
+            val inversion = if (invertDrive.asBoolean) -1 else 1
             drive.acceptTeleopInput(
-                -controller.leftY,
-                -controller.leftX,
+                -controller.leftY * inversion,
+                -controller.leftX * inversion,
                 controller.leftTriggerAxis - controller.rightTriggerAxis
             )
         }.withName("Teleop Drive")
@@ -462,7 +464,7 @@ object Robot: LoggedCoroutineRobot() {
 //            drive::getCharacterizationVelocity
 //        ).finallyDo(drive::endCharacterization).schedule()
 
-        Autos(drive, pivot, rollers, flywheels, noteSimulation, setSimulationPose).ampsideTriple().schedule()
+        Autos(drive, pivot, rollers, flywheels, noteSimulation, setSimulationPose).fourClose().schedule()
 //        RobotController.setAction {
 //            val trajectoryGroup = Choreo.getTrajectoryGroup("testing")
 //            Swerve.resetOdometry(trajectoryGroup.first().getAutoFlippedInitialPose())

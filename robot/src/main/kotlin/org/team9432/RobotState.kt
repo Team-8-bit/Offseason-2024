@@ -59,7 +59,7 @@ object RobotState {
         // Return the latest aiming parameters if they haven't changed
         latestAimingParameters.ifValid { cachedValue -> return cachedValue }
 
-        val predictedFuturePose = if (!shouldDisableShootOnMove()) getFutureRobotPose(SHOT_TIME_SECONDS) else currentPose
+        val predictedFuturePose = if (!shouldDisableShootOnMove()) getFutureRobotPose() else currentPose
         val targetPose = PositionConstants.speakerAimPose
 
         val drivetrainAngleTarget = predictedFuturePose.angleTo(targetPose).asRotation2d
@@ -81,7 +81,7 @@ object RobotState {
 
     val swerveLimits = SwerveSetpointGenerator.ModuleLimits(
         maxDriveVelocity = 4.0,
-        maxDriveAcceleration = 20.0,
+        maxDriveAcceleration = 10.0,
         maxSteeringVelocity = Units.degreesToRadians(1080.0)
     )
 
@@ -103,9 +103,18 @@ object RobotState {
         put(4.0, 25.0)
     }
 
-    private fun getFutureRobotPose(timeSeconds: Double) = currentPose.transformBySpeeds(ChassisSpeeds.fromRobotRelativeSpeeds(currentChassisSpeeds, currentPose.rotation), timeSeconds)
+    private val shotTimeMap = InterpolatingDoubleTreeMap().apply {
+        put(2.0, 0.4)
+        put(4.0, 0.6)
+    }
 
-    private const val SHOT_TIME_SECONDS = 0.4
+    private fun getFutureRobotPose(): Pose2d {
+        val distance = currentPose.distanceTo(PositionConstants.speakerAimPose)
+        return currentPose.transformBySpeeds(
+            ChassisSpeeds.fromRobotRelativeSpeeds(currentChassisSpeeds, currentPose.rotation),
+            shotTimeMap.get(distance.inMeters)
+        )
+    }
 
     val isInSpeakerScoringRange: Boolean
         get() {
@@ -131,7 +140,7 @@ object RobotState {
             Logger.recordOutput("RobotPosition/CurrentPose", currentPose)
             Logger.recordOutput("RobotPosition/CurrentSpeeds", getRobotRelativeChassisSpeeds())
             Logger.recordOutput("RobotPosition/CurrentFieldRelativeSpeeds", ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeChassisSpeeds(), currentPose.rotation))
-            Logger.recordOutput("RobotPosition/PoseInShotTime", getFutureRobotPose(SHOT_TIME_SECONDS))
+            Logger.recordOutput("RobotPosition/PoseInShotTime", getFutureRobotPose())
             Logger.recordOutput("RobotPosition/SpeakerTuningDistanceMeters", currentPose.distanceTo(PositionConstants.speakerAimPose).inMeters)
         }
     }

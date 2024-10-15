@@ -98,6 +98,7 @@ class Autos(
 
         return loop.cmd()
     }
+
     fun ampsideTriple(): Command {
         val loop = factory.newLoop("AmpsideTriple")
 
@@ -132,6 +133,47 @@ class Autos(
         return loop.cmd()
     }
 
+    fun fourClose(): Command {
+        val loop = factory.newLoop("FourClose")
+
+        val trajName = "Four_Close"
+        val preload = factory.trajectory(trajName, 0, loop)
+        val s1 = factory.trajectory(trajName, 1, loop)
+        val s2 = factory.trajectory(trajName, 2, loop)
+        val s3 = factory.trajectory(trajName, 3, loop)
+
+        loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
+
+        loop.enabled().onTrue(
+            Commands.runOnce({
+                whenSimulated { simulatedPoseConsumer?.accept(preload.initialPose.get()) }
+                drive.setPosition(preload.initialPose.get())
+            }).andThen(
+                ScheduleCommand(preload.cmd())
+            )
+        )
+
+        preload.done().onTrue(aimAndScore().andThen(ScheduleCommand(s1.cmd())))
+
+        s1.active().whileTrue(intake())
+        s1.done().onTrue(aimAndScore().andThen(ScheduleCommand(s2.cmd())))
+
+        s2.active().whileTrue(intake())
+        s2.done().onTrue(aimAndScore().andThen(ScheduleCommand(s3.cmd())))
+
+        s3.active().whileTrue(intake())
+        s3.done().onTrue(aimAndScore().andThen(autoCleanup()))
+
+//        loop.enabled().and { noteStaged }.whileTrue(pivot.runGoal(Pivot.Goal.SPEAKER_AIM))
+//        loop.enabled().and { !noteStaged }.whileTrue(intake())
+//
+//        preload.atTime("Shoot").and({ noteStaged }).onTrue(justScore())
+//
+//        traj.done().onTrue(autoCleanup())
+
+        return loop.cmd()
+    }
+
     private fun autoCleanup(): Command = Commands.runOnce({ drive.clearTrajectoryInput() })
 
     fun aimAndScore() = Commands.parallel(
@@ -162,7 +204,7 @@ class Autos(
             Commands.waitUntil(pivot::atGoal).andThen(
                 rollers.runGoal(Rollers.Goal.INTAKE)
                     .until(Beambreak::hasNote).afterSimCondition({ noteSimulation!!.hasNote }, { Beambreak.lowerBeambreak.setSimTripped() })
-                    .andThen(alignNote())
+                    .andThen(ScheduleCommand(alignNote()))
             )
         )
             .withName("AutoIntake")
@@ -171,8 +213,7 @@ class Autos(
         Commands.runOnce({ noteSimulation?.animateAlign() }),
         rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.2) { Beambreak.upperBeambreak.setSimTripped() },
     )
-        .onlyIf { Beambreak.hasNote }
-        .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
+        .alongWith(pivot.runGoal(Pivot.Goal.SPEAKER_AIM))
         .withTimeout(3.0)
         .withName("Note Align")
 }
