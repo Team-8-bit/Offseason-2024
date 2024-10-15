@@ -39,6 +39,10 @@ object RobotState {
         latestAimingParameters.invalidate()
         poseEstimator.addVisionMeasurement(visionPose, timestamp, measurementStdDevs)
         previousVisionMeasurementTimeStamp = max(timestamp, previousVisionMeasurementTimeStamp)
+
+        Logger.recordOutput("RobotPosition/LatestVisionPose", visionPose)
+        Logger.recordOutput("RobotPosition/LatestVisionStddevsXY", measurementStdDevs.get(1, 1))
+        Logger.recordOutput("RobotPosition/LatestVisionStddevsRotation", measurementStdDevs.get(1, 3))
     }
 
     fun addVelocityData(velocity: ChassisSpeeds) {
