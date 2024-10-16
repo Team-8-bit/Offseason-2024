@@ -41,8 +41,8 @@ object RobotState {
         previousVisionMeasurementTimeStamp = max(timestamp, previousVisionMeasurementTimeStamp)
 
         Logger.recordOutput("RobotPosition/LatestVisionPose", visionPose)
-        Logger.recordOutput("RobotPosition/LatestVisionStddevsXY", measurementStdDevs.get(1, 1))
-        Logger.recordOutput("RobotPosition/LatestVisionStddevsRotation", measurementStdDevs.get(1, 3))
+        Logger.recordOutput("RobotPosition/LatestVisionStddevsXY", measurementStdDevs.get(0, 0))
+        Logger.recordOutput("RobotPosition/LatestVisionStddevsRotation", measurementStdDevs.get(2, 0))
     }
 
     fun addVelocityData(velocity: ChassisSpeeds) {

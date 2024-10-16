@@ -3,6 +3,7 @@ package org.team9432
 
 import choreo.Choreo
 import com.ctre.phoenix6.CANBus
+import com.ctre.phoenix6.SignalLogger
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
@@ -24,9 +25,11 @@ import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.networktables.NT4Publisher
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
+import org.team9432.AutoBuilder.CenterNote
 import org.team9432.lib.Library
 import org.team9432.lib.coroutines.LoggedCoroutineRobot
 import org.team9432.lib.coroutines.Team8BitRobot.Runtime.*
+import org.team9432.lib.dashboard.AutoSelector
 import org.team9432.lib.simulation.competitionfield.simulations.CompetitionFieldSimulation
 import org.team9432.lib.simulation.competitionfield.simulations.Crescendo2024FieldSimulation
 import org.team9432.lib.simulation.competitionfield.simulations.IntakeSimulation
@@ -85,6 +88,8 @@ object Robot: LoggedCoroutineRobot() {
 
     init {
         Library.initialize(this, runtime)
+
+        SignalLogger.start()
 
         loggerInit()
 
@@ -444,6 +449,7 @@ object Robot: LoggedCoroutineRobot() {
         fieldSimulation?.updateSimulationWorld()
         fieldSimulation?.competitionField?.updateObjectsToDashboardAndTelemetry()
 
+        autochooser.update()
 
         // Log CANivore status
         if (runtime == REAL) {
@@ -457,6 +463,35 @@ object Robot: LoggedCoroutineRobot() {
         }
     }
 
+    private var currentAuto = Commands.none()
+    private val autoChoosers = List(5) { AutoSelector.DashboardQuestion("Option $it Chooser", "Option $it Question") }.toSet()
+
+    private val autochooser = AutoSelector(autoChoosers) {
+        val autoBuilder = AutoBuilder(drive, pivot, rollers, flywheels, noteSimulation, setSimulationPose)
+
+        addQuestion("Which Auto?", { currentAuto = it }) {
+            addOption("Do Nothing", Commands::none)
+
+            val noteNames = mapOf(null to "None", CenterNote.ONE to "Centerline One", CenterNote.TWO to "Centerline Two", CenterNote.THREE to "Centerline Three")
+
+            var firstNote: CenterNote? = null
+            var secondNote: CenterNote? = null
+            var thirdNote: CenterNote? = null
+            val getAuto = { autoBuilder.smartFarsideTriple(setOfNotNull(firstNote, secondNote, thirdNote)) }
+
+            addOption("Smart Amp Centerline", getAuto) {
+                addQuestion("First note?", { firstNote = it }) { noteNames.forEach { (note, name) -> addOption(name, { note }) } }
+                addQuestion("Second note?", { secondNote = it }) { noteNames.forEach { (note, name) -> addOption(name, { note }) } }
+                addQuestion("Third note?", { thirdNote = it }) { noteNames.forEach { (note, name) -> addOption(name, { note }) } }
+            }
+
+            addOption("Four Close", autoBuilder::fourClose)
+            addOption("Farside Triple", autoBuilder::farsideTriple)
+            addOption("Ampside Triple", autoBuilder::ampsideTriple)
+            addOption("Test Auto", autoBuilder::test)
+        }
+    }
+
     override suspend fun autonomous() {
 //        StaticCharacterization(
 //            drive,
@@ -464,41 +499,7 @@ object Robot: LoggedCoroutineRobot() {
 //            drive::getCharacterizationVelocity
 //        ).finallyDo(drive::endCharacterization).schedule()
 
-        Autos(drive, pivot, rollers, flywheels, noteSimulation, setSimulationPose).fourClose().schedule()
-//        RobotController.setAction {
-//            val trajectoryGroup = Choreo.getTrajectoryGroup("testing")
-//            Swerve.resetOdometry(trajectoryGroup.first().getAutoFlippedInitialPose())
-//            Swerve.setActualSimPose(trajectoryGroup.first().getAutoFlippedInitialPose())
-//            trajectoryGroup.forEachIndexed { index1, it ->
-//                println("starting $index1")
-//                Logger.recordOutput("Test/TargetEndPose", it.finalPose.applyFlip())
-//                Logger.recordOutput("Test/Samples", *it.poses.map { it.applyFlip() }.filterIndexed { index, _ -> index % 4 == 0 }.toTypedArray())
-//                Swerve.followChoreo(it)
-//                delay(1.seconds)
-//            }
-//            val selectedAuto = AutoChooser.getAuto()
-
-//            if (selectedAuto == null) {
-//                println("[Error] Auto was null")
-//                return@setAction
-//            }
-
-//            when (selectedAuto) {
-//                is FourNote -> RobotFourNote.run(selectedAuto)
-//                is FarsideCenterline -> RobotFarsideCenterline.run(selectedAuto)
-//                is AmpsideCenterline -> RobotAmpsideCenterline.run(selectedAuto)
-//            }
-//        }
-    }
-
-    override suspend fun disabled() {
-//        RobotController.resetRequests()
-    }
-
-    override suspend fun test() {
-//        RobotController.setAction {
-//            wheelDiameterTest(rotationsPerSecond = 0.125)
-//        }
+        currentAuto.schedule()
     }
 }
 

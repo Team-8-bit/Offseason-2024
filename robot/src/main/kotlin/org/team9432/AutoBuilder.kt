@@ -21,7 +21,7 @@ import org.team9432.resources.rollers.Rollers
 import java.util.*
 import java.util.function.Consumer
 
-class Autos(
+class AutoBuilder(
     private val drive: Drive,
     private val pivot: Pivot,
     private val rollers: Rollers,
@@ -63,6 +63,10 @@ class Autos(
             )
 
         return loop.cmd()
+    }
+
+    enum class CenterNote(val choreoName: String) {
+        ONE("C1"), TWO("C2"), THREE("C3"), FOUR("C4"), FIVE("C5")
     }
 
     fun farsideTriple(): Command {
@@ -164,12 +168,148 @@ class Autos(
         s3.active().whileTrue(intake())
         s3.done().onTrue(aimAndScore().andThen(autoCleanup()))
 
-//        loop.enabled().and { noteStaged }.whileTrue(pivot.runGoal(Pivot.Goal.SPEAKER_AIM))
-//        loop.enabled().and { !noteStaged }.whileTrue(intake())
-//
-//        preload.atTime("Shoot").and({ noteStaged }).onTrue(justScore())
-//
-//        traj.done().onTrue(autoCleanup())
+        return loop.cmd()
+    }
+
+    fun smartFarsideTriple(noteOrder: Set<CenterNote>): Command {
+        val noteQueue: Queue<CenterNote> = LinkedList(noteOrder)
+
+        val loop = factory.newLoop("SmartFarsideTriple")
+
+        val AMPtoAMPSHOT = factory.trajectory("AMPtoAMPSHOT", loop)
+        val AMPSHOTtoC1 = factory.trajectory("AMPSHOTtoC1", loop)
+        val AMPSHOTtoC2 = factory.trajectory("AMPSHOTtoC2", loop)
+        val AMPSHOTtoC3 = factory.trajectory("AMPSHOTtoC3", loop)
+
+        val C1toAMPSHOT = factory.trajectory("C1toAMPSHOT", loop)
+        val C2toAMPSHOT = factory.trajectory("C2toAMPSHOT", loop)
+        val C3toAMPSHOT = factory.trajectory("C3toAMPSHOT", loop)
+
+        val C1toC2 = factory.trajectory("C1toC2", loop)
+        val C1toC3 = factory.trajectory("C1toC3", loop)
+        val C2toC1 = factory.trajectory("C2toC1", loop)
+        val C2toC3 = factory.trajectory("C2toC3", loop)
+        val C3toC1 = factory.trajectory("C3toC1", loop)
+        val C3toC2 = factory.trajectory("C3toC2", loop)
+
+        loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
+
+        loop.enabled().onTrue(
+            Commands.runOnce({
+                whenSimulated { simulatedPoseConsumer?.accept(AMPtoAMPSHOT.initialPose.get()) }
+                drive.setPosition(AMPtoAMPSHOT.initialPose.get())
+            }).andThen(AMPtoAMPSHOT.cmd())
+        )
+
+        // Tracking whether the robot has a note
+        var touchedNote = false
+        rollers.noteCurrentTrigger.onTrue(Commands.runOnce({ touchedNote = true }))
+
+        val hasNoteSupplier = { touchedNote || Beambreak.hasNote }
+        val hasNoNoteSupplier = { !touchedNote && Beambreak.hasNoNote }
+
+        // True if there are more notes to grab
+        val moreTargetNotes = { noteQueue.isNotEmpty() }
+
+        // Intake while driving to centerline
+        AMPSHOTtoC1.active().onTrue(intake())
+        AMPSHOTtoC2.active().onTrue(intake())
+        AMPSHOTtoC3.active().onTrue(intake())
+
+        // Triggers for arriving at a center note from any other path
+        val arrivingAtC1 = AMPSHOTtoC1.done()
+            .or(C2toC1.done())
+            .or(C3toC1.done())
+        val arrivingAtC2 = AMPSHOTtoC2.done()
+            .or(C1toC2.done())
+            .or(C3toC2.done())
+        val arrivingAtC3 = AMPSHOTtoC3.done()
+            .or(C1toC3.done())
+            .or(C2toC3.done())
+
+        // After getting to centerline, return if note
+        arrivingAtC1
+            .and(hasNoteSupplier)
+            .onTrue(C1toAMPSHOT.cmd())
+        arrivingAtC2
+            .and(hasNoteSupplier)
+            .onTrue(C2toAMPSHOT.cmd())
+        arrivingAtC3
+            .and(hasNoteSupplier)
+            .onTrue(C3toAMPSHOT.cmd())
+
+        // After getting to centerline, keep looking if no note
+        arrivingAtC1
+            .and(hasNoNoteSupplier)
+            .and(moreTargetNotes)
+            .onTrue(Commands.defer({
+                when (noteQueue.poll()) {
+                    CenterNote.TWO -> C1toC2.cmd()
+                    CenterNote.THREE -> C1toC3.cmd()
+                    else -> {
+                        loop.kill()
+                        DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
+                        Commands.none()
+                    }
+                }
+            }, setOf(drive)))
+        arrivingAtC2
+            .and(hasNoNoteSupplier)
+            .and(moreTargetNotes)
+            .onTrue(Commands.defer({
+                when (noteQueue.poll()) {
+                    CenterNote.ONE -> C2toC1.cmd()
+                    CenterNote.THREE -> C2toC3.cmd()
+                    else -> {
+                        loop.kill()
+                        DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
+                        Commands.none()
+                    }
+                }
+            }, setOf(drive)))
+        arrivingAtC3
+            .and(hasNoNoteSupplier)
+            .and(moreTargetNotes)
+            .onTrue(Commands.defer({
+                when (noteQueue.poll()) {
+                    CenterNote.ONE -> C3toC1.cmd()
+                    CenterNote.TWO -> C3toC2.cmd()
+                    else -> {
+                        loop.kill()
+                        DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
+                        Commands.none()
+                    }
+                }
+            }, setOf(drive)))
+
+
+        val arrivingAtAMPSHOT =
+            C1toAMPSHOT.done()
+                .or(C2toAMPSHOT.done())
+                .or(C3toAMPSHOT.done())
+                .or(AMPtoAMPSHOT.done())
+
+        // After arriving to score, shoot
+        arrivingAtAMPSHOT.onTrue(aimAndScore().andThen(Commands.runOnce({ touchedNote = false })))
+
+        arrivingAtAMPSHOT
+            .and(moreTargetNotes)
+            .onTrue(
+                Commands.waitUntil(hasNoNoteSupplier).andThen(
+                    Commands.defer({
+                        when (noteQueue.poll()) {
+                            CenterNote.ONE -> AMPSHOTtoC1.cmd()
+                            CenterNote.TWO -> AMPSHOTtoC2.cmd()
+                            CenterNote.THREE -> AMPSHOTtoC3.cmd()
+                            else -> {
+                                loop.kill()
+                                DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
+                                Commands.none()
+                            }
+                        }
+                    }, setOf(drive))
+                )
+            )
 
         return loop.cmd()
     }

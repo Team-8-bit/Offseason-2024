@@ -67,5 +67,7 @@ class Rollers(
 
     val isIntaking get() = goal == Goal.INTAKE
 
+    val noteCurrentTrigger = intake.noteCurrentTrigger
+
     fun runGoal(newGoal: Goal): Command = startEnd({ goal = newGoal }, { goal = Goal.IDLE })
 }
