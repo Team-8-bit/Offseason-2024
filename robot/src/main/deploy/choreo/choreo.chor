@@ -4,11 +4,18 @@
  "type":"Swerve",
  "variables":{
   "expressions":{
-   "SpikeX":{
+   "CenterY":{
     "dimension":"Length",
     "var":{
-     "exp":"9 ft + 6 in",
-     "val":2.8956
+     "exp":"(26 ft + 11.25 in) / 2",
+     "val":4.105275
+    }
+   },
+   "CenterSpacing":{
+    "dimension":"Length",
+    "var":{
+     "exp":"5 ft + 6 in",
+     "val":1.6764
     }
    },
    "SpikeSpacing":{
@@ -18,13 +25,6 @@
      "val":1.4478
     }
    },
-   "CenterY":{
-    "dimension":"Length",
-    "var":{
-     "exp":"(26 ft + 11.25 in) / 2",
-     "val":4.105275
-    }
-   },
    "StartOnLineX":{
     "dimension":"Length",
     "var":{
@@ -32,11 +32,11 @@
      "val":1.4
     }
    },
-   "CenterSpacing":{
+   "SpikeX":{
     "dimension":"Length",
     "var":{
-     "exp":"5 ft + 6 in",
-     "val":1.6764
+     "exp":"9 ft + 6 in",
+     "val":2.8956
     }
    },
    "CenterX":{
@@ -48,24 +48,10 @@
    }
   },
   "poses":{
-   "C1Note":{
-    "x":{
-     "exp":"CenterX",
-     "val":8.270875
-    },
-    "y":{
-     "exp":"CenterY + (CenterSpacing * 2)",
-     "val":7.458075
-    },
-    "heading":{
-     "exp":"0 rad",
-     "val":0.0
-    }
-   },
    "CenterPickupOffset":{
     "x":{
-     "exp":"-0.3 m",
-     "val":-0.3
+     "exp":"-0.25 m",
+     "val":-0.25
     },
     "y":{
      "exp":"0 m",
@@ -76,52 +62,10 @@
      "val":3.141592653589793
     }
    },
-   "C4Note":{
-    "x":{
-     "exp":"CenterX",
-     "val":8.270875
-    },
-    "y":{
-     "exp":"CenterY + (CenterSpacing * -1)",
-     "val":2.4288749999999997
-    },
-    "heading":{
-     "exp":"0 rad",
-     "val":0.0
-    }
-   },
-   "S3Note":{
-    "x":{
-     "exp":"SpikeX",
-     "val":2.8956
-    },
-    "y":{
-     "exp":"CenterY + (SpikeSpacing * 0)",
-     "val":4.105275
-    },
-    "heading":{
-     "exp":"0 rad",
-     "val":0.0
-    }
-   },
-   "C3":{
-    "x":{
-     "exp":"C3Note.x() + CenterPickupOffset.x()",
-     "val":7.970875
-    },
-    "y":{
-     "exp":"C3Note.y() + CenterPickupOffset.y()",
-     "val":4.105275
-    },
-    "heading":{
-     "exp":"C3Note.heading() + CenterPickupOffset.heading()",
-     "val":3.141592653589793
-    }
-   },
    "C2":{
     "x":{
      "exp":"C2Note.x() + CenterPickupOffset.x()",
-     "val":7.970875
+     "val":8.020875
     },
     "y":{
      "exp":"C2Note.y() + CenterPickupOffset.y()",
@@ -132,38 +76,10 @@
      "val":3.141592653589793
     }
    },
-   "C5":{
-    "x":{
-     "exp":"C5Note.x() + CenterPickupOffset.x()",
-     "val":7.970875
-    },
-    "y":{
-     "exp":"C5Note.y() + CenterPickupOffset.y()",
-     "val":0.7524749999999994
-    },
-    "heading":{
-     "exp":"C5Note.heading() + CenterPickupOffset.heading()",
-     "val":3.141592653589793
-    }
-   },
-   "SpeakerStart":{
-    "x":{
-     "exp":"1.25 m",
-     "val":1.25
-    },
-    "y":{
-     "exp":"S2Note.y()",
-     "val":5.553075000000001
-    },
-    "heading":{
-     "exp":"180 deg",
-     "val":3.141592653589793
-    }
-   },
    "C4":{
     "x":{
      "exp":"C4Note.x() + CenterPickupOffset.x()",
-     "val":7.970875
+     "val":8.020875
     },
     "y":{
      "exp":"C4Note.y() + CenterPickupOffset.y()",
@@ -171,76 +87,6 @@
     },
     "heading":{
      "exp":"C4Note.heading() + CenterPickupOffset.heading()",
-     "val":3.141592653589793
-    }
-   },
-   "S1Note":{
-    "x":{
-     "exp":"SpikeX",
-     "val":2.8956
-    },
-    "y":{
-     "exp":"CenterY + (SpikeSpacing * 2)",
-     "val":7.000874999999999
-    },
-    "heading":{
-     "exp":"0 rad",
-     "val":0.0
-    }
-   },
-   "S2Note":{
-    "x":{
-     "exp":"SpikeX",
-     "val":2.8956
-    },
-    "y":{
-     "exp":"CenterY + (SpikeSpacing * 1)",
-     "val":5.553075000000001
-    },
-    "heading":{
-     "exp":"0 rad",
-     "val":0.0
-    }
-   },
-   "C2Note":{
-    "x":{
-     "exp":"CenterX",
-     "val":8.270875
-    },
-    "y":{
-     "exp":"CenterY + (CenterSpacing * 1)",
-     "val":5.781675
-    },
-    "heading":{
-     "exp":"0 rad",
-     "val":0.0
-    }
-   },
-   "SourceStart":{
-    "x":{
-     "exp":"StartOnLineX",
-     "val":1.4
-    },
-    "y":{
-     "exp":"2.8 m",
-     "val":2.8
-    },
-    "heading":{
-     "exp":"180 deg",
-     "val":3.141592653589793
-    }
-   },
-   "AmpStart":{
-    "x":{
-     "exp":"StartOnLineX",
-     "val":1.4
-    },
-    "y":{
-     "exp":"7.36 m",
-     "val":7.36
-    },
-    "heading":{
-     "exp":"180 deg",
      "val":3.141592653589793
     }
    },
@@ -258,13 +104,27 @@
      "val":0.0
     }
    },
-   "C3Note":{
+   "C5":{
     "x":{
-     "exp":"CenterX",
-     "val":8.270875
+     "exp":"C5Note.x() + CenterPickupOffset.x()",
+     "val":8.020875
     },
     "y":{
-     "exp":"CenterY + (CenterSpacing * 0)",
+     "exp":"C5Note.y() + CenterPickupOffset.y()",
+     "val":0.7524749999999994
+    },
+    "heading":{
+     "exp":"C5Note.heading() + CenterPickupOffset.heading()",
+     "val":3.141592653589793
+    }
+   },
+   "S3Note":{
+    "x":{
+     "exp":"SpikeX",
+     "val":2.8956
+    },
+    "y":{
+     "exp":"CenterY + (SpikeSpacing * 0)",
      "val":4.105275
     },
     "heading":{
@@ -286,10 +146,122 @@
      "val":3.141592653589793
     }
    },
+   "C4Note":{
+    "x":{
+     "exp":"CenterX",
+     "val":8.270875
+    },
+    "y":{
+     "exp":"CenterY + (CenterSpacing * -1)",
+     "val":2.4288749999999997
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "C3":{
+    "x":{
+     "exp":"C3Note.x() + CenterPickupOffset.x()",
+     "val":8.020875
+    },
+    "y":{
+     "exp":"C3Note.y() + CenterPickupOffset.y()",
+     "val":4.105275
+    },
+    "heading":{
+     "exp":"C3Note.heading() + CenterPickupOffset.heading()",
+     "val":3.141592653589793
+    }
+   },
+   "SourceStart":{
+    "x":{
+     "exp":"StartOnLineX",
+     "val":1.4
+    },
+    "y":{
+     "exp":"2.8 m",
+     "val":2.8
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
+   "C1Note":{
+    "x":{
+     "exp":"CenterX",
+     "val":8.270875
+    },
+    "y":{
+     "exp":"CenterY + (CenterSpacing * 2)",
+     "val":7.458075
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "SpeakerStart":{
+    "x":{
+     "exp":"1.25 m",
+     "val":1.25
+    },
+    "y":{
+     "exp":"S2Note.y()",
+     "val":5.553075000000001
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
+   "AmpFarShot":{
+    "x":{
+     "exp":"4.5 m",
+     "val":4.5
+    },
+    "y":{
+     "exp":"6.3 m",
+     "val":6.3
+    },
+    "heading":{
+     "exp":"-2.96 rad",
+     "val":-2.96
+    }
+   },
+   "C3Note":{
+    "x":{
+     "exp":"CenterX",
+     "val":8.270875
+    },
+    "y":{
+     "exp":"CenterY + (CenterSpacing * 0)",
+     "val":4.105275
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "AmpStart":{
+    "x":{
+     "exp":"StartOnLineX",
+     "val":1.4
+    },
+    "y":{
+     "exp":"7.36 m",
+     "val":7.36
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
    "C1":{
     "x":{
      "exp":"C1Note.x() + CenterPickupOffset.x()",
-     "val":7.970875
+     "val":8.020875
     },
     "y":{
      "exp":"C1Note.y() + CenterPickupOffset.y()",
@@ -298,6 +270,48 @@
     "heading":{
      "exp":"C1Note.heading() + CenterPickupOffset.heading()",
      "val":3.141592653589793
+    }
+   },
+   "S2Note":{
+    "x":{
+     "exp":"SpikeX",
+     "val":2.8956
+    },
+    "y":{
+     "exp":"CenterY + (SpikeSpacing * 1)",
+     "val":5.553075000000001
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "S1Note":{
+    "x":{
+     "exp":"SpikeX",
+     "val":2.8956
+    },
+    "y":{
+     "exp":"CenterY + (SpikeSpacing * 2)",
+     "val":7.000874999999999
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "C2Note":{
+    "x":{
+     "exp":"CenterX",
+     "val":8.270875
+    },
+    "y":{
+     "exp":"CenterY + (CenterSpacing * 1)",
+     "val":5.781675
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
     }
    }
   }
