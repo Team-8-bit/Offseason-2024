@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Commands
 import edu.wpi.first.wpilibj2.command.ScheduleCommand
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import org.littletonrobotics.junction.Logger
+import org.team9432.lib.Library
 import org.team9432.lib.util.afterSimCondition
 import org.team9432.lib.util.afterSimDelay
 import org.team9432.lib.util.whenSimulated
@@ -35,7 +36,7 @@ class AutoBuilder(
 ) {
     private val controller = ChoreoTrajectoryController(drive) { drive.currentTrajectoryModuleForces = it }
 
-    val shouldMirror = { Robot.alliance == DriverStation.Alliance.Red }
+    val shouldMirror = { Library.alliance == DriverStation.Alliance.Red }
     private val factory = AutoFactory(
         RobotState::currentPose,
         { pose, sample -> controller.calculate(pose, sample as SwerveSample) },

@@ -22,7 +22,7 @@ class GyroIOSim: GyroIO, SimulatedGyro() {
 
     override fun updateInputs(inputs: GyroIO.GyroIOInputs) {
         val angularVelocityChange = abs(gyroPhysicsSimulationResults.robotAngularVelocityRadPerSec - previousAngularVelocityRadPerSec)
-        val angularAccelerationMagnitudeRadPerSecSq: Double = angularVelocityChange / Robot.periodSeconds
+        val angularAccelerationMagnitudeRadPerSecSq: Double = angularVelocityChange / Robot.period
         previousAngularVelocityRadPerSec = gyroPhysicsSimulationResults.robotAngularVelocityRadPerSec
         val currentTickDriftStdDevRad: Double =
             if (angularAccelerationMagnitudeRadPerSecSq > GYRO_ANGULAR_ACCELERATION_THRESHOLD_SKIDDING_RAD_PER_SEC_SQ) {
@@ -63,6 +63,6 @@ class GyroIOSim: GyroIO, SimulatedGyro() {
     * the gyro's drift has standard deviation of NORMAL_GYRO_DRIFT_IN_1_MIN_Std_Dev_RAD
     * sqrt(n) * GYRO_DRIFT_IN_1_TICK_Std_Dev_RAD = NORMAL_GYRO_DRIFT_IN_1_MIN_Std_Dev_RAD
      *  */
-        val GYRO_DRIFT_IN_1_TICK_Std_Dev_RAD: Double = NORMAL_GYRO_DRIFT_IN_1_MIN_Std_Dev_RAD / sqrt(60.0 / Robot.periodSeconds)
+        val GYRO_DRIFT_IN_1_TICK_Std_Dev_RAD: Double = NORMAL_GYRO_DRIFT_IN_1_MIN_Std_Dev_RAD / sqrt(60.0 / Robot.period)
     }
 }

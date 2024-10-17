@@ -2,7 +2,7 @@ package org.team9432.resources.drive.odometrythread
 
 import org.team9432.Robot
 import org.team9432.annotation.Logged
-import org.team9432.lib.coroutines.Team8BitRobot
+import org.team9432.lib.Library.Runtime
 
 interface OdometryThread {
     @Logged
@@ -17,9 +17,9 @@ interface OdometryThread {
     companion object {
         fun createInstance(): OdometryThread {
             return when (Robot.runtime) {
-                Team8BitRobot.Runtime.REAL -> OdometryThreadReal
-                Team8BitRobot.Runtime.SIM -> OdometryThreadSim()
-                Team8BitRobot.Runtime.REPLAY -> object: OdometryThread {}
+                Runtime.REAL -> OdometryThreadReal
+                Runtime.SIM -> OdometryThreadSim()
+                Runtime.REPLAY -> object: OdometryThread {}
             }
         }
     }

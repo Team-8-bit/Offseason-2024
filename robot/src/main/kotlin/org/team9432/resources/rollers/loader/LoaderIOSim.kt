@@ -15,7 +15,7 @@ class LoaderIOSim: LoaderIO {
     }
 
     override fun updateInputs(inputs: LoaderIO.LoaderIOInputs) {
-        sim.update(Robot.periodSeconds)
+        sim.update(Robot.period)
         inputs.positionRotations = sim.angularPositionRotations
         inputs.velocityRPM = sim.angularVelocityRPM
         inputs.appliedVoltage = appliedVoltage

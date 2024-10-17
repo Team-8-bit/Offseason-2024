@@ -81,7 +81,7 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
 
         if (!runningCharacterization && !disabled) {
             setpointState = profile.calculate(
-                Robot.periodSeconds,
+                Robot.period,
                 setpointState,
                 TrapezoidProfile.State(
                     MathUtil.clamp(

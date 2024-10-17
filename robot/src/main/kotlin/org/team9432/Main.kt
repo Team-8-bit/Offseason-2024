@@ -21,14 +21,15 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import org.littletonrobotics.junction.LogFileUtil
 import org.littletonrobotics.junction.LogTable
+import org.littletonrobotics.junction.LoggedRobot
 import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.networktables.NT4Publisher
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
 import org.team9432.AutoBuilder.CenterNote
 import org.team9432.lib.Library
-import org.team9432.lib.coroutines.LoggedCoroutineRobot
-import org.team9432.lib.coroutines.Team8BitRobot.Runtime.*
+import org.team9432.lib.Library.Runtime.*
+import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.dashboard.AutoSelector
 import org.team9432.lib.simulation.competitionfield.simulations.CompetitionFieldSimulation
 import org.team9432.lib.simulation.competitionfield.simulations.Crescendo2024FieldSimulation
@@ -68,9 +69,7 @@ import org.team9432.vision.VisionIOReal
 import org.team9432.vision.VisionIOSim
 
 
-object Robot: LoggedCoroutineRobot() {
-    override val tuningMode = true
-
+object Robot: LoggedRobot() {
     val runtime = if (RobotBase.isReal()) REAL else SIM
 
     private val controller = CommandXboxController(0)
@@ -86,8 +85,10 @@ object Robot: LoggedCoroutineRobot() {
     private val noteSimulation: NoteSimulation?
     private val setSimulationPose: ((Pose2d) -> Unit)?
 
+    private var currentAlliance: DriverStation.Alliance? = null
+
     init {
-        Library.initialize(this, runtime)
+        Library.initialize(runtime, tuningMode = true, allianceSupplier = { currentAlliance })
 
         SignalLogger.start()
 
@@ -204,11 +205,8 @@ object Robot: LoggedCoroutineRobot() {
         PortForwarder.add(5800, "10.94.32.12", 5800)
         PortForwarder.add(5800, "photonvision.local", 5800)
 
-//        `LEDs!`
-
         DriverStation.silenceJoystickConnectionWarning(true)
     }
-
 
     private fun CommandGenericHID.rumbleCommand() = Commands.startEnd(
         { hid.setRumble(RumbleType.kBothRumble, 1.0) },
@@ -444,13 +442,16 @@ object Robot: LoggedCoroutineRobot() {
         LogTable.disableProtobufWarning()
     }
 
-    override fun periodic() {
+    override fun robotPeriodic() {
         CommandScheduler.getInstance().run()
+        RobotPeriodicManager.invokeAllAndStartNew()
 
         fieldSimulation?.updateSimulationWorld()
         fieldSimulation?.competitionField?.updateObjectsToDashboardAndTelemetry()
 
         autochooser.update()
+
+        DriverStation.getAlliance().ifPresent { currentAlliance = it }
 
         // Log CANivore status
         if (runtime == REAL) {
@@ -493,7 +494,7 @@ object Robot: LoggedCoroutineRobot() {
         }
     }
 
-    override suspend fun autonomous() {
+    override fun autonomousInit() {
 //        StaticCharacterization(
 //            drive,
 //            drive::runCharacterization,

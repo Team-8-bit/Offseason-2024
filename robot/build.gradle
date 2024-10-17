@@ -104,8 +104,6 @@ dependencies {
 
     wpi.sim.enableRelease().forEach { simulationRelease(it) }
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1-Beta")
-
     // Swerve sim
     implementation("org.dyn4j:dyn4j:5.0.2")
 
@@ -129,9 +127,6 @@ dependencies {
 
     // REVLib
     implementation("com.revrobotics.frc:REVLib-java:2024.2.1")
-
-    // DogLog
-    implementation("com.github.jonahsnider:doglog:2024.5.8")
 }
 
 // Simulation configuration (e.g. environment variables).

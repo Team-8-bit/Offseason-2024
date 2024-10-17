@@ -25,7 +25,7 @@ class PivotIOSim: PivotIO {
     }
 
     override fun updateInputs(inputs: PivotIO.PivotIOInputs) {
-        sim.update(Robot.periodSeconds)
+        sim.update(Robot.period)
         inputs.leaderPositionRotations = Units.radiansToRotations(sim.angleRads)
         inputs.leaderVelocityRPM = Units.radiansPerSecondToRotationsPerMinute(sim.velocityRadPerSec)
         inputs.leaderAppliedVoltage = appliedVoltage

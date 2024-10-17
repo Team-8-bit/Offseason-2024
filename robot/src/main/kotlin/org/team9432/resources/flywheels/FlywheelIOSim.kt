@@ -21,8 +21,8 @@ class FlywheelIOSim: FlywheelIO {
     }
 
     override fun updateInputs(inputs: FlywheelIO.FlywheelIOInputs) {
-        upperSim.update(Robot.periodSeconds)
-        lowerSim.update(Robot.periodSeconds)
+        upperSim.update(Robot.period)
+        lowerSim.update(Robot.period)
 
         inputs.upperPositionRotations = upperSim.angularPositionRotations
         inputs.upperVelocityRPM = upperSim.angularVelocityRPM

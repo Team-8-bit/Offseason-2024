@@ -9,8 +9,8 @@ import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.DriverStation
-import org.team9432.Robot
 import org.team9432.RobotState
+import org.team9432.lib.Library
 import org.team9432.lib.dashboard.LoggedTunableNumber
 import kotlin.math.hypot
 import kotlin.math.pow
@@ -43,7 +43,7 @@ class TeleopDriveController: GenericDriveController<ChassisSpeeds>() {
         val linearSpeed = getLinearSpeed(controllerX, controllerY)
         val rotationSpeed = MathUtil.applyDeadband(controllerR, rotationDeadband)
 
-        val invert = if (Robot.alliance == DriverStation.Alliance.Red) -1 else 1
+        val invert = if (Library.alliance == DriverStation.Alliance.Red) -1 else 1
 
         return ChassisSpeeds.fromFieldRelativeSpeeds(
             ratelimitX.calculate(linearSpeed.x * maxLinearVelocity) * invert,

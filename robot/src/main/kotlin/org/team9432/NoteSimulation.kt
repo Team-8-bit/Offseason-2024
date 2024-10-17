@@ -3,8 +3,7 @@ package org.team9432
 import edu.wpi.first.math.geometry.*
 import edu.wpi.first.math.util.Units
 import edu.wpi.first.wpilibj.Timer
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import edu.wpi.first.wpilibj2.command.FunctionalCommand
 import org.littletonrobotics.junction.Logger
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.simulation.competitionfield.objects.Crescendo2024FieldObjects
@@ -13,7 +12,6 @@ import org.team9432.lib.simulation.competitionfield.simulations.IntakeSimulation
 import org.team9432.lib.unit.inMeters
 import org.team9432.lib.util.allianceSwitch
 import org.team9432.lib.util.distanceTo
-import kotlin.time.Duration.Companion.milliseconds
 
 
 class NoteSimulation(private val robotPoseSupplier: () -> Pose2d, private val addGamePieceOnFlyDisplay: (GamePieceOnFlyDisplay) -> Unit, private val intakeSim: IntakeSimulation) {
@@ -88,17 +86,12 @@ class NoteSimulation(private val robotPoseSupplier: () -> Pose2d, private val ad
 
     private fun genericAnimation(durationSeconds: Double, onEnd: (() -> Unit)? = null, onLoop: (Double) -> Unit) {
         val timer = Timer()
-        Robot.coroutineScope.launch {
-            timer.restart()
-
-            while (!timer.hasElapsed(durationSeconds)) {
-                onLoop.invoke(timer.get() / durationSeconds)
-                delay(5.milliseconds)
-            }
-
-            timer.stop()
-            onEnd?.invoke()
-        }
+        FunctionalCommand(
+            { timer.restart() },
+            { onLoop.invoke(timer.get() / durationSeconds) },
+            { timer.stop(); onEnd?.invoke() },
+            { timer.hasElapsed(durationSeconds) }
+        ).schedule()
     }
 
     private fun Transform3d.interpolate(endValue: Transform3d, t: Double): Transform3d {
