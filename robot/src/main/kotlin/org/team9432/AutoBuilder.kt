@@ -11,6 +11,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
+import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.ScheduleCommand
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import org.littletonrobotics.junction.Logger
@@ -250,34 +251,38 @@ class AutoBuilder(
             )
         )
 
-        val arrivingAtAMPSHOT =
-            C1toAMPSHOT.done()
-                .or(C2toAMPSHOT.done())
-                .or(C3toAMPSHOT.done())
-                .or(AMPtoAMPSHOT.done())
+        val drivingToAMPSHOT =
+            C1toAMPSHOT.active()
+                .or(C2toAMPSHOT.active())
+                .or(C3toAMPSHOT.active())
+                .or(AMPtoAMPSHOT.active())
+
+        // Prepare to shoot while driving
+        drivingToAMPSHOT.whileTrue(pivot.runGoal(Pivot.Goal.SPEAKER_AIM))
 
         // After arriving to score, shoot
-        arrivingAtAMPSHOT
-            .onTrue(
-                aimAndScore()
-                    .andThen(
-                        ScheduleCommand(
-                            Commands.waitUntil(Beambreak::hasNoNote).andThen(
-                                Commands.defer({
-                                    when (noteQueue.poll()) {
-                                        CenterNote.ONE -> AMPSHOTtoC1.cmdWithEnd()
-                                        CenterNote.TWO -> AMPSHOTtoC2.cmdWithEnd()
-                                        CenterNote.THREE -> AMPSHOTtoC3.cmdWithEnd()
-                                        else -> {
-                                            loop.kill()
-                                            DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
-                                            Commands.none()
-                                        }
-                                    }
-                                }, setOf(drive))
-                            )
-                        ).onlyIf(moreTargetNotes)
-                    )
+        drivingToAMPSHOT
+            .onFalse(aimAndScore())
+
+        // If there are more notes to get, start another path
+        drivingToAMPSHOT
+            .and(moreTargetNotes)
+            .onFalse(
+                // Wait until the notes is out of the robot and then start the next path
+                Commands.waitUntil(Beambreak::hasNoNote).andThen(
+                    Commands.defer({
+                        when (noteQueue.poll()) {
+                            CenterNote.ONE -> AMPSHOTtoC1.cmdWithEnd()
+                            CenterNote.TWO -> AMPSHOTtoC2.cmdWithEnd()
+                            CenterNote.THREE -> AMPSHOTtoC3.cmdWithEnd()
+                            else -> {
+                                loop.kill()
+                                DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
+                                Commands.none()
+                            }
+                        }
+                    }, setOf(drive))
+                )
             )
 
         return loop.cmd()
@@ -327,14 +332,14 @@ class AutoBuilder(
         return loop.cmd { isFinished }
     }
 
-    val readyToShoot = Trigger { pivot.atGoal && drive.atAutoAimGoal() && flywheels.atGoal }.debounce(0.3, Debouncer.DebounceType.kRising)
+    val readyToShoot = Trigger { pivot.atGoal && drive.atAutoAimGoal(1.0) && flywheels.atGoal }.debounce(0.3, Debouncer.DebounceType.kRising)
 
     fun aimAndScore() = Commands.parallel(
         drive.aimSpeaker(),
         pivot.runGoal(Pivot.Goal.SPEAKER_AIM),
         Commands.waitUntil(readyToShoot).andThen(
             Commands.runOnce({ noteSimulation?.animateShoot() }),
-            rollers.runGoal(Rollers.Goal.SHOOTER_FEED).afterSimDelay(0.2) { Beambreak.simClear() },
+            rollers.runGoal(Rollers.Goal.SHOOTER_FEED).afterSimDelay(0.15) { Beambreak.simClear() },
         )
     )
         .until(Beambreak.upperBeambreak::isClear)

@@ -48,10 +48,14 @@ class TeleopAutoAimController(private val goalSupplier: () -> Rotation2d, privat
         return output
     }
 
-    override fun atGoal() =
+    fun atGoal(toleranceDegrees: Double) =
         epsilonEquals(
             controller.setpoint.position,
             controller.goal.position,
-            controller.positionTolerance
+            toleranceDegrees
         )
+
+    override fun atGoal(): Boolean {
+        return atGoal(controller.positionTolerance)
+    }
 }

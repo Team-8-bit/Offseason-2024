@@ -225,6 +225,7 @@ class Drive(
     }
 
     fun atAutoAimGoal() = teleopAutoAimController == null || teleopAutoAimController?.atGoal() == true
+    fun atAutoAimGoal(toleranceDegrees: Double) = teleopAutoAimController == null || teleopAutoAimController?.atGoal(toleranceDegrees) == true
 
     fun clearAutoAimGoal() {
         teleopAutoAimController = null
