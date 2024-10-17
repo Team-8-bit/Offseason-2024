@@ -11,7 +11,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.Commands
-import edu.wpi.first.wpilibj2.command.PrintCommand
 import edu.wpi.first.wpilibj2.command.ScheduleCommand
 import edu.wpi.first.wpilibj2.command.button.Trigger
 import org.littletonrobotics.junction.Logger
@@ -148,19 +147,94 @@ class AutoBuilder(
         return this
     }
 
-    fun smartFarsideTriple(noteOrder: Set<CenterNote>): Command {
+    fun ampSpikeFarsideCenterline(noteOrder: Set<CenterNote>): Command {
+        val loop = factory.newLoop("FarsideCenterlineAmpSpikeStart")
+
+        val preload = factory.trajectory("AMPtoAMPSHOTCLOSE", 0, loop)
+        val toAMPSHOTCLOSE = factory.trajectory("AMPtoAMPSHOTCLOSE", 1, loop)
+
+        loop.enabled().onTrue(
+            Commands.runOnce({
+                noteSimulation?.addPreload()
+                whenSimulated { simulatedPoseConsumer?.accept(preload.initialPose.get()) }
+                drive.setPosition(preload.initialPose.get())
+            }).andThen(preload.cmdWithEnd())
+        )
+
+        // Prepare to shoot while driving
+        preload.active().whileTrue(pivot.runGoal(Pivot.Goal.SPEAKER_AIM))
+
+        loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
+
+        // After arriving to score, shoot
+        preload.active().onFalse(aimAndScore())
+        preload.active().onFalse(Commands.waitUntil(Beambreak::hasNoNote).andThen(toAMPSHOTCLOSE.cmdWithEnd()))
+
+        toAMPSHOTCLOSE.active().whileTrue(intake())
+        toAMPSHOTCLOSE.active().onFalse(aimAndScore())
+        toAMPSHOTCLOSE.active()
+            .onFalse(
+                Commands.waitUntil(Beambreak::hasNoNote).andThen(
+                    farsideCenterlinePortion(startPosition = FarsideCenterlinePortionStart.AMPSHOT_CLOSE, noteOrder)
+                ).onlyIf(noteOrder::isNotEmpty)
+            )
+
+        return loop.cmd()
+    }
+
+    fun ogFarsideCenterline(noteOrder: Set<CenterNote>): Command {
+        val loop = factory.newLoop("FarsideCenterlineSkipSpikeStart")
+
+        val AMPtoAMPSHOTFAR = factory.trajectory("AMPtoAMPSHOTFAR", loop)
+
+        loop.enabled().onTrue(
+            Commands.runOnce({
+                noteSimulation?.addPreload()
+                whenSimulated { simulatedPoseConsumer?.accept(AMPtoAMPSHOTFAR.initialPose.get()) }
+                drive.setPosition(AMPtoAMPSHOTFAR.initialPose.get())
+            }).andThen(AMPtoAMPSHOTFAR.cmdWithEnd())
+        )
+
+        loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
+
+        // Prepare to shoot while driving
+        AMPtoAMPSHOTFAR.active().whileTrue(pivot.runGoal(Pivot.Goal.SPEAKER_AIM))
+
+        // After arriving to score, shoot
+        AMPtoAMPSHOTFAR.active().onFalse(aimAndScore())
+        AMPtoAMPSHOTFAR.active()
+            .onFalse(
+                Commands.waitUntil(Beambreak::hasNoNote).andThen(
+                    farsideCenterlinePortion(startPosition = FarsideCenterlinePortionStart.AMPSHOT_FAR, noteOrder)
+                ).onlyIf(noteOrder::isNotEmpty)
+            )
+
+        return loop.cmd()
+    }
+
+    enum class FarsideCenterlinePortionStart {
+        AMPSHOT_CLOSE, AMPSHOT_FAR
+    }
+
+    fun farsideCenterlinePortion(startPosition: FarsideCenterlinePortionStart, noteOrder: Set<CenterNote>): Command {
         val noteQueue: Queue<CenterNote> = LinkedList(noteOrder)
 
-        val loop = factory.newLoop("SmartFarsideTriple")
+        val loop = factory.newLoop("FarsideCenterlinePortion")
 
-        val AMPtoAMPSHOT = factory.trajectory("AMPtoAMPSHOT", loop)
-        val AMPSHOTtoC1 = factory.trajectory("AMPSHOTtoC1", loop)
-        val AMPSHOTtoC2 = factory.trajectory("AMPSHOTtoC2", loop)
-        val AMPSHOTtoC3 = factory.trajectory("AMPSHOTtoC3", loop)
+        // True if there are more notes to grab
+        val moreTargetNotes = { noteQueue.isNotEmpty() }
 
-        val C1toAMPSHOT = factory.trajectory("C1toAMPSHOT", loop)
-        val C2toAMPSHOT = factory.trajectory("C2toAMPSHOT", loop)
-        val C3toAMPSHOT = factory.trajectory("C3toAMPSHOT", loop)
+        val AMPSHOTFARtoC1 = factory.trajectory("AMPSHOTFARtoC1", loop)
+        val AMPSHOTFARtoC2 = factory.trajectory("AMPSHOTFARtoC2", loop)
+        val AMPSHOTFARtoC3 = factory.trajectory("AMPSHOTFARtoC3", loop)
+
+        val AMPSHOTCLOSEtoC1 = factory.trajectory("AMPSHOTCLOSEtoC1", loop)
+        val AMPSHOTCLOSEtoC2 = factory.trajectory("AMPSHOTCLOSEtoC2", loop)
+        val AMPSHOTCLOSEtoC3 = factory.trajectory("AMPSHOTCLOSEtoC3", loop)
+
+        val C1toAMPSHOTFAR = factory.trajectory("C1toAMPSHOTFAR", loop)
+        val C2toAMPSHOTFAR = factory.trajectory("C2toAMPSHOTFAR", loop)
+        val C3toAMPSHOTFAR = factory.trajectory("C3toAMPSHOTFAR", loop)
 
         val C1toC2 = factory.trajectory("C1toC2", loop)
         val C1toC3 = factory.trajectory("C1toC3", loop)
@@ -169,48 +243,68 @@ class AutoBuilder(
         val C3toC1 = factory.trajectory("C3toC1", loop)
         val C3toC2 = factory.trajectory("C3toC2", loop)
 
+        fun exit(): Command {
+            loop.kill()
+            DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
+            return Commands.none()
+        }
+
         loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
 
-        loop.enabled().onTrue(
-            Commands.runOnce({
-                noteSimulation?.addPreload()
-                whenSimulated { simulatedPoseConsumer?.accept(AMPtoAMPSHOT.initialPose.get()) }
-                drive.setPosition(AMPtoAMPSHOT.initialPose.get())
-            }).andThen(AMPtoAMPSHOT.cmdWithEnd())
-        )
+        loop.enabled()
+            .and(moreTargetNotes)
+            .onTrue(
+                Commands.defer({
+                    val firstNote = noteQueue.poll()
+                    when (startPosition) {
+                        FarsideCenterlinePortionStart.AMPSHOT_CLOSE -> when (firstNote) {
+                            CenterNote.ONE -> AMPSHOTCLOSEtoC1.cmdWithEnd()
+                            CenterNote.TWO -> AMPSHOTCLOSEtoC2.cmdWithEnd()
+                            CenterNote.THREE -> AMPSHOTCLOSEtoC3.cmdWithEnd()
+                            else -> exit()
+                        }
 
-        // True if there are more notes to grab
-        val moreTargetNotes = { noteQueue.isNotEmpty() }
+                        FarsideCenterlinePortionStart.AMPSHOT_FAR -> when (firstNote) {
+                            CenterNote.ONE -> AMPSHOTFARtoC1.cmdWithEnd()
+                            CenterNote.TWO -> AMPSHOTFARtoC2.cmdWithEnd()
+                            CenterNote.THREE -> AMPSHOTFARtoC3.cmdWithEnd()
+                            else -> exit()
+                        }
+                    }
+                }, setOf(drive))
+            )
 
         // Intake while driving to centerline
-        AMPSHOTtoC1.active().onTrue(intake())
-        AMPSHOTtoC2.active().onTrue(intake())
-        AMPSHOTtoC3.active().onTrue(intake())
+        AMPSHOTFARtoC1.active().onTrue(intake())
+        AMPSHOTFARtoC2.active().onTrue(intake())
+        AMPSHOTFARtoC3.active().onTrue(intake())
+        AMPSHOTCLOSEtoC1.active().onTrue(intake())
+        AMPSHOTCLOSEtoC2.active().onTrue(intake())
+        AMPSHOTCLOSEtoC3.active().onTrue(intake())
 
         // Triggers for arriving at a center note from any other path
-        val arrivingAtC1 = AMPSHOTtoC1.done()
+        val arrivingAtC1 = AMPSHOTCLOSEtoC1.done()
+            .or(AMPSHOTFARtoC1.done())
             .or(C2toC1.done())
             .or(C3toC1.done())
-        val arrivingAtC2 = AMPSHOTtoC2.done()
+        val arrivingAtC2 = AMPSHOTCLOSEtoC2.done()
+            .or(AMPSHOTFARtoC2.done())
             .or(C1toC2.done())
             .or(C3toC2.done())
-        val arrivingAtC3 = AMPSHOTtoC3.done()
+        val arrivingAtC3 = AMPSHOTCLOSEtoC3.done()
+            .or(AMPSHOTFARtoC3.done())
             .or(C1toC3.done())
             .or(C2toC3.done())
 
         // After getting to centerline, return if note
         arrivingAtC1.onTrue(
             Commands.either(
-                C1toAMPSHOT.cmdWithEnd(),
+                C1toAMPSHOTFAR.cmdWithEnd(),
                 ScheduleCommand(Commands.defer({
                     when (noteQueue.poll()) {
                         CenterNote.TWO -> C1toC2.cmdWithEnd()
                         CenterNote.THREE -> C1toC3.cmdWithEnd()
-                        else -> {
-                            loop.kill()
-                            DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
-                            Commands.none()
-                        }
+                        else -> exit()
                     }
                 }, setOf(drive))).onlyIf({ moreTargetNotes.invoke() }),
                 Beambreak::hasNote
@@ -218,16 +312,12 @@ class AutoBuilder(
         )
         arrivingAtC2.onTrue(
             Commands.either(
-                C2toAMPSHOT.cmdWithEnd(),
+                C2toAMPSHOTFAR.cmdWithEnd(),
                 ScheduleCommand(Commands.defer({
                     when (noteQueue.poll()) {
                         CenterNote.ONE -> C2toC1.cmdWithEnd()
                         CenterNote.THREE -> C2toC3.cmdWithEnd()
-                        else -> {
-                            loop.kill()
-                            DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
-                            Commands.none()
-                        }
+                        else -> exit()
                     }
                 }, setOf(drive))).onlyIf({ moreTargetNotes.invoke() }),
                 Beambreak::hasNote
@@ -235,51 +325,42 @@ class AutoBuilder(
         )
         arrivingAtC3.onTrue(
             Commands.either(
-                C3toAMPSHOT.cmdWithEnd(),
+                C3toAMPSHOTFAR.cmdWithEnd(),
                 ScheduleCommand(Commands.defer({
                     when (noteQueue.poll()) {
                         CenterNote.ONE -> C3toC1.cmdWithEnd()
                         CenterNote.TWO -> C3toC2.cmdWithEnd()
-                        else -> {
-                            loop.kill()
-                            DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
-                            Commands.none()
-                        }
+                        else -> exit()
                     }
                 }, setOf(drive))).onlyIf({ moreTargetNotes.invoke() }),
                 Beambreak::hasNote
             )
         )
 
-        val drivingToAMPSHOT =
-            C1toAMPSHOT.active()
-                .or(C2toAMPSHOT.active())
-                .or(C3toAMPSHOT.active())
-                .or(AMPtoAMPSHOT.active())
+        val drivingToAMPSHOTFAR =
+            C1toAMPSHOTFAR.active()
+                .or(C2toAMPSHOTFAR.active())
+                .or(C3toAMPSHOTFAR.active())
 
         // Prepare to shoot while driving
-        drivingToAMPSHOT.whileTrue(pivot.runGoal(Pivot.Goal.SPEAKER_AIM))
+        drivingToAMPSHOTFAR.whileTrue(pivot.runGoal(Pivot.Goal.SPEAKER_AIM))
 
         // After arriving to score, shoot
-        drivingToAMPSHOT
+        drivingToAMPSHOTFAR
             .onFalse(aimAndScore())
 
         // If there are more notes to get, start another path
-        drivingToAMPSHOT
+        drivingToAMPSHOTFAR
             .and(moreTargetNotes)
             .onFalse(
                 // Wait until the notes is out of the robot and then start the next path
                 Commands.waitUntil(Beambreak::hasNoNote).andThen(
                     Commands.defer({
                         when (noteQueue.poll()) {
-                            CenterNote.ONE -> AMPSHOTtoC1.cmdWithEnd()
-                            CenterNote.TWO -> AMPSHOTtoC2.cmdWithEnd()
-                            CenterNote.THREE -> AMPSHOTtoC3.cmdWithEnd()
-                            else -> {
-                                loop.kill()
-                                DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
-                                Commands.none()
-                            }
+                            CenterNote.ONE -> AMPSHOTFARtoC1.cmdWithEnd()
+                            CenterNote.TWO -> AMPSHOTFARtoC2.cmdWithEnd()
+                            CenterNote.THREE -> AMPSHOTFARtoC3.cmdWithEnd()
+                            else -> exit()
                         }
                     }, setOf(drive))
                 )
@@ -368,4 +449,8 @@ class AutoBuilder(
                 rollers.runGoal(Rollers.Goal.ALIGN_REVERSE_SLOW).withTimeout(0.05),
             )
         ).withName("AutoIntake")
+
+    fun farsideCenterline(scoreSpike: Boolean, noteOrder: Set<CenterNote>): Command {
+        return if (scoreSpike) ampSpikeFarsideCenterline(noteOrder) else ogFarsideCenterline(noteOrder)
+    }
 }

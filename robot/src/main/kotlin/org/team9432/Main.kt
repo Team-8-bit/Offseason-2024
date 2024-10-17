@@ -476,12 +476,17 @@ object Robot: LoggedRobot() {
 
             val noteNames = mapOf(null to "None", CenterNote.ONE to "Centerline One", CenterNote.TWO to "Centerline Two", CenterNote.THREE to "Centerline Three")
 
+            var scoreSpike = true
             var firstNote: CenterNote? = null
             var secondNote: CenterNote? = null
             var thirdNote: CenterNote? = null
-            val getAuto = { autoBuilder.smartFarsideTriple(setOfNotNull(firstNote, secondNote, thirdNote)) }
+            val getAuto = { autoBuilder.farsideCenterline(scoreSpike, setOfNotNull(firstNote, secondNote, thirdNote)) }
 
             addOption("Smart Amp Centerline", getAuto) {
+                addQuestion("Score spike?", { scoreSpike = it }) {
+                    addOption("Yes", { true })
+                    addOption("No", { false })
+                }
                 addQuestion("First note?", { firstNote = it }) { noteNames.forEach { (note, name) -> addOption(name, { note }) } }
                 addQuestion("Second note?", { secondNote = it }) { noteNames.forEach { (note, name) -> addOption(name, { note }) } }
                 addQuestion("Third note?", { thirdNote = it }) { noteNames.forEach { (note, name) -> addOption(name, { note }) } }
