@@ -40,6 +40,7 @@ import org.team9432.lib.util.*
 import org.team9432.resources.drive.Drive
 import org.team9432.resources.drive.DrivetrainConstants.simProfile
 import org.team9432.resources.drive.TunerConstants
+import org.team9432.resources.drive.WheelRadiusCharacterization
 import org.team9432.resources.drive.gyro.GyroIO
 import org.team9432.resources.drive.gyro.GyroIOPigeon2
 import org.team9432.resources.drive.gyro.GyroIOSim
@@ -496,16 +497,18 @@ object Robot: LoggedRobot() {
             addOption("Farside Triple", autoBuilder::farsideTriple)
             addOption("Ampside Triple", autoBuilder::ampsideTriple)
             addOption("Test Auto", autoBuilder::test)
+
+            var characterizationDirection = WheelRadiusCharacterization.Direction.CLOCKWISE
+            addOption("Wheel Radius Characterization", { WheelRadiusCharacterization(drive, characterizationDirection) }) {
+                addQuestion("Which direction?", { characterizationDirection = it }) {
+                    addOption("Clockwise", { WheelRadiusCharacterization.Direction.CLOCKWISE })
+                    addOption("Counterclockwise", { WheelRadiusCharacterization.Direction.COUNTER_CLOCKWISE })
+                }
+            }
         }
     }
 
     override fun autonomousInit() {
-//        StaticCharacterization(
-//            drive,
-//            drive::runCharacterization,
-//            drive::getCharacterizationVelocity
-//        ).finallyDo(drive::endCharacterization).schedule()
-
         currentAuto.schedule()
     }
 }
