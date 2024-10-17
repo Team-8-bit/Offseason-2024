@@ -11,8 +11,10 @@ class Loader(private val io: LoaderIO) {
 
     enum class Goal(val getVoltage: () -> Double) {
         FLOOR_INTAKE(LoggedTunableNumber("Loader/FloorIntakeVoltage", 11.0)),
-        SHOOTER_FEED(LoggedTunableNumber("Loader/ShooterFeedVoltage", 2.0)),
+        SHOOTER_FEED(LoggedTunableNumber("Loader/ShooterFeedVoltage", 8.0)),
         ALIGN_FORWARD(LoggedTunableNumber("Loader/AlignForwardVoltage", 5.0)),
+        ALIGN_FORWARD_SLOW(LoggedTunableNumber("Loader/AlignForwardSlowVoltage", 2.0)),
+        ALIGN_REVERSE_SLOW(LoggedTunableNumber("Loader/AlignReverseSlowVoltage", -1.0)),
         ALIGN_REVERSE(LoggedTunableNumber("Loader/AlignReverseVoltage", -3.0)),
         REVERSE(LoggedTunableNumber("Loader/ReverseVoltage", -8.0)),
         IDLE(LoggedTunableNumber("Loader/IdleVoltage", 0.0));

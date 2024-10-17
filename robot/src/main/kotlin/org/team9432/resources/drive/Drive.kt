@@ -81,33 +81,35 @@ class Drive(
         updateOdometry()
         updateControl()
 
-        currentSetpoint = setpointGenerator.generateSetpoint(
-            limits = RobotState.swerveLimits,
-            prevSetpoint = currentSetpoint,
-            desiredState = desiredChassisSpeeds,
-            dt = Robot.periodSeconds
-        )
+//        currentSetpoint = setpointGenerator.generateSetpoint(
+//            limits = RobotState.swerveLimits,
+//            prevSetpoint = currentSetpoint,
+//            desiredState = desiredChassisSpeeds,
+//            dt = Robot.periodSeconds
+//        )
+
+        val states = DRIVE_KINEMATICS.toSwerveModuleStates(desiredChassisSpeeds)
 
         val optimizedSetpointStates = arrayOfNulls<SwerveModuleState>(4)
         val optimizedSetpointTorques = arrayOfNulls<SwerveModuleState>(4)
 
         if (currentControlMode != ControlMode.CHARACTERIZATION) {
             for (i in modules.indices) {
-                optimizedSetpointStates[i] = SwerveModuleState.optimize(currentSetpoint.moduleStates[i], modules[i].angle)
+                optimizedSetpointStates[i] = SwerveModuleState.optimize(states[i]/*currentSetpoint.moduleStates[i]*/, modules[i].angle)
 
-                val finalModuleForces = currentTrajectoryModuleForces
-                if (currentControlMode == ControlMode.TRAJECTORY && finalModuleForces != null) {
-                    // Only do torque FF in trajectory mode
-                    val wheelDirection = VecBuilder.fill(
-                        optimizedSetpointStates[i]!!.angle.cos,
-                        optimizedSetpointStates[i]!!.angle.sin
-                    )
-                    val wheelForces = finalModuleForces[i]
-                    val wheelTorque = wheelForces.dot(wheelDirection) * Units.inchesToMeters(TunerConstants.kWheelRadiusInches)
-                    optimizedSetpointTorques[i] = SwerveModuleState(wheelTorque, optimizedSetpointStates[i]!!.angle)
-                } else {
+//                val finalModuleForces = currentTrajectoryModuleForces
+//                if (currentControlMode == ControlMode.TRAJECTORY && finalModuleForces != null) {
+//                    // Only do torque FF in trajectory mode
+//                    val wheelDirection = VecBuilder.fill(
+//                        optimizedSetpointStates[i]!!.angle.cos,
+//                        optimizedSetpointStates[i]!!.angle.sin
+//                    )
+//                    val wheelForces = finalModuleForces[i]
+//                    val wheelTorque = wheelForces.dot(wheelDirection) * Units.inchesToMeters(TunerConstants.kWheelRadiusInches)
+//                    optimizedSetpointTorques[i] = SwerveModuleState(wheelTorque, optimizedSetpointStates[i]!!.angle)
+//                } else {
                     optimizedSetpointTorques[i] = SwerveModuleState(0.0, optimizedSetpointStates[i]!!.angle)
-                }
+//                }
                 modules[i].runSetpoint(optimizedSetpointStates[i]!!, optimizedSetpointTorques[i]!!)
             }
         }
@@ -207,6 +209,8 @@ class Drive(
         if (DriverStation.isAutonomousEnabled()) {
             currentControlMode = ControlMode.TRAJECTORY
             currentTrajectorySpeeds = speeds
+        } else {
+            clearTrajectoryInput()
         }
     }
 

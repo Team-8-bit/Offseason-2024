@@ -19,7 +19,9 @@ class Rollers(
         SHOOTER_FEED,
         FLOOR_EJECT,
         ALIGN_REVERSE,
-        ALIGN_FORWARD
+        ALIGN_FORWARD,
+        ALIGN_FORWARD_SLOW,
+        ALIGN_REVERSE_SLOW,
     }
 
     init {
@@ -56,6 +58,14 @@ class Rollers(
 
             Goal.ALIGN_FORWARD -> {
                 loader.goal = Loader.Goal.ALIGN_FORWARD
+            }
+
+            Goal.ALIGN_FORWARD_SLOW -> {
+                loader.goal = Loader.Goal.ALIGN_FORWARD_SLOW
+            }
+
+            Goal.ALIGN_REVERSE_SLOW -> {
+                loader.goal = Loader.Goal.ALIGN_REVERSE_SLOW
             }
         }
 

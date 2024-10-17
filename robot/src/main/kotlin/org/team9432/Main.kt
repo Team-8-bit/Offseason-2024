@@ -318,6 +318,7 @@ object Robot: LoggedCoroutineRobot() {
             .a()
             .and(inSpeakerScoringRange).or(visionDisabled)
             .and(readyToShoot)
+            .and(visionDisabled.negate())
             .whileTrue(controller.alternatingRumbleCommand(0.1))
 
         // Prepare for an amp shot
@@ -366,7 +367,7 @@ object Robot: LoggedCoroutineRobot() {
                                 ScheduleCommand(
                                     Commands.sequence(
                                         Commands.runOnce({ noteSimulation?.animateAlign() }),
-                                        rollers.runGoal(Rollers.Goal.INTAKE).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.2) { Beambreak.upperBeambreak.setSimTripped() },
+                                        rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.2) { Beambreak.upperBeambreak.setSimTripped() },
                                         rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).until(Beambreak.lowerBeambreak::isClear).afterSimDelay(0.2) { Beambreak.lowerBeambreak.setSimClear() },
                                         rollers.runGoal(Rollers.Goal.ALIGN_REVERSE).until(Beambreak.lowerBeambreak::isTripped).afterSimDelay(0.2) { Beambreak.lowerBeambreak.setSimTripped() },
                                     )

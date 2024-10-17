@@ -58,11 +58,26 @@ class ChoreoTrajectoryController(private val drive: Drive, private val moduleFor
         moduleForcesOutput.invoke(outputForces)
         drive.acceptTrajectoryInput(output)
 
-
+        Logger.recordOutput("$TABLE_KEY/Timestamp", sample.timestamp)
         Logger.recordOutput("$TABLE_KEY/SetpointPose", sample.pose)
         Logger.recordOutput("$TABLE_KEY/SetpointSpeeds", sample.chassisSpeeds)
         Logger.recordOutput("$TABLE_KEY/OutputSpeeds", output)
         Logger.recordOutput("$TABLE_KEY/TranslationErrorMeters", currentPose.distanceTo(sample.pose).inMeters)
         Logger.recordOutput("$TABLE_KEY/RotationErrorDegrees", currentPose.rotation.minus(sample.pose.rotation).degrees)
+    }
+
+    fun stop() {
+        drive.acceptTrajectoryInput(ChassisSpeeds())
+    }
+
+    fun reset() {
+        xController.reset()
+        yController.reset()
+        rController.reset()
+    }
+
+    fun stopAndReset() {
+        stop()
+        reset()
     }
 }

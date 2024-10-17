@@ -32,7 +32,7 @@ class Vision(private val io: VisionIO) {
 
     private fun periodic() {
         io.updateInputs(inputs)
-        Logger.processInputs("Vision", inputs)
+//        Logger.processInputs("Vision", inputs)
 
         Logger.recordOutput("Vision/Connected", inputs.isConnected)
         Logger.recordOutput("Vision/TrackedTagIds", *inputs.results.targets.mapNotNull { apriltagFieldLayout.getTagPose(it.fiducialId).getOrNull() }.toTypedArray())
