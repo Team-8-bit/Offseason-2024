@@ -149,7 +149,7 @@ object Robot: LoggedRobot() {
                     drive::setPosition
                 )
 
-                setSimulationPose = { swerveSim.setSimulationWorldPose(it) }
+                setSimulationPose = { swerveSim.setSimulationWorldPose(it); gyroIO.setAngle(it.rotation) }
 
                 val intakeWidth = 18.inches
                 val intakeX = -14.325.inches - 1.5.inches // The extra 1.5" is because the sim doesn't let notes go under the bumpers
