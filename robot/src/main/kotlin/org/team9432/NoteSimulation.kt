@@ -41,6 +41,13 @@ class NoteSimulation(private val robotPoseSupplier: () -> Pose2d, private val ad
         Logger.recordOutput("NoteSimulation/IntakeSimPieces", intakeSim.gamePieceCount)
     }
 
+    fun addPreload() {
+        intakeSim.gamePieceCount = 1
+        robotNoteTransform = loadedTransform
+        Beambreak.lowerBeambreak.setSimTripped()
+        Beambreak.upperBeambreak.setSimTripped()
+    }
+
     val hasNote get() = intakeSim.gamePieceCount == 1
 
     /******** Animations ********/

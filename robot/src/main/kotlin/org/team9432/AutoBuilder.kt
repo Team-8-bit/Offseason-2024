@@ -62,7 +62,7 @@ class AutoBuilder(
 
         loop.enabled()
             .onTrue(
-                Commands.runOnce({ drive.setPosition(traj.initialPose.get()) }).andThen(traj.cmd())
+                Commands.runOnce({ drive.setPosition(traj.initialPose.get()) }).andThen(traj.cmdWithEnd())
                     .andThen(Commands.runOnce({ drive.acceptTrajectoryInput(ChassisSpeeds()) }))
             )
 
@@ -77,10 +77,10 @@ class AutoBuilder(
         val loop = factory.newLoop("FarsideTriple")
 
         val trajName = "Farside_Triple"
-        val preload = factory.trajectory(trajName, 0, loop)
-        val c5 = factory.trajectory(trajName, 1, loop)
-        val c4 = factory.trajectory(trajName, 2, loop)
-        val c3 = factory.trajectory(trajName, 3, loop)
+        val preload = factory.trajectory(trajName, 0, loop).applyStopOnEnd()
+        val c5 = factory.trajectory(trajName, 1, loop).applyStopOnEnd()
+        val c4 = factory.trajectory(trajName, 2, loop).applyStopOnEnd()
+        val c3 = factory.trajectory(trajName, 3, loop).applyStopOnEnd()
 
         loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
 
@@ -89,17 +89,17 @@ class AutoBuilder(
                 whenSimulated { simulatedPoseConsumer?.accept(preload.initialPose.get()) }
                 drive.setPosition(preload.initialPose.get())
             }).andThen(
-                ScheduleCommand(preload.cmd())
+                ScheduleCommand(preload.cmdWithEnd())
             )
         )
 
-        preload.done().onTrue(aimAndScore().andThen(ScheduleCommand(c5.cmd())))
+        preload.done().onTrue(aimAndScore().andThen(ScheduleCommand(c5.cmdWithEnd())))
 
         c5.active().whileTrue(intake())
-        c5.done().onTrue(aimAndScore().andThen(ScheduleCommand(c4.cmd())))
+        c5.done().onTrue(aimAndScore().andThen(ScheduleCommand(c4.cmdWithEnd())))
 
         c4.active().whileTrue(intake())
-        c4.done().onTrue(aimAndScore().andThen(ScheduleCommand(c3.cmd())))
+        c4.done().onTrue(aimAndScore().andThen(ScheduleCommand(c3.cmdWithEnd())))
 
         c3.active().whileTrue(intake())
         c3.done().onTrue(aimAndScore().andThen(Commands.runOnce({ drive.acceptTrajectoryInput(ChassisSpeeds()) })))
@@ -111,10 +111,10 @@ class AutoBuilder(
         val loop = factory.newLoop("AmpsideTriple")
 
         val trajName = "Ampside_Triple"
-        val preload = factory.trajectory(trajName, 0, loop)
-        val c1 = factory.trajectory(trajName, 1, loop)
-        val c2 = factory.trajectory(trajName, 2, loop)
-        val c3 = factory.trajectory(trajName, 3, loop)
+        val preload = factory.trajectory(trajName, 0, loop).applyStopOnEnd()
+        val c1 = factory.trajectory(trajName, 1, loop).applyStopOnEnd()
+        val c2 = factory.trajectory(trajName, 2, loop).applyStopOnEnd()
+        val c3 = factory.trajectory(trajName, 3, loop).applyStopOnEnd()
 
         loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
 
@@ -123,17 +123,17 @@ class AutoBuilder(
                 whenSimulated { simulatedPoseConsumer?.accept(preload.initialPose.get()) }
                 drive.setPosition(preload.initialPose.get())
             }).andThen(
-                ScheduleCommand(preload.cmd())
+                ScheduleCommand(preload.cmdWithEnd())
             )
         )
 
-        preload.done().onTrue(aimAndScore().andThen(ScheduleCommand(c1.cmd())))
+        preload.done().onTrue(aimAndScore().andThen(ScheduleCommand(c1.cmdWithEnd())))
 
         c1.active().whileTrue(intake())
-        c1.done().onTrue(aimAndScore().andThen(ScheduleCommand(c2.cmd())))
+        c1.done().onTrue(aimAndScore().andThen(ScheduleCommand(c2.cmdWithEnd())))
 
         c2.active().whileTrue(intake())
-        c2.done().onTrue(aimAndScore().andThen(ScheduleCommand(c3.cmd())))
+        c2.done().onTrue(aimAndScore().andThen(ScheduleCommand(c3.cmdWithEnd())))
 
         c3.active().whileTrue(intake())
         c3.done().onTrue(aimAndScore().andThen(Commands.runOnce({ drive.acceptTrajectoryInput(ChassisSpeeds()) })))
@@ -141,7 +141,7 @@ class AutoBuilder(
         return loop.cmd()
     }
 
-    private fun AutoTrajectory.applyEndCondition(): AutoTrajectory {
+    private fun AutoTrajectory.applyStopOnEnd(): AutoTrajectory {
         done().onTrue(Commands.runOnce({ controller.stopAndReset() }))
         return this
     }
@@ -151,29 +151,30 @@ class AutoBuilder(
 
         val loop = factory.newLoop("SmartFarsideTriple")
 
-        val AMPtoAMPSHOT = factory.trajectory("AMPtoAMPSHOT", loop).applyEndCondition()
-        val AMPSHOTtoC1 = factory.trajectory("AMPSHOTtoC1", loop).applyEndCondition()
-        val AMPSHOTtoC2 = factory.trajectory("AMPSHOTtoC2", loop).applyEndCondition()
-        val AMPSHOTtoC3 = factory.trajectory("AMPSHOTtoC3", loop).applyEndCondition()
+        val AMPtoAMPSHOT = factory.trajectory("AMPtoAMPSHOT", loop)
+        val AMPSHOTtoC1 = factory.trajectory("AMPSHOTtoC1", loop)
+        val AMPSHOTtoC2 = factory.trajectory("AMPSHOTtoC2", loop)
+        val AMPSHOTtoC3 = factory.trajectory("AMPSHOTtoC3", loop)
 
-        val C1toAMPSHOT = factory.trajectory("C1toAMPSHOT", loop).applyEndCondition()
-        val C2toAMPSHOT = factory.trajectory("C2toAMPSHOT", loop).applyEndCondition()
-        val C3toAMPSHOT = factory.trajectory("C3toAMPSHOT", loop).applyEndCondition()
+        val C1toAMPSHOT = factory.trajectory("C1toAMPSHOT", loop)
+        val C2toAMPSHOT = factory.trajectory("C2toAMPSHOT", loop)
+        val C3toAMPSHOT = factory.trajectory("C3toAMPSHOT", loop)
 
-        val C1toC2 = factory.trajectory("C1toC2", loop).applyEndCondition()
-        val C1toC3 = factory.trajectory("C1toC3", loop).applyEndCondition()
-        val C2toC1 = factory.trajectory("C2toC1", loop).applyEndCondition()
-        val C2toC3 = factory.trajectory("C2toC3", loop).applyEndCondition()
-        val C3toC1 = factory.trajectory("C3toC1", loop).applyEndCondition()
-        val C3toC2 = factory.trajectory("C3toC2", loop).applyEndCondition()
+        val C1toC2 = factory.trajectory("C1toC2", loop)
+        val C1toC3 = factory.trajectory("C1toC3", loop)
+        val C2toC1 = factory.trajectory("C2toC1", loop)
+        val C2toC3 = factory.trajectory("C2toC3", loop)
+        val C3toC1 = factory.trajectory("C3toC1", loop)
+        val C3toC2 = factory.trajectory("C3toC2", loop)
 
         loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
 
         loop.enabled().onTrue(
             Commands.runOnce({
+                noteSimulation?.addPreload()
                 whenSimulated { simulatedPoseConsumer?.accept(AMPtoAMPSHOT.initialPose.get()) }
                 drive.setPosition(AMPtoAMPSHOT.initialPose.get())
-            }).andThen(AMPtoAMPSHOT.cmd())
+            }).andThen(AMPtoAMPSHOT.cmdWithEnd())
         )
 
         // True if there are more notes to grab
@@ -196,60 +197,57 @@ class AutoBuilder(
             .or(C2toC3.done())
 
         // After getting to centerline, return if note
-        arrivingAtC1
-            .and(Beambreak::hasNote)
-            .onTrue(C1toAMPSHOT.cmd())
-        arrivingAtC2
-            .and(Beambreak::hasNote)
-            .onTrue(C2toAMPSHOT.cmd())
-        arrivingAtC3
-            .and(Beambreak::hasNote)
-            .onTrue(C3toAMPSHOT.cmd())
-
-        // After getting to centerline, keep looking if no note
-        arrivingAtC1
-            .and(Beambreak::hasNote)
-            .and(moreTargetNotes)
-            .onTrue(Commands.defer({
-                when (noteQueue.poll()) {
-                    CenterNote.TWO -> C1toC2.cmd()
-                    CenterNote.THREE -> C1toC3.cmd()
-                    else -> {
-                        loop.kill()
-                        DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
-                        Commands.none()
+        arrivingAtC1.onTrue(
+            Commands.either(
+                C1toAMPSHOT.cmdWithEnd(),
+                ScheduleCommand(Commands.defer({
+                    when (noteQueue.poll()) {
+                        CenterNote.TWO -> C1toC2.cmdWithEnd()
+                        CenterNote.THREE -> C1toC3.cmdWithEnd()
+                        else -> {
+                            loop.kill()
+                            DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
+                            Commands.none()
+                        }
                     }
-                }
-            }, setOf(drive)))
-        arrivingAtC2
-            .and(Beambreak::hasNote)
-            .and(moreTargetNotes)
-            .onTrue(Commands.defer({
-                when (noteQueue.poll()) {
-                    CenterNote.ONE -> C2toC1.cmd()
-                    CenterNote.THREE -> C2toC3.cmd()
-                    else -> {
-                        loop.kill()
-                        DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
-                        Commands.none()
+                }, setOf(drive))).onlyIf({ moreTargetNotes.invoke() }),
+                Beambreak::hasNote
+            )
+        )
+        arrivingAtC2.onTrue(
+            Commands.either(
+                C2toAMPSHOT.cmdWithEnd(),
+                ScheduleCommand(Commands.defer({
+                    when (noteQueue.poll()) {
+                        CenterNote.ONE -> C2toC1.cmdWithEnd()
+                        CenterNote.THREE -> C2toC3.cmdWithEnd()
+                        else -> {
+                            loop.kill()
+                            DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
+                            Commands.none()
+                        }
                     }
-                }
-            }, setOf(drive)))
-        arrivingAtC3
-            .and(Beambreak::hasNote)
-            .and(moreTargetNotes)
-            .onTrue(Commands.defer({
-                when (noteQueue.poll()) {
-                    CenterNote.ONE -> C3toC1.cmd()
-                    CenterNote.TWO -> C3toC2.cmd()
-                    else -> {
-                        loop.kill()
-                        DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
-                        Commands.none()
+                }, setOf(drive))).onlyIf({ moreTargetNotes.invoke() }),
+                Beambreak::hasNote
+            )
+        )
+        arrivingAtC3.onTrue(
+            Commands.either(
+                C3toAMPSHOT.cmdWithEnd(),
+                ScheduleCommand(Commands.defer({
+                    when (noteQueue.poll()) {
+                        CenterNote.ONE -> C3toC1.cmdWithEnd()
+                        CenterNote.TWO -> C3toC2.cmdWithEnd()
+                        else -> {
+                            loop.kill()
+                            DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
+                            Commands.none()
+                        }
                     }
-                }
-            }, setOf(drive)))
-
+                }, setOf(drive))).onlyIf({ moreTargetNotes.invoke() }),
+                Beambreak::hasNote
+            )
+        )
 
         val arrivingAtAMPSHOT =
             C1toAMPSHOT.done()
@@ -258,59 +256,63 @@ class AutoBuilder(
                 .or(AMPtoAMPSHOT.done())
 
         // After arriving to score, shoot
-        arrivingAtAMPSHOT.onTrue(aimAndScore())
-
         arrivingAtAMPSHOT
-            .and(moreTargetNotes)
             .onTrue(
-                Commands.waitUntil(Beambreak::hasNoNote).andThen(
-                    Commands.defer({
-                        when (noteQueue.poll()) {
-                            CenterNote.ONE -> AMPSHOTtoC1.cmd()
-                            CenterNote.TWO -> AMPSHOTtoC2.cmd()
-                            CenterNote.THREE -> AMPSHOTtoC3.cmd()
-                            else -> {
-                                loop.kill()
-                                DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
-                                Commands.none()
-                            }
-                        }
-                    }, setOf(drive))
-                )
+                aimAndScore()
+                    .andThen(
+                        ScheduleCommand(
+                            Commands.waitUntil(Beambreak::hasNoNote).andThen(
+                                Commands.defer({
+                                    when (noteQueue.poll()) {
+                                        CenterNote.ONE -> AMPSHOTtoC1.cmdWithEnd()
+                                        CenterNote.TWO -> AMPSHOTtoC2.cmdWithEnd()
+                                        CenterNote.THREE -> AMPSHOTtoC3.cmdWithEnd()
+                                        else -> {
+                                            loop.kill()
+                                            DriverStation.reportError("Error in SmartFarsideTriple auto, invalid note!", true)
+                                            Commands.none()
+                                        }
+                                    }
+                                }, setOf(drive))
+                            )
+                        ).onlyIf(moreTargetNotes)
+                    )
             )
 
         return loop.cmd()
     }
 
+    fun AutoTrajectory.cmdWithEnd(): Command = cmd().finallyDo { _ -> controller.stopAndReset() }
+
     fun fourClose(): Command {
         val loop = factory.newLoop("FourClose")
 
         val trajName = "Four_Close"
-        val preload = factory.trajectory(trajName, 0, loop)
-        val s1 = factory.trajectory(trajName, 1, loop)
-        val s2 = factory.trajectory(trajName, 2, loop)
-        val s3 = factory.trajectory(trajName, 3, loop)
+        val preload = factory.trajectory(trajName, 0, loop).applyStopOnEnd()
+        val s1 = factory.trajectory(trajName, 1, loop).applyStopOnEnd()
+        val s2 = factory.trajectory(trajName, 2, loop).applyStopOnEnd()
+        val s3 = factory.trajectory(trajName, 3, loop).applyStopOnEnd()
 
         loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
 
         loop.enabled().onTrue(
             Commands.runOnce({
+                noteSimulation?.addPreload()
                 whenSimulated { simulatedPoseConsumer?.accept(preload.initialPose.get()) }
                 drive.setPosition(preload.initialPose.get())
-            }).andThen(
-                ScheduleCommand(preload.cmd())
-            )
+            }).andThen(preload.cmdWithEnd())
         )
 
-        preload.done().onTrue(aimAndScore().andThen(ScheduleCommand(s1.cmd())))
+        preload.done().onTrue(aimAndScore())
+        preload.done().onTrue(Commands.waitUntil(Beambreak::hasNoNote).andThen(s1.cmdWithEnd()))
 
         s1.active().whileTrue(intake())
         s1.done().onTrue(aimAndScore())
-        s1.done().onTrue(Commands.waitUntil(Beambreak::hasNoNote).andThen(s2.cmd()))
+        s1.done().onTrue(Commands.waitUntil(Beambreak::hasNoNote).andThen(s2.cmdWithEnd()))
 
         s2.active().whileTrue(intake())
         s2.done().onTrue(aimAndScore())
-        s2.done().onTrue(Commands.waitUntil(Beambreak::hasNoNote).andThen(s3.cmd()))
+        s2.done().onTrue(Commands.waitUntil(Beambreak::hasNoNote).andThen(s3.cmdWithEnd()))
 
         var isFinished = false
 
@@ -320,6 +322,7 @@ class AutoBuilder(
             isFinished = true
         })))
 
+        loop.enabled().whileTrue(Commands.runOnce({ println(readyToShoot.asBoolean) }).repeatedly())
         return loop.cmd { isFinished }
     }
 
@@ -330,13 +333,12 @@ class AutoBuilder(
         pivot.runGoal(Pivot.Goal.SPEAKER_AIM),
         Commands.waitUntil(readyToShoot).andThen(
             Commands.runOnce({ noteSimulation?.animateShoot() }),
-            rollers.runGoal(Rollers.Goal.SHOOTER_FEED),
+            rollers.runGoal(Rollers.Goal.SHOOTER_FEED).afterSimDelay(0.2) { Beambreak.simClear() },
         )
     )
-        .until(Beambreak.lowerBeambreak::isClear)
+        .until(Beambreak.upperBeambreak::isClear)
         .withTimeout(2.5)
         .withName("Auto Aim and Score")
-        .finallyDo { _ -> Beambreak.simClear() } // Remove note from the robot in sim
 
 
     // To add to AutoCommands
@@ -354,10 +356,10 @@ class AutoBuilder(
         Commands.parallel(
             pivot.runGoal(Pivot.Goal.INTAKE),
             Commands.waitUntil(pivot::atGoal).andThen(
-                rollers.runGoal(Rollers.Goal.INTAKE).until(Beambreak.lowerBeambreak::isTripped).afterSimDelay(0.2) { Beambreak.upperBeambreak.setSimTripped() },
-                rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.2) { Beambreak.lowerBeambreak.setSimClear() },
-                rollers.runGoal(Rollers.Goal.ALIGN_REVERSE_SLOW).withTimeout(0.05).afterSimDelay(0.2) { Beambreak.lowerBeambreak.setSimTripped() },
+                Commands.runOnce({ noteSimulation?.animateAlign() }),
+                rollers.runGoal(Rollers.Goal.INTAKE).until(Beambreak.lowerBeambreak::isTripped).afterSimCondition({ noteSimulation!!.hasNote }) { Beambreak.lowerBeambreak.setSimTripped() },
+                rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.1) { Beambreak.upperBeambreak.setSimTripped() },
+                rollers.runGoal(Rollers.Goal.ALIGN_REVERSE_SLOW).withTimeout(0.05),
             )
-        )
-            .withName("AutoIntake")
+        ).withName("AutoIntake")
 }
