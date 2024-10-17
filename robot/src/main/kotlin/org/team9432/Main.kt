@@ -26,7 +26,7 @@ import org.littletonrobotics.junction.Logger
 import org.littletonrobotics.junction.networktables.NT4Publisher
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
-import org.team9432.AutoBuilder.CenterNote
+import org.team9432.AutoBuilder.AmpsideCenterNote
 import org.team9432.lib.Library
 import org.team9432.lib.Library.Runtime.*
 import org.team9432.lib.RobotPeriodicManager
@@ -475,12 +475,12 @@ object Robot: LoggedRobot() {
         addQuestion("Which Auto?", { currentAuto = it }) {
             addOption("Do Nothing", Commands::none)
 
-            val noteNames = mapOf(null to "None", CenterNote.ONE to "Centerline One", CenterNote.TWO to "Centerline Two", CenterNote.THREE to "Centerline Three")
+            val noteNames = mapOf(null to "None", AmpsideCenterNote.ONE to "Centerline One", AmpsideCenterNote.TWO to "Centerline Two", AmpsideCenterNote.THREE to "Centerline Three")
 
             var scoreSpike = true
-            var firstNote: CenterNote? = null
-            var secondNote: CenterNote? = null
-            var thirdNote: CenterNote? = null
+            var firstNote: AmpsideCenterNote? = null
+            var secondNote: AmpsideCenterNote? = null
+            var thirdNote: AmpsideCenterNote? = null
             val getAuto = { autoBuilder.farsideCenterline(scoreSpike, setOfNotNull(firstNote, secondNote, thirdNote)) }
 
             addOption("Smart Amp Centerline", getAuto) {
@@ -495,7 +495,6 @@ object Robot: LoggedRobot() {
 
             addOption("Four Close", autoBuilder::fourClose)
             addOption("Farside Triple", autoBuilder::farsideTriple)
-            addOption("Ampside Triple", autoBuilder::ampsideTriple)
             addOption("Test Auto", autoBuilder::test)
 
             var characterizationDirection = WheelRadiusCharacterization.Direction.CLOCKWISE

@@ -2,6 +2,7 @@ package org.team9432
 
 import choreo.Choreo
 import choreo.auto.AutoFactory
+import choreo.auto.AutoLoop
 import choreo.auto.AutoTrajectory
 import choreo.trajectory.SwerveSample
 import choreo.trajectory.Trajectory
@@ -70,84 +71,57 @@ class AutoBuilder(
         return loop.cmd()
     }
 
-    enum class CenterNote(val choreoName: String) {
-        ONE("C1"), TWO("C2"), THREE("C3"), FOUR("C4"), FIVE("C5")
+    enum class AmpsideCenterNote {
+        ONE, TWO, THREE
     }
 
     fun farsideTriple(): Command {
         val loop = factory.newLoop("FarsideTriple")
-
         val trajName = "Farside_Triple"
-        val preload = factory.trajectory(trajName, 0, loop).applyStopOnEnd()
-        val c5 = factory.trajectory(trajName, 1, loop).applyStopOnEnd()
-        val c4 = factory.trajectory(trajName, 2, loop).applyStopOnEnd()
-        val c3 = factory.trajectory(trajName, 3, loop).applyStopOnEnd()
+        return genericSplitTripleAuto(trajName, loop)
+    }
+
+    fun fourClose(): Command {
+        val loop = factory.newLoop("FourClose")
+        val trajName = "Four_Close"
+        return genericSplitTripleAuto(trajName, loop)
+    }
+
+    private fun genericSplitTripleAuto(trajName: String, loop: AutoLoop): Command {
+        val preload = factory.trajectory(trajName, 0, loop)
+        val firstNote = factory.trajectory(trajName, 1, loop)
+        val secondNote = factory.trajectory(trajName, 2, loop)
+        val thirdNote = factory.trajectory(trajName, 3, loop)
 
         loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
 
         loop.enabled().onTrue(
             Commands.runOnce({
+                noteSimulation?.addPreload()
                 whenSimulated { simulatedPoseConsumer?.accept(preload.initialPose.get()) }
                 drive.setPosition(preload.initialPose.get())
-            }).andThen(
-                ScheduleCommand(preload.cmdWithEnd())
-            )
+            }).andThen(preload.cmdWithEnd())
         )
 
-        preload.done().onTrue(aimAndScore().andThen(ScheduleCommand(c5.cmdWithEnd())))
+        preload.active().whileTrue(pivot.runGoal(Pivot.Goal.SPEAKER_AIM))
+        preload.active().onFalse(aimAndScore())
+        preload.active().onFalse(Commands.waitUntil(Beambreak::hasNoNote).andThen(firstNote.cmdWithEnd()))
 
-        c5.active().whileTrue(intake())
-        c5.done().onTrue(aimAndScore().andThen(ScheduleCommand(c4.cmdWithEnd())))
+        firstNote.active().whileTrue(intake().andThen(pivot.runGoal(Pivot.Goal.SPEAKER_AIM)))
+        firstNote.active().onFalse(aimAndScore())
+        firstNote.active().onFalse(Commands.waitUntil(Beambreak::hasNoNote).andThen(secondNote.cmdWithEnd()))
 
-        c4.active().whileTrue(intake())
-        c4.done().onTrue(aimAndScore().andThen(ScheduleCommand(c3.cmdWithEnd())))
+        secondNote.active().whileTrue(intake().andThen(pivot.runGoal(Pivot.Goal.SPEAKER_AIM)))
+        secondNote.active().onFalse(aimAndScore())
+        secondNote.active().onFalse(Commands.waitUntil(Beambreak::hasNoNote).andThen(thirdNote.cmdWithEnd()))
 
-        c3.active().whileTrue(intake())
-        c3.done().onTrue(aimAndScore().andThen(Commands.runOnce({ drive.acceptTrajectoryInput(ChassisSpeeds()) })))
+        thirdNote.active().whileTrue(intake().andThen(pivot.runGoal(Pivot.Goal.SPEAKER_AIM)))
+        thirdNote.active().onFalse(aimAndScore())
 
         return loop.cmd()
     }
 
-    fun ampsideTriple(): Command {
-        val loop = factory.newLoop("AmpsideTriple")
-
-        val trajName = "Ampside_Triple"
-        val preload = factory.trajectory(trajName, 0, loop).applyStopOnEnd()
-        val c1 = factory.trajectory(trajName, 1, loop).applyStopOnEnd()
-        val c2 = factory.trajectory(trajName, 2, loop).applyStopOnEnd()
-        val c3 = factory.trajectory(trajName, 3, loop).applyStopOnEnd()
-
-        loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
-
-        loop.enabled().onTrue(
-            Commands.runOnce({
-                whenSimulated { simulatedPoseConsumer?.accept(preload.initialPose.get()) }
-                drive.setPosition(preload.initialPose.get())
-            }).andThen(
-                ScheduleCommand(preload.cmdWithEnd())
-            )
-        )
-
-        preload.done().onTrue(aimAndScore().andThen(ScheduleCommand(c1.cmdWithEnd())))
-
-        c1.active().whileTrue(intake())
-        c1.done().onTrue(aimAndScore().andThen(ScheduleCommand(c2.cmdWithEnd())))
-
-        c2.active().whileTrue(intake())
-        c2.done().onTrue(aimAndScore().andThen(ScheduleCommand(c3.cmdWithEnd())))
-
-        c3.active().whileTrue(intake())
-        c3.done().onTrue(aimAndScore().andThen(Commands.runOnce({ drive.acceptTrajectoryInput(ChassisSpeeds()) })))
-
-        return loop.cmd()
-    }
-
-    private fun AutoTrajectory.applyStopOnEnd(): AutoTrajectory {
-        done().onTrue(Commands.runOnce({ controller.stopAndReset() }))
-        return this
-    }
-
-    fun ampSpikeFarsideCenterline(noteOrder: Set<CenterNote>): Command {
+    private fun ampSpikeFarsideCenterline(noteOrder: Set<AmpsideCenterNote>): Command {
         val loop = factory.newLoop("FarsideCenterlineAmpSpikeStart")
 
         val preload = factory.trajectory("AMPtoAMPSHOTCLOSE", 0, loop)
@@ -161,10 +135,10 @@ class AutoBuilder(
             }).andThen(preload.cmdWithEnd())
         )
 
+        loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
+
         // Prepare to shoot while driving
         preload.active().whileTrue(pivot.runGoal(Pivot.Goal.SPEAKER_AIM))
-
-        loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
 
         // After arriving to score, shoot
         preload.active().onFalse(aimAndScore())
@@ -182,7 +156,7 @@ class AutoBuilder(
         return loop.cmd()
     }
 
-    fun ogFarsideCenterline(noteOrder: Set<CenterNote>): Command {
+    private fun farsideCenterlineSkipSpike(noteOrder: Set<AmpsideCenterNote>): Command {
         val loop = factory.newLoop("FarsideCenterlineSkipSpikeStart")
 
         val AMPtoAMPSHOTFAR = factory.trajectory("AMPtoAMPSHOTFAR", loop)
@@ -216,8 +190,8 @@ class AutoBuilder(
         AMPSHOT_CLOSE, AMPSHOT_FAR
     }
 
-    fun farsideCenterlinePortion(startPosition: FarsideCenterlinePortionStart, noteOrder: Set<CenterNote>): Command {
-        val noteQueue: Queue<CenterNote> = LinkedList(noteOrder)
+    private fun farsideCenterlinePortion(startPosition: FarsideCenterlinePortionStart, noteOrder: Set<AmpsideCenterNote>): Command {
+        val noteQueue: Queue<AmpsideCenterNote> = LinkedList(noteOrder)
 
         val loop = factory.newLoop("FarsideCenterlinePortion")
 
@@ -258,16 +232,16 @@ class AutoBuilder(
                     val firstNote = noteQueue.poll()
                     when (startPosition) {
                         FarsideCenterlinePortionStart.AMPSHOT_CLOSE -> when (firstNote) {
-                            CenterNote.ONE -> AMPSHOTCLOSEtoC1.cmdWithEnd()
-                            CenterNote.TWO -> AMPSHOTCLOSEtoC2.cmdWithEnd()
-                            CenterNote.THREE -> AMPSHOTCLOSEtoC3.cmdWithEnd()
+                            AmpsideCenterNote.ONE -> AMPSHOTCLOSEtoC1.cmdWithEnd()
+                            AmpsideCenterNote.TWO -> AMPSHOTCLOSEtoC2.cmdWithEnd()
+                            AmpsideCenterNote.THREE -> AMPSHOTCLOSEtoC3.cmdWithEnd()
                             else -> exit()
                         }
 
                         FarsideCenterlinePortionStart.AMPSHOT_FAR -> when (firstNote) {
-                            CenterNote.ONE -> AMPSHOTFARtoC1.cmdWithEnd()
-                            CenterNote.TWO -> AMPSHOTFARtoC2.cmdWithEnd()
-                            CenterNote.THREE -> AMPSHOTFARtoC3.cmdWithEnd()
+                            AmpsideCenterNote.ONE -> AMPSHOTFARtoC1.cmdWithEnd()
+                            AmpsideCenterNote.TWO -> AMPSHOTFARtoC2.cmdWithEnd()
+                            AmpsideCenterNote.THREE -> AMPSHOTFARtoC3.cmdWithEnd()
                             else -> exit()
                         }
                     }
@@ -302,8 +276,8 @@ class AutoBuilder(
                 C1toAMPSHOTFAR.cmdWithEnd(),
                 ScheduleCommand(Commands.defer({
                     when (noteQueue.poll()) {
-                        CenterNote.TWO -> C1toC2.cmdWithEnd()
-                        CenterNote.THREE -> C1toC3.cmdWithEnd()
+                        AmpsideCenterNote.TWO -> C1toC2.cmdWithEnd()
+                        AmpsideCenterNote.THREE -> C1toC3.cmdWithEnd()
                         else -> exit()
                     }
                 }, setOf(drive))).onlyIf({ moreTargetNotes.invoke() }),
@@ -315,8 +289,8 @@ class AutoBuilder(
                 C2toAMPSHOTFAR.cmdWithEnd(),
                 ScheduleCommand(Commands.defer({
                     when (noteQueue.poll()) {
-                        CenterNote.ONE -> C2toC1.cmdWithEnd()
-                        CenterNote.THREE -> C2toC3.cmdWithEnd()
+                        AmpsideCenterNote.ONE -> C2toC1.cmdWithEnd()
+                        AmpsideCenterNote.THREE -> C2toC3.cmdWithEnd()
                         else -> exit()
                     }
                 }, setOf(drive))).onlyIf({ moreTargetNotes.invoke() }),
@@ -328,8 +302,8 @@ class AutoBuilder(
                 C3toAMPSHOTFAR.cmdWithEnd(),
                 ScheduleCommand(Commands.defer({
                     when (noteQueue.poll()) {
-                        CenterNote.ONE -> C3toC1.cmdWithEnd()
-                        CenterNote.TWO -> C3toC2.cmdWithEnd()
+                        AmpsideCenterNote.ONE -> C3toC1.cmdWithEnd()
+                        AmpsideCenterNote.TWO -> C3toC2.cmdWithEnd()
                         else -> exit()
                     }
                 }, setOf(drive))).onlyIf({ moreTargetNotes.invoke() }),
@@ -357,9 +331,9 @@ class AutoBuilder(
                 Commands.waitUntil(Beambreak::hasNoNote).andThen(
                     Commands.defer({
                         when (noteQueue.poll()) {
-                            CenterNote.ONE -> AMPSHOTFARtoC1.cmdWithEnd()
-                            CenterNote.TWO -> AMPSHOTFARtoC2.cmdWithEnd()
-                            CenterNote.THREE -> AMPSHOTFARtoC3.cmdWithEnd()
+                            AmpsideCenterNote.ONE -> AMPSHOTFARtoC1.cmdWithEnd()
+                            AmpsideCenterNote.TWO -> AMPSHOTFARtoC2.cmdWithEnd()
+                            AmpsideCenterNote.THREE -> AMPSHOTFARtoC3.cmdWithEnd()
                             else -> exit()
                         }
                     }, setOf(drive))
@@ -369,53 +343,14 @@ class AutoBuilder(
         return loop.cmd()
     }
 
-    fun AutoTrajectory.cmdWithEnd(): Command = cmd().finallyDo { _ -> controller.stopAndReset() }
-
-    fun fourClose(): Command {
-        val loop = factory.newLoop("FourClose")
-
-        val trajName = "Four_Close"
-        val preload = factory.trajectory(trajName, 0, loop).applyStopOnEnd()
-        val s1 = factory.trajectory(trajName, 1, loop).applyStopOnEnd()
-        val s2 = factory.trajectory(trajName, 2, loop).applyStopOnEnd()
-        val s3 = factory.trajectory(trajName, 3, loop).applyStopOnEnd()
-
-        loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
-
-        loop.enabled().onTrue(
-            Commands.runOnce({
-                noteSimulation?.addPreload()
-                whenSimulated { simulatedPoseConsumer?.accept(preload.initialPose.get()) }
-                drive.setPosition(preload.initialPose.get())
-            }).andThen(preload.cmdWithEnd())
-        )
-
-        preload.done().onTrue(aimAndScore())
-        preload.done().onTrue(Commands.waitUntil(Beambreak::hasNoNote).andThen(s1.cmdWithEnd()))
-
-        s1.active().whileTrue(intake())
-        s1.done().onTrue(aimAndScore())
-        s1.done().onTrue(Commands.waitUntil(Beambreak::hasNoNote).andThen(s2.cmdWithEnd()))
-
-        s2.active().whileTrue(intake())
-        s2.done().onTrue(aimAndScore())
-        s2.done().onTrue(Commands.waitUntil(Beambreak::hasNoNote).andThen(s3.cmdWithEnd()))
-
-        var isFinished = false
-
-        s3.active().whileTrue(intake())
-        s3.done().onTrue(aimAndScore().andThen(Commands.runOnce({
-            drive.acceptTrajectoryInput(ChassisSpeeds())
-            isFinished = true
-        })))
-
-        loop.enabled().whileTrue(Commands.runOnce({ println(readyToShoot.asBoolean) }).repeatedly())
-        return loop.cmd { isFinished }
+    fun farsideCenterline(scoreSpike: Boolean, noteOrder: Set<AmpsideCenterNote>): Command {
+        return if (scoreSpike) ampSpikeFarsideCenterline(noteOrder) else farsideCenterlineSkipSpike(noteOrder)
     }
 
-    val readyToShoot = Trigger { pivot.atGoal && drive.atAutoAimGoal(1.0) && flywheels.atGoal }.debounce(0.3, Debouncer.DebounceType.kRising)
+    private val readyToShoot = Trigger { pivot.atGoal && drive.atAutoAimGoal(1.0) && flywheels.atGoal }.debounce(0.3, Debouncer.DebounceType.kRising)
+    private fun AutoTrajectory.cmdWithEnd(): Command = cmd().finallyDo { _ -> controller.stopAndReset() }
 
-    fun aimAndScore() = Commands.parallel(
+    private fun aimAndScore() = Commands.parallel(
         drive.aimSpeaker(),
         pivot.runGoal(Pivot.Goal.SPEAKER_AIM),
         Commands.waitUntil(readyToShoot).andThen(
@@ -429,7 +364,7 @@ class AutoBuilder(
 
 
     // To add to AutoCommands
-    fun Drive.aimSpeaker() = Commands.startEnd(
+    private fun Drive.aimSpeaker() = Commands.startEnd(
         {
             clearTrajectoryInput()
             setAutoAimGoal({ RobotState.getStandardAimingParameters().drivetrainAngle }, { 0.3 })
@@ -439,7 +374,7 @@ class AutoBuilder(
         }
     )
 
-    fun intake() =
+    private fun intake() =
         Commands.parallel(
             pivot.runGoal(Pivot.Goal.INTAKE),
             Commands.waitUntil(pivot::atGoal).andThen(
@@ -449,8 +384,4 @@ class AutoBuilder(
                 rollers.runGoal(Rollers.Goal.ALIGN_REVERSE_SLOW).withTimeout(0.05),
             )
         ).withName("AutoIntake")
-
-    fun farsideCenterline(scoreSpike: Boolean, noteOrder: Set<CenterNote>): Command {
-        return if (scoreSpike) ampSpikeFarsideCenterline(noteOrder) else ogFarsideCenterline(noteOrder)
-    }
 }
