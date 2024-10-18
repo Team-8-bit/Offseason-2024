@@ -1,7 +1,5 @@
 package org.team9432.resources.rollers.intake
 
-import edu.wpi.first.math.filter.Debouncer
-import edu.wpi.first.wpilibj2.command.button.Trigger
 import org.littletonrobotics.junction.Logger
 import org.team9432.lib.dashboard.LoggedTunableNumber
 
@@ -18,13 +16,13 @@ class Intake(private val io: IntakeIO) {
         IDLE(0.0)
     }
 
-    val noteCurrentTrigger = Trigger { (inputs.leaderSupplyCurrentAmps + inputs.followerSupplyCurrentAmps) / 2 > noteDetectionAmps }.debounce(0.25, Debouncer.DebounceType.kFalling)
+    val noteCurrentExceeded get() = (inputs.leaderSupplyCurrentAmps + inputs.followerSupplyCurrentAmps) / 2 > noteDetectionAmps
 
     fun periodic() {
         io.updateInputs(inputs)
         Logger.processInputs("Rollers/Intake", inputs)
         Logger.recordOutput("Rollers/IntakeState", goal)
-        Logger.recordOutput("Rollers/NoteDetectionTrigger", noteCurrentTrigger.asBoolean)
+        Logger.recordOutput("Rollers/NoteCurrentExceeded", noteCurrentExceeded)
         io.setVoltage(goal.voltage)
     }
 }

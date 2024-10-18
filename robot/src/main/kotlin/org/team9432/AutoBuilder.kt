@@ -274,7 +274,12 @@ class AutoBuilder(
             .or(C1toC3.done())
             .or(C2toC3.done())
 
-        // After getting to centerline, return if note
+        val foundNoteTrigger = Trigger(loop.loop) { Beambreak.hasNote || rollers.noteCurrentExceeded }
+            // Debounce on falling so this is true for 1.5 seconds after last detected
+            // This makes sure it is still detected even if it's not technically true at the moment the path ends
+            .debounce(1.5, Debouncer.DebounceType.kFalling)
+
+        // After getting to centerline, return if note else go to the next one
         arrivingAtC1.onTrue(
             Commands.either(
                 C1toAMPSHOTFAR.cmdWithEnd(),
@@ -285,7 +290,7 @@ class AutoBuilder(
                         else -> exit()
                     }
                 }, setOf(drive))).onlyIf({ moreTargetNotes.invoke() }),
-                Beambreak::hasNote
+                foundNoteTrigger
             )
         )
         arrivingAtC2.onTrue(
@@ -298,7 +303,7 @@ class AutoBuilder(
                         else -> exit()
                     }
                 }, setOf(drive))).onlyIf({ moreTargetNotes.invoke() }),
-                Beambreak::hasNote
+                foundNoteTrigger
             )
         )
         arrivingAtC3.onTrue(
@@ -311,7 +316,7 @@ class AutoBuilder(
                         else -> exit()
                     }
                 }, setOf(drive))).onlyIf({ moreTargetNotes.invoke() }),
-                Beambreak::hasNote
+                foundNoteTrigger
             )
         )
 
@@ -320,20 +325,19 @@ class AutoBuilder(
                 .or(C2toAMPSHOTFAR.active())
                 .or(C3toAMPSHOTFAR.active())
 
-        val AMPSHOTFAR_endPose = C1toAMPSHOTFAR.finalPose.get()
-        drivingToAMPSHOTFAR.onTrue(setPivotAimFromPose(AMPSHOTFAR_endPose))
         // Prepare to shoot while driving
+        drivingToAMPSHOTFAR.onTrue(setPivotAimFromPose(C1toAMPSHOTFAR.finalPose.get()))
         drivingToAMPSHOTFAR.whileTrue(preparePivot())
 
         // After arriving to score, shoot
         drivingToAMPSHOTFAR
-            .onFalse(aimAndScore(loop))
+            .onFalse(aimAndScore(loop, toleranceDegrees = 1.0))
 
         // If there are more notes to get, start another path
         drivingToAMPSHOTFAR
             .and(moreTargetNotes)
             .onFalse(
-                // Wait until the notes is out of the robot and then start the next path
+                // Wait until the note is out of the robot and then start the next path
                 Commands.waitUntil(shotComplete).andThen(
                     Commands.defer({
                         when (noteQueue.poll()) {
@@ -349,7 +353,7 @@ class AutoBuilder(
         return loop.cmd()
     }
 
-    fun farsideCenterline(scoreSpike: Boolean, noteOrder: Set<AmpsideCenterNote>): Command {
+    fun smartFarsideCenterline(scoreSpike: Boolean, noteOrder: Set<AmpsideCenterNote>): Command {
         return if (scoreSpike) ampSpikeFarsideCenterline(noteOrder) else farsideCenterlineSkipSpike(noteOrder)
     }
 

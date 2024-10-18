@@ -481,7 +481,7 @@ object Robot: LoggedRobot() {
             var firstNote: AmpsideCenterNote? = null
             var secondNote: AmpsideCenterNote? = null
             var thirdNote: AmpsideCenterNote? = null
-            val getAuto = { autoBuilder.farsideCenterline(scoreSpike, setOfNotNull(firstNote, secondNote, thirdNote)) }
+            val getAuto = { autoBuilder.smartFarsideCenterline(scoreSpike, setOfNotNull(firstNote, secondNote, thirdNote)) }
 
             addOption("Smart Amp Centerline", getAuto) {
                 addQuestion("Score spike?", { scoreSpike = it }) {
