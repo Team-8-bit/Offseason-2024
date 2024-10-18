@@ -11,7 +11,7 @@ class Intake(private val io: IntakeIO) {
 
     enum class Goal(val voltage: Double) {
         FLOOR_INTAKE(10.0),
-        LOAD(2.0),
+        LOAD(3.0),
         FLOOR_EJECT(-5.0),
         IDLE(0.0)
     }

@@ -7,6 +7,7 @@ import com.ctre.phoenix6.SignalLogger
 import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID.RumbleType
@@ -88,8 +89,10 @@ object Robot: LoggedRobot() {
 
     private var currentAlliance: DriverStation.Alliance? = null
 
+    private val autoBuilder: AutoBuilder
+
     init {
-        Library.initialize(runtime, tuningMode = true, allianceSupplier = { currentAlliance })
+        Library.initialize(runtime, tuningMode = false, allianceSupplier = { currentAlliance })
 
         SignalLogger.start()
 
@@ -198,6 +201,8 @@ object Robot: LoggedRobot() {
             }
         }
 
+        autoBuilder = AutoBuilder(drive, pivot, rollers, flywheels, noteSimulation, setSimulationPose)
+
         bindButtons()
 
         Beambreak
@@ -233,6 +238,7 @@ object Robot: LoggedRobot() {
         val shootOnMoveDisabled = overrides.switchThree
         val ampAlignDisabled = overrides.switchFour
         val visionDisabled = overrides.switchFive.or { !vision.isConnected }
+        val useAutoIntakeCommand = overrides.switchSix.and { !DriverStation.isFMSAttached() }
         val invertDrive = overrides.switchSeven.and { !DriverStation.isFMSAttached() }
         val podiumOnly = overrides.switchEight
 
@@ -271,9 +277,18 @@ object Robot: LoggedRobot() {
                     flywheels.atGoal
         }.debounce(0.4, Debouncer.DebounceType.kRising)
 
+        val toleranceMap = InterpolatingDoubleTreeMap().apply {
+            // Speaker distance (meters) to tolerance (degrees)
+            put(1.0, 6.0)
+            put(2.0, 4.0)
+            put(3.0, 3.0)
+            put(4.0, 2.0)
+            put(5.0, 1.0)
+        }
+
         val speakerToleranceSupplier = {
             val goalDistance = RobotState.currentPose.distanceTo(PositionConstants.speakerAimPose).inMeters
-            5 / goalDistance
+             toleranceMap.get(goalDistance)
         }
 
         // Prepare for a speaker shot
@@ -332,13 +347,15 @@ object Robot: LoggedRobot() {
                 ).withName("Prepare Amp")
             )
 
+        val shotComplete = Trigger(Beambreak::hasNoNote).debounce(0.1)
+
         // Execute amp shot
         controller
             .rightBumper()
             .and(controller.b()) // Make sure we are trying to shoot amp
             .onTrue(
                 Commands.parallel(
-                    Commands.waitSeconds(0.5),
+                    Commands.waitUntil(shotComplete),
                     Commands.waitUntil(controller.rightBumper().negate())
                 ).deadlineWith( // Deadline runs the below commands until 0.5 second have passed or the button is released
                     rollers.runGoal(Rollers.Goal.SHOOTER_FEED),
@@ -353,12 +370,11 @@ object Robot: LoggedRobot() {
 
         /**** Intake ****/
         controller.leftBumper()
-            .and(DriverStation::isEnabled) // I think this makes it so it runs if you are holding the button while it enables
-            .and(Beambreak.upperBeambreak::isClear)
+            .and(DriverStation::isEnabled) // This makes it so it runs if you are holding the button while it enables
+            .and(useAutoIntakeCommand.negate())
             .whileTrue(
                 Commands.parallel(
                     pivotAimCommand(Pivot.Goal.INTAKE),
-                    flywheels.runGoal(Flywheels.Goal.NOTE_ALIGN),
                     Commands.waitUntil(pivot::atGoal).andThen(
                         rollers.runGoal(Rollers.Goal.INTAKE)
                             .until(Beambreak::hasNote).afterSimCondition({ noteSimulation!!.hasNote }, { Beambreak.lowerBeambreak.setSimTripped() })
@@ -366,11 +382,13 @@ object Robot: LoggedRobot() {
                                 ScheduleCommand(
                                     Commands.sequence(
                                         Commands.runOnce({ noteSimulation?.animateAlign() }),
-                                        rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.2) { Beambreak.upperBeambreak.setSimTripped() },
-                                        rollers.runGoal(Rollers.Goal.ALIGN_FORWARD).until(Beambreak.lowerBeambreak::isClear).afterSimDelay(0.2) { Beambreak.lowerBeambreak.setSimClear() },
-                                        rollers.runGoal(Rollers.Goal.ALIGN_REVERSE).until(Beambreak.lowerBeambreak::isTripped).afterSimDelay(0.2) { Beambreak.lowerBeambreak.setSimTripped() },
+                                        rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.1) { Beambreak.upperBeambreak.setSimTripped() },
+                                        rollers.runGoal(Rollers.Goal.ALIGN_REVERSE_SLOW).until(Beambreak.upperBeambreak::isClear).afterSimDelay(0.1) { Beambreak.upperBeambreak.setSimClear() },
+                                        rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.1) { Beambreak.upperBeambreak.setSimTripped() },
+                                        rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).withTimeout(0.075),
+                                        rollers.runGoal(Rollers.Goal.ALIGN_REVERSE_SLOW).withTimeout(0.05),
                                     )
-                                        .deadlineWith(flywheels.runGoal(Flywheels.Goal.NOTE_ALIGN))
+                                        .deadlineWith(pivotAimCommand(Pivot.Goal.INTAKE))
                                         .alongWith(ScheduleCommand(controller.rumbleCommand().withTimeout(2.0)))
                                         .onlyIf { Beambreak.hasNote }
                                         .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
@@ -378,10 +396,14 @@ object Robot: LoggedRobot() {
                                         .withName("Note Align")
                                 )
                             )
-
                     )
                 ).withName("Teleop Intake")
             )
+
+        // For testing auto intake
+        controller.leftBumper()
+            .and(useAutoIntakeCommand)
+            .whileTrue(autoBuilder.intake())
 
         controller.start().whileTrue(rollers.runGoal(Rollers.Goal.FLOOR_EJECT).withName("Floor Eject").afterSimDelay(0.5) { Beambreak.simClear(); noteSimulation?.clearNote() })
 
@@ -470,8 +492,6 @@ object Robot: LoggedRobot() {
     private val autoChoosers = List(5) { AutoSelector.DashboardQuestion("Option $it Chooser", "Option $it Question") }.toSet()
 
     private val autochooser = AutoSelector(autoChoosers) {
-        val autoBuilder = AutoBuilder(drive, pivot, rollers, flywheels, noteSimulation, setSimulationPose)
-
         addQuestion("Which Auto?", { currentAuto = it }) {
             addOption("Do Nothing", Commands::none)
 

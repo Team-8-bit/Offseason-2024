@@ -58,10 +58,12 @@ class Rollers(
 
             Goal.ALIGN_FORWARD -> {
                 loader.goal = Loader.Goal.ALIGN_FORWARD
+                intake.goal = Intake.Goal.LOAD
             }
 
             Goal.ALIGN_FORWARD_SLOW -> {
                 loader.goal = Loader.Goal.ALIGN_FORWARD_SLOW
+                intake.goal = Intake.Goal.LOAD
             }
 
             Goal.ALIGN_REVERSE_SLOW -> {

@@ -393,12 +393,14 @@ class AutoBuilder(
         }
     )
 
-    private fun intake() =
+    fun intake() =
         Commands.waitUntil(pivot::atGoal).andThen(
             Commands.runOnce({ noteSimulation?.animateAlign() }),
-            rollers.runGoal(Rollers.Goal.INTAKE).until(Beambreak.lowerBeambreak::isTripped).afterSimCondition({ noteSimulation!!.hasNote }) { Beambreak.lowerBeambreak.setSimTripped() },
+            rollers.runGoal(Rollers.Goal.INTAKE).until(Beambreak::hasNote).afterSimCondition({ noteSimulation!!.hasNote }) { Beambreak.lowerBeambreak.setSimTripped() },
             rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.1) { Beambreak.upperBeambreak.setSimTripped() },
-            rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).withTimeout(0.1),
+            rollers.runGoal(Rollers.Goal.ALIGN_REVERSE_SLOW).until(Beambreak.upperBeambreak::isClear).afterSimDelay(0.1) { Beambreak.upperBeambreak.setSimClear() },
+            rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.1) { Beambreak.upperBeambreak.setSimTripped() },
+            rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).withTimeout(0.075),
             rollers.runGoal(Rollers.Goal.ALIGN_REVERSE_SLOW).withTimeout(0.05),
         )
             .deadlineWith(pivot.runGoal(Pivot.Goal.IDLE))
