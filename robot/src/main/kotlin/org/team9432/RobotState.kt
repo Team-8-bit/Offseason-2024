@@ -59,17 +59,35 @@ object RobotState {
     var shouldDisableShootOnMove = { false }
     var shouldUsePivotSetpoints = { true }
 
+    // Aims as if the robot was in this pose during auto, useful for being ready at the end of a trajectory
+    var autoPivotAimFromPose: Pose2d? = null
+        set(value) {
+            latestAimingParameters.invalidate()
+            field = value
+        }
+
     fun getStandardAimingParameters(): AimingParameters {
         // Return the latest aiming parameters if they haven't changed
         latestAimingParameters.ifValid { cachedValue -> return cachedValue }
 
-        val predictedFuturePose = if (!shouldDisableShootOnMove()) getFutureRobotPose() else currentPose
+        val robotPose = if (!shouldDisableShootOnMove()) {
+            getFutureRobotPose()
+        } else {
+            currentPose
+        }
+
         val targetPose = PositionConstants.speakerAimPose
 
-        val drivetrainAngleTarget = predictedFuturePose.angleTo(targetPose).asRotation2d
-        val distanceToSpeaker = predictedFuturePose.distanceTo(targetPose)
+        val drivetrainAngleTarget = robotPose.angleTo(targetPose).asRotation2d
+        val distanceToSpeaker = robotPose.distanceTo(targetPose)
 
-        val pivotAngleTarget = pivotAngleMap.get(distanceToSpeaker.inMeters)
+        val finalPivotAutoAimFromPose = autoPivotAimFromPose
+        val pivotAngleTarget = if (Robot.isAutonomousEnabled && finalPivotAutoAimFromPose != null) {
+            pivotAngleMap.get(finalPivotAutoAimFromPose.distanceTo(targetPose).inMeters)
+        } else {
+            pivotAngleMap.get(distanceToSpeaker.inMeters)
+        }
+
         val shooterSpeedTarget = if (shouldUsePivotSetpoints.invoke() && distanceToSpeaker > 1.5) {
             ShooterSpeeds(upperRPM = 5000.0, lowerRPM = 5000.0)
         } else {
@@ -143,6 +161,7 @@ object RobotState {
         RobotPeriodicManager.startPeriodic {
             Logger.recordOutput("RobotPosition/CurrentPose", currentPose)
             Logger.recordOutput("RobotPosition/CurrentSpeeds", getRobotRelativeChassisSpeeds())
+            Logger.recordOutput("RobotPosition/AutoPivotAimFromPose", *listOfNotNull(autoPivotAimFromPose).toTypedArray())
             Logger.recordOutput("RobotPosition/CurrentFieldRelativeSpeeds", ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeChassisSpeeds(), currentPose.rotation))
             Logger.recordOutput("RobotPosition/PoseInShotTime", getFutureRobotPose())
             Logger.recordOutput("RobotPosition/SpeakerTuningDistanceMeters", currentPose.distanceTo(PositionConstants.speakerAimPose).inMeters)

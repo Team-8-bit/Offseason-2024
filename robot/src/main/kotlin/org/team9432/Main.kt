@@ -273,7 +273,7 @@ object Robot: LoggedRobot() {
 
         val speakerToleranceSupplier = {
             val goalDistance = RobotState.currentPose.distanceTo(PositionConstants.speakerAimPose).inMeters
-            0.8 / goalDistance
+            5 / goalDistance
         }
 
         // Prepare for a speaker shot

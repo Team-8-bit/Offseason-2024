@@ -74,7 +74,7 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
         if (disabled) {
             io.runVoltage(0.0)
             feedback.reset()
-            setpointState = TrapezoidProfile.State(mechanismPositionRadians, 0.0)
+            setpointState = TrapezoidProfile.State(0.0, 0.0)
         }
 
         io.setBrakeMode(!disabled) // Coast when disabled

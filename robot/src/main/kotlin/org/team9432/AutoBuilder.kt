@@ -103,20 +103,24 @@ class AutoBuilder(
             }).andThen(preload.cmdWithEnd())
         )
 
-        preload.active().whileTrue(pivot.runGoal(Pivot.Goal.SPEAKER_AIM))
-        preload.active().onFalse(aimAndScore())
-        preload.active().onFalse(Commands.waitUntil(Beambreak::hasNoNote).andThen(firstNote.cmdWithEnd()))
+        preload.active().onTrue(setPivotAimFromPose(preload.finalPose.get()))
+        preload.active().whileTrue(preparePivot())
+        preload.active().onFalse(aimAndScore(loop, 2.0))
+        preload.active().onFalse(Commands.waitUntil(shotComplete).andThen(firstNote.cmdWithEnd()))
 
-        firstNote.active().whileTrue(intake().andThen(pivot.runGoal(Pivot.Goal.SPEAKER_AIM)))
-        firstNote.active().onFalse(aimAndScore())
-        firstNote.active().onFalse(Commands.waitUntil(Beambreak::hasNoNote).andThen(secondNote.cmdWithEnd()))
+        firstNote.active().onTrue(setPivotAimFromPose(firstNote.finalPose.get()))
+        firstNote.active().onTrue(intake().andThen(preparePivot()))
+        firstNote.active().onFalse(aimAndScore(loop, 2.0))
+        firstNote.active().onFalse(Commands.waitUntil(shotComplete).andThen(secondNote.cmdWithEnd()))
 
-        secondNote.active().whileTrue(intake().andThen(pivot.runGoal(Pivot.Goal.SPEAKER_AIM)))
-        secondNote.active().onFalse(aimAndScore())
-        secondNote.active().onFalse(Commands.waitUntil(Beambreak::hasNoNote).andThen(thirdNote.cmdWithEnd()))
+        secondNote.active().onTrue(setPivotAimFromPose(secondNote.finalPose.get()))
+        secondNote.active().onTrue(intake().andThen(preparePivot()))
+        secondNote.active().onFalse(aimAndScore(loop, 2.0))
+        secondNote.active().onFalse(Commands.waitUntil(shotComplete).andThen(thirdNote.cmdWithEnd()))
 
-        thirdNote.active().whileTrue(intake().andThen(pivot.runGoal(Pivot.Goal.SPEAKER_AIM)))
-        thirdNote.active().onFalse(aimAndScore())
+        thirdNote.active().onTrue(setPivotAimFromPose(thirdNote.finalPose.get()))
+        thirdNote.active().onTrue(intake().andThen(preparePivot()))
+        thirdNote.active().onFalse(aimAndScore(loop, 2.0))
 
         return loop.cmd()
     }
@@ -138,20 +142,19 @@ class AutoBuilder(
         loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
 
         // Prepare to shoot while driving
-        preload.active().whileTrue(pivot.runGoal(Pivot.Goal.SPEAKER_AIM))
+        preload.active().onTrue(setPivotAimFromPose(preload.finalPose.get()))
+        preload.active().whileTrue(preparePivot())
+        preload.active().onFalse(aimAndScore(loop, 0.5))
+        preload.active().onFalse(Commands.waitUntil(shotComplete).andThen(toAMPSHOTCLOSE.cmdWithEnd()))
 
-        // After arriving to score, shoot
-        preload.active().onFalse(aimAndScore())
-        preload.active().onFalse(Commands.waitUntil(Beambreak::hasNoNote).andThen(toAMPSHOTCLOSE.cmdWithEnd()))
-
-        toAMPSHOTCLOSE.active().whileTrue(intake())
-        toAMPSHOTCLOSE.active().onFalse(aimAndScore())
-        toAMPSHOTCLOSE.active()
-            .onFalse(
-                Commands.waitUntil(Beambreak::hasNoNote).andThen(
-                    farsideCenterlinePortion(startPosition = FarsideCenterlinePortionStart.AMPSHOT_CLOSE, noteOrder)
-                ).onlyIf(noteOrder::isNotEmpty)
-            )
+        toAMPSHOTCLOSE.active().onTrue(setPivotAimFromPose(toAMPSHOTCLOSE.finalPose.get()))
+        toAMPSHOTCLOSE.active().whileTrue(intake().andThen(preparePivot()))
+        toAMPSHOTCLOSE.active().onFalse(aimAndScore(loop, 0.5))
+        toAMPSHOTCLOSE.active().onFalse(
+            Commands.waitUntil(shotComplete).andThen(
+                farsideCenterlinePortion(startPosition = FarsideCenterlinePortionStart.AMPSHOT_CLOSE, noteOrder)
+            ).onlyIf(noteOrder::isNotEmpty)
+        )
 
         return loop.cmd()
     }
@@ -172,13 +175,14 @@ class AutoBuilder(
         loop.enabled().whileTrue(flywheels.runGoal(Flywheels.Goal.SHOOT))
 
         // Prepare to shoot while driving
-        AMPtoAMPSHOTFAR.active().whileTrue(pivot.runGoal(Pivot.Goal.SPEAKER_AIM))
+        AMPtoAMPSHOTFAR.active().onTrue(setPivotAimFromPose(AMPtoAMPSHOTFAR.finalPose.get()))
+        AMPtoAMPSHOTFAR.active().whileTrue(preparePivot())
 
         // After arriving to score, shoot
-        AMPtoAMPSHOTFAR.active().onFalse(aimAndScore())
+        AMPtoAMPSHOTFAR.active().onFalse(aimAndScore(loop))
         AMPtoAMPSHOTFAR.active()
             .onFalse(
-                Commands.waitUntil(Beambreak::hasNoNote).andThen(
+                Commands.waitUntil(shotComplete).andThen(
                     farsideCenterlinePortion(startPosition = FarsideCenterlinePortionStart.AMPSHOT_FAR, noteOrder)
                 ).onlyIf(noteOrder::isNotEmpty)
             )
@@ -316,19 +320,21 @@ class AutoBuilder(
                 .or(C2toAMPSHOTFAR.active())
                 .or(C3toAMPSHOTFAR.active())
 
+        val AMPSHOTFAR_endPose = C1toAMPSHOTFAR.finalPose.get()
+        drivingToAMPSHOTFAR.onTrue(setPivotAimFromPose(AMPSHOTFAR_endPose))
         // Prepare to shoot while driving
-        drivingToAMPSHOTFAR.whileTrue(pivot.runGoal(Pivot.Goal.SPEAKER_AIM))
+        drivingToAMPSHOTFAR.whileTrue(preparePivot())
 
         // After arriving to score, shoot
         drivingToAMPSHOTFAR
-            .onFalse(aimAndScore())
+            .onFalse(aimAndScore(loop))
 
         // If there are more notes to get, start another path
         drivingToAMPSHOTFAR
             .and(moreTargetNotes)
             .onFalse(
                 // Wait until the notes is out of the robot and then start the next path
-                Commands.waitUntil(Beambreak::hasNoNote).andThen(
+                Commands.waitUntil(shotComplete).andThen(
                     Commands.defer({
                         when (noteQueue.poll()) {
                             AmpsideCenterNote.ONE -> AMPSHOTFARtoC1.cmdWithEnd()
@@ -347,21 +353,30 @@ class AutoBuilder(
         return if (scoreSpike) ampSpikeFarsideCenterline(noteOrder) else farsideCenterlineSkipSpike(noteOrder)
     }
 
-    private val readyToShoot = Trigger { pivot.atGoal && drive.atAutoAimGoal(1.0) && flywheels.atGoal }.debounce(0.3, Debouncer.DebounceType.kRising)
+    private fun readyToShoot(loop: AutoLoop, toleranceDegrees: Double) =
+        Trigger(loop.loop) { pivot.atGoal && drive.atAutoAimGoal(toleranceDegrees) && flywheels.atGoal }//.debounce(0.3, Debouncer.DebounceType.kRising)
+
     private fun AutoTrajectory.cmdWithEnd(): Command = cmd().finallyDo { _ -> controller.stopAndReset() }
 
-    private fun aimAndScore() = Commands.parallel(
-        drive.aimSpeaker(),
-        pivot.runGoal(Pivot.Goal.SPEAKER_AIM),
-        Commands.waitUntil(readyToShoot).andThen(
-            Commands.runOnce({ noteSimulation?.animateShoot() }),
-            rollers.runGoal(Rollers.Goal.SHOOTER_FEED).afterSimDelay(0.15) { Beambreak.simClear() },
-        )
-    )
-        .until(Beambreak.upperBeambreak::isClear)
-        .withTimeout(2.5)
-        .withName("Auto Aim and Score")
+    private val shotComplete = Trigger(Beambreak::hasNoNote).debounce(0.1)
 
+    private fun aimAndScore(loop: AutoLoop, toleranceDegrees: Double = 1.0) =
+        Commands.parallel(
+            drive.aimSpeaker(),
+            pivot.runGoal(Pivot.Goal.SPEAKER_AIM),
+            Commands.waitUntil(readyToShoot(loop, toleranceDegrees)).andThen(
+                Commands.runOnce({ noteSimulation?.animateShoot() }),
+                rollers.runGoal(Rollers.Goal.SHOOTER_FEED).afterSimDelay(0.15) { Beambreak.simClear() },
+            )
+        )
+            .beforeStarting({ RobotState.autoPivotAimFromPose = null })
+            .until(shotComplete)
+            .withTimeout(2.5)
+            .withName("Auto Aim and Score")
+
+    private fun preparePivot() = pivot.runGoal(Pivot.Goal.SPEAKER_AIM)
+
+    private fun setPivotAimFromPose(pose2d: Pose2d): Command = Commands.runOnce({ RobotState.autoPivotAimFromPose = pose2d })
 
     // To add to AutoCommands
     private fun Drive.aimSpeaker() = Commands.startEnd(
@@ -375,13 +390,13 @@ class AutoBuilder(
     )
 
     private fun intake() =
-        Commands.parallel(
-            pivot.runGoal(Pivot.Goal.INTAKE),
-            Commands.waitUntil(pivot::atGoal).andThen(
-                Commands.runOnce({ noteSimulation?.animateAlign() }),
-                rollers.runGoal(Rollers.Goal.INTAKE).until(Beambreak.lowerBeambreak::isTripped).afterSimCondition({ noteSimulation!!.hasNote }) { Beambreak.lowerBeambreak.setSimTripped() },
-                rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.1) { Beambreak.upperBeambreak.setSimTripped() },
-                rollers.runGoal(Rollers.Goal.ALIGN_REVERSE_SLOW).withTimeout(0.05),
-            )
-        ).withName("AutoIntake")
+        Commands.waitUntil(pivot::atGoal).andThen(
+            Commands.runOnce({ noteSimulation?.animateAlign() }),
+            rollers.runGoal(Rollers.Goal.INTAKE).until(Beambreak.lowerBeambreak::isTripped).afterSimCondition({ noteSimulation!!.hasNote }) { Beambreak.lowerBeambreak.setSimTripped() },
+            rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).until(Beambreak.upperBeambreak::isTripped).afterSimDelay(0.1) { Beambreak.upperBeambreak.setSimTripped() },
+            rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).withTimeout(0.1),
+            rollers.runGoal(Rollers.Goal.ALIGN_REVERSE_SLOW).withTimeout(0.05),
+        )
+            .deadlineWith(pivot.runGoal(Pivot.Goal.IDLE))
+            .withName("AutoIntake")
 }
