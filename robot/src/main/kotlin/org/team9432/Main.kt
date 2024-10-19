@@ -8,6 +8,7 @@ import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
+import edu.wpi.first.math.util.Units
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID.RumbleType
@@ -31,6 +32,7 @@ import org.team9432.AutoBuilder.AmpsideCenterNote
 import org.team9432.lib.Library
 import org.team9432.lib.Library.Runtime.*
 import org.team9432.lib.RobotPeriodicManager
+import org.team9432.lib.constants.EvergreenFieldConstants
 import org.team9432.lib.dashboard.AutoSelector
 import org.team9432.lib.simulation.competitionfield.simulations.CompetitionFieldSimulation
 import org.team9432.lib.simulation.competitionfield.simulations.Crescendo2024FieldSimulation
@@ -309,6 +311,7 @@ object Robot: LoggedRobot() {
             .rightBumper()
             .and(controller.y()) // Make sure we are trying to shoot speaker
             .and(readyToShoot)
+            .and { RobotState.currentPose.applyFlip().x < EvergreenFieldConstants.centerX + 1.25.meters }
             .onTrue(
                 Commands.parallel(
                     Commands.waitSeconds(0.5),
@@ -398,7 +401,6 @@ object Robot: LoggedRobot() {
                     driveAimCommand({ 90.degrees.asRotation2d }, toleranceSupplier = { 1.0 }).onlyIf(ampAlignDisabled.negate())
                 )
                     .withName("Shoot Amp")
-                    .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming) // Don't let this be interrupted
                     .finallyDo { _ -> Beambreak.simClear(); noteSimulation?.clearNote() } // Remove note from the robot in sim
             )
 
