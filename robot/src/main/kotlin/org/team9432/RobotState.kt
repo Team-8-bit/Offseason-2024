@@ -108,7 +108,7 @@ object RobotState {
         latestFeedAimingParameters.ifValid { cachedValue -> return cachedValue }
 
         val robotPose = if (!shouldDisableShootOnMove()) {
-            getFutureRobotPose()
+            getFutureRobotPose(lookaheadTime = 1.1)
         } else {
             currentPose
         }
@@ -177,11 +177,11 @@ object RobotState {
         put(4.0, 0.6)
     }
 
-    private fun getFutureRobotPose(): Pose2d {
+    private fun getFutureRobotPose(lookaheadTime: Double? = null): Pose2d {
         val distance = currentPose.distanceTo(PositionConstants.speakerAimPose)
         return currentPose.transformBySpeeds(
             ChassisSpeeds.fromRobotRelativeSpeeds(currentChassisSpeeds, currentPose.rotation),
-            shotTimeMap.get(distance.inMeters)
+            lookaheadTime ?: shotTimeMap.get(distance.inMeters)
         )
     }
 

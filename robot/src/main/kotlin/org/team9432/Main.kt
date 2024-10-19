@@ -8,7 +8,6 @@ import edu.wpi.first.math.filter.Debouncer
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
-import edu.wpi.first.math.util.Units
 import edu.wpi.first.net.PortForwarder
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.GenericHID.RumbleType
@@ -311,7 +310,10 @@ object Robot: LoggedRobot() {
             .rightBumper()
             .and(controller.y()) // Make sure we are trying to shoot speaker
             .and(readyToShoot)
-            .and { RobotState.currentPose.applyFlip().x < EvergreenFieldConstants.centerX + 1.25.meters }
+            .and {
+                RobotState.currentPose.applyFlip().x < EvergreenFieldConstants.centerX + 1.25.meters && // Make sure we're making a legal shot past the opponent's wing
+                        RobotState.getRobotRelativeChassisSpeeds().velocityLessThan(2.0, 90.0) // Make sure the robot is going pretty slow
+            }
             .onTrue(
                 Commands.parallel(
                     Commands.waitSeconds(0.5),

@@ -45,7 +45,7 @@ class Flywheels(private val io: FlywheelIO): SubsystemBase() {
         NOTE_ALIGN({ ShooterSpeeds(-200.0, -200.0) }),
         FEED_SPEED({ RobotState.getFeedAimingParameters().shooterSpeeds }),
         CUSTOM({ ShooterSpeeds(0.0, 0.0) }),
-        AMP({ ShooterSpeeds(750.0, 4000.0) });
+        AMP({ ShooterSpeeds(100.0, 4400.0) });
     }
 
     init {
