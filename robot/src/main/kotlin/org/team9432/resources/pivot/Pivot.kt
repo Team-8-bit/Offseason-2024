@@ -37,7 +37,8 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
         SPEAKER_AIM({ RobotState.getStandardAimingParameters().pivotAngle.inDegrees }),
         AMP(LoggedTunableNumber("Pivot/AmpAngleDegrees", 0.0)),
         PODIUM(LoggedTunableNumber("Pivot/PodiumAngleDegrees", 19.0)),
-        CUSTOM(LoggedTunableNumber("Pivot/CustomGoal", 0.0));
+        CUSTOM(LoggedTunableNumber("Pivot/CustomGoal", 0.0)),
+        FEED({ RobotState.getFeedAimingParameters().pivotAngle.inDegrees });
 
         val angleRads get() = Units.degreesToRadians(angleSupplier.invoke())
     }

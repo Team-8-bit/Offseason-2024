@@ -12,6 +12,7 @@ import edu.wpi.first.math.numbers.N3
 import edu.wpi.first.math.util.Units
 import org.littletonrobotics.junction.Logger
 import org.team9432.lib.RobotPeriodicManager
+import org.team9432.lib.constants.EvergreenFieldConstants
 import org.team9432.lib.unit.*
 import org.team9432.lib.util.*
 import org.team9432.resources.drive.DrivetrainConstants.DRIVE_KINEMATICS
@@ -55,6 +56,7 @@ object RobotState {
     data class AimingParameters(val shooterSpeeds: ShooterSpeeds, val drivetrainAngle: Rotation2d, val pivotAngle: Angle)
 
     private var latestAimingParameters = CachedValue<AimingParameters>()
+    private var latestFeedAimingParameters = CachedValue<AimingParameters>()
 
     var shouldDisableShootOnMove = { false }
     var shouldUsePivotSetpoints = { true }
@@ -101,11 +103,50 @@ object RobotState {
         )
     }
 
+    fun getFeedAimingParameters(): AimingParameters {
+        // Return the latest aiming parameters if they haven't changed
+        latestFeedAimingParameters.ifValid { cachedValue -> return cachedValue }
+
+        val robotPose = if (!shouldDisableShootOnMove()) {
+            getFutureRobotPose()
+        } else {
+            currentPose
+        }
+
+        val targetPose = PositionConstants.feedAimPose
+
+        Logger.recordOutput("FeedPose", PositionConstants.feedAimPose)
+
+        val drivetrainAngleTarget = robotPose.angleTo(targetPose).asRotation2d
+        val distanceToSpeaker = robotPose.distanceTo(targetPose)
+
+        val pivotAngleTarget: Double
+        val shooterSpeedTarget: ShooterSpeeds
+        if (currentPose.y > (EvergreenFieldConstants.lengthY / 3) * 2) {
+            pivotAngleTarget = 30.0 // Toss
+            shooterSpeedTarget = ShooterSpeeds(3000.0, 3000.0)
+        } else {
+            pivotAngleTarget = 0.0 // Over stage
+            shooterSpeedTarget = feedSpeeds.getMapValue(distanceToSpeaker)
+        }
+
+        return AimingParameters(
+            shooterSpeeds = shooterSpeedTarget,
+            drivetrainAngle = drivetrainAngleTarget,
+            pivotAngle = pivotAngleTarget.degrees
+        )
+    }
+
     val swerveLimits = SwerveSetpointGenerator.ModuleLimits(
         maxDriveVelocity = 4.0,
         maxDriveAcceleration = 10.0,
         maxSteeringVelocity = Units.degreesToRadians(1080.0)
     )
+
+    private val feedSpeeds = DifferentialFlywheelSpeedMap().apply {
+        addMapValue(18.meters, ShooterSpeeds(upperRPM = 5000.0, lowerRPM = 5000.0))
+        addMapValue(16.meters, ShooterSpeeds(upperRPM = 4000.0, lowerRPM = 4800.0))
+    }
 
     private val differentialShooterSpeedsMap = DifferentialFlywheelSpeedMap().apply {
         addMapValue(2.25.meters, ShooterSpeeds(upperRPM = 5000.0, lowerRPM = 2000.0))

@@ -288,8 +288,42 @@ object Robot: LoggedRobot() {
 
         val speakerToleranceSupplier = {
             val goalDistance = RobotState.currentPose.distanceTo(PositionConstants.speakerAimPose).inMeters
-             toleranceMap.get(goalDistance)
+            toleranceMap.get(goalDistance)
         }
+
+        // Prepare feed shot
+        controller
+            .y()
+            .and(controller.leftBumper().negate())
+            .whileTrue(
+                driveAimCommand({ RobotState.getFeedAimingParameters().drivetrainAngle }, { 4.0 })
+                    .alongWith(
+                        flywheels.runGoal(Flywheels.Goal.FEED_SPEED),
+                        pivotAimCommand(Pivot.Goal.FEED)
+                    )
+                    .withName("Prepare Feed")
+            )
+
+        // Execute feed shot
+        controller
+            .rightBumper()
+            .and(controller.y()) // Make sure we are trying to shoot speaker
+            .and(readyToShoot)
+            .onTrue(
+                Commands.parallel(
+                    Commands.waitSeconds(0.5),
+                    Commands.waitUntil(controller.rightBumper().negate())
+                ).deadlineWith( // Deadline runs the below commands until 0.5 second have passed or the button is released
+                    rollers.runGoal(Rollers.Goal.SHOOTER_FEED),
+                    flywheels.runGoal(Flywheels.Goal.FEED_SPEED),
+                    pivotAimCommand(Pivot.Goal.FEED),
+                    driveAimCommand({ RobotState.getFeedAimingParameters().drivetrainAngle }, speakerToleranceSupplier),
+                    Commands.runOnce({ noteSimulation?.animateShoot() })
+                )
+                    .withName("Feed Notes")
+                    .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming) // Don't let this be interrupted
+                    .finallyDo { _ -> Beambreak.simClear() } // Remove note from the robot in sim
+            )
 
         // Prepare for a speaker shot
         controller
