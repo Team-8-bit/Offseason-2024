@@ -123,8 +123,8 @@ object RobotState {
         val pivotAngleTarget: Double
         val shooterSpeedTarget: ShooterSpeeds
         if (currentPose.y > (EvergreenFieldConstants.lengthY / 3) * 2) {
-            pivotAngleTarget = 30.0 // Toss
-            shooterSpeedTarget = ShooterSpeeds(3000.0, 3000.0)
+            pivotAngleTarget = 26.0 // Toss
+            shooterSpeedTarget = ShooterSpeeds(3500.0, 3500.0)
         } else {
             pivotAngleTarget = 0.0 // Over stage
             shooterSpeedTarget = feedSpeeds.getMapValue(distanceToSpeaker)
@@ -144,8 +144,8 @@ object RobotState {
     )
 
     private val feedSpeeds = DifferentialFlywheelSpeedMap().apply {
-        addMapValue(18.meters, ShooterSpeeds(upperRPM = 5000.0, lowerRPM = 5000.0))
-        addMapValue(16.meters, ShooterSpeeds(upperRPM = 4000.0, lowerRPM = 4800.0))
+        addMapValue(18.meters, ShooterSpeeds(upperRPM = 4500.0, lowerRPM = 4500.0))
+        addMapValue(16.meters, ShooterSpeeds(upperRPM = 4000.0, lowerRPM = 4000.0))
     }
 
     private val differentialShooterSpeedsMap = DifferentialFlywheelSpeedMap().apply {

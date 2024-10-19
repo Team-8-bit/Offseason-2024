@@ -13,5 +13,5 @@ object PositionConstants {
 
     /** Position the robot aims when feeding, it is in the amp corner of the field. */
     val feedAimPose
-        get() = Translation2d(0.0.meters, EvergreenFieldConstants.lengthY - 0.75.meters).applyFlip()
+        get() = Translation2d(0.0.meters, EvergreenFieldConstants.lengthY - 0.25.meters).applyFlip()
 }
