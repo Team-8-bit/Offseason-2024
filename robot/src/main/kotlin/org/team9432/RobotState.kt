@@ -113,16 +113,23 @@ object RobotState {
             currentPose
         }
 
-        val targetPose = PositionConstants.feedAimPose
+        val shouldToss = currentPose.y > ((EvergreenFieldConstants.lengthY / 3) * 2)
 
-        Logger.recordOutput("FeedPose", PositionConstants.feedAimPose)
+        val targetPose = if (shouldToss) {
+            Translation2d(0.0.meters, EvergreenFieldConstants.lengthY - 0.25.meters).applyFlip()
+        } else {
+            Translation2d(0.0.meters, EvergreenFieldConstants.lengthY - 0.5.meters).applyFlip()
+        }
 
         val drivetrainAngleTarget = robotPose.angleTo(targetPose).asRotation2d
         val distanceToTarget = robotPose.distanceTo(targetPose)
 
+        Logger.recordOutput("RobotPosition/FeedTarget", targetPose)
+        Logger.recordOutput("RobotPosition/FeedTargetDistance", distanceToTarget.inMeters)
+
         val pivotAngleTarget: Double
         val shooterSpeedTarget: ShooterSpeeds
-        if (currentPose.y > (EvergreenFieldConstants.lengthY / 3) * 2) {
+        if (shouldToss) {
             pivotAngleTarget = 26.0 // Toss
             shooterSpeedTarget = ShooterSpeeds(3500.0, 3500.0)
         } else {
@@ -145,7 +152,7 @@ object RobotState {
 
     private val feedSpeeds = DifferentialFlywheelSpeedMap().apply {
         addMapValue(10.0.meters, ShooterSpeeds(upperRPM = 4000.0, lowerRPM = 4800.0))
-        addMapValue(12.meters, ShooterSpeeds(upperRPM = 4000.0, lowerRPM = 4000.0))
+        addMapValue(12.meters, ShooterSpeeds(upperRPM = 3500.0, lowerRPM = 3500.0))
     }
 
     private val pivotFeedMap = InterpolatingDoubleTreeMap().apply {
@@ -212,7 +219,6 @@ object RobotState {
             Logger.recordOutput("RobotPosition/CurrentFieldRelativeSpeeds", ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeChassisSpeeds(), currentPose.rotation))
             Logger.recordOutput("RobotPosition/PoseInShotTime", getFutureRobotPose())
             Logger.recordOutput("RobotPosition/SpeakerTuningDistanceMeters", currentPose.distanceTo(PositionConstants.speakerAimPose).inMeters)
-            Logger.recordOutput("RobotPosition/FeedPoseDistance", currentPose.distanceTo(PositionConstants.feedAimPose).inMeters)
         }
     }
 }
