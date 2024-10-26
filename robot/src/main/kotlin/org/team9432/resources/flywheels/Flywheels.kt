@@ -41,11 +41,13 @@ class Flywheels(private val io: FlywheelIO): SubsystemBase() {
     enum class Goal(val getSpeeds: () -> ShooterSpeeds) {
         IDLE({ ShooterSpeeds(0.0, 0.0) }),
         SHOOT({ RobotState.getStandardAimingParameters().shooterSpeeds }),
+        DEMO_SHOOT({ RobotState.getDemoAimingParameters().shooterSpeeds }),
         SUBWOOFER({ ShooterSpeeds(2000.0, 5000.0) }),
         NOTE_ALIGN({ ShooterSpeeds(-200.0, -200.0) }),
         FEED_SPEED({ RobotState.getFeedAimingParameters().shooterSpeeds }),
         CUSTOM({ ShooterSpeeds(0.0, 0.0) }),
-        AMP({ ShooterSpeeds(100.0, 4400.0) });
+        AMP({ ShooterSpeeds(100.0, 4400.0) }),
+        DEMO_INTAKE({ ShooterSpeeds(-3000.0, -3000.0) });
     }
 
     init {

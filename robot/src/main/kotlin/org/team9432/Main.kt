@@ -74,6 +74,7 @@ import org.team9432.vision.VisionIOSim
 
 object Robot: LoggedRobot() {
     val runtime = if (RobotBase.isReal()) REAL else SIM
+    val isDemo = true
 
     private val controller = CommandXboxController(0)
     private val overrides = Switchbox(1)
@@ -124,7 +125,7 @@ object Robot: LoggedRobot() {
                 noteSimulation = null
                 setSimulationPose = null
 
-                vision = Vision(VisionIOReal())
+                vision = Vision(VisionIOReal(), isDemo)
             }
 
             SIM -> {
@@ -176,7 +177,7 @@ object Robot: LoggedRobot() {
                     intakeSim
                 )
 
-                vision = Vision(VisionIOSim(actualRobotPoseSupplier = { swerveSim.objectOnFieldPose2d }))
+                vision = Vision(VisionIOSim(actualRobotPoseSupplier = { swerveSim.objectOnFieldPose2d }), isDemo)
             }
 
             REPLAY -> {
@@ -198,13 +199,13 @@ object Robot: LoggedRobot() {
                 noteSimulation = null
                 setSimulationPose = null
 
-                vision = Vision(object: VisionIO {})
+                vision = Vision(object: VisionIO {}, isDemo)
             }
         }
 
         autoBuilder = AutoBuilder(drive, pivot, rollers, flywheels, noteSimulation, setSimulationPose)
 
-        bindButtons()
+        if (isDemo) bindDemoButtons() else bindButtons()
 
         Beambreak
 
@@ -232,6 +233,103 @@ object Robot: LoggedRobot() {
         }),
         Commands.waitSeconds(periodSeconds / 2),
     ).finallyDo { _ -> hid.setRumble(RumbleType.kBothRumble, 0.0) }.asProxy()
+
+    private fun bindDemoButtons() {
+        val invertDrive = overrides.switchSeven
+        val verySlowDrive = overrides.switchOne
+
+        drive.defaultCommand = drive.run {
+            val inversion = if (invertDrive.asBoolean) -1 else 1
+            val scalar = if (verySlowDrive.asBoolean) 0.3 else 0.5
+            drive.acceptTeleopInput(
+                (-controller.leftY * inversion) * scalar,
+                (-controller.leftX * inversion) * scalar,
+                (controller.leftTriggerAxis - controller.rightTriggerAxis) * (scalar / 2)
+            )
+        }.withName("Teleop Drive")
+
+        fun driveAimCommand(target: () -> Rotation2d, toleranceSupplier: () -> Double) =
+            Commands.startEnd(
+                { drive.setAutoAimGoal(target, toleranceSupplier) },
+                { drive.clearAutoAimGoal() }
+            )
+
+
+        val readyToShoot = Trigger {
+            drive.atAutoAimGoal() && pivot.atGoal && flywheels.atGoal
+        }.debounce(0.4, Debouncer.DebounceType.kRising)
+
+        // Prepare for a demo shot
+        controller
+            .a()
+            .and(controller.leftBumper().negate()) // Don't aim and stuff while trying to intake
+            .whileTrue(
+                driveAimCommand({ RobotState.getDemoAimingParameters().drivetrainAngle }, { 2.0 })
+                    .alongWith(
+                        flywheels.runGoal(Flywheels.Goal.DEMO_SHOOT),
+                        pivot.runGoal(Pivot.Goal.DEMO_AIM)
+                    )
+                    .withName("Prepare Speaker")
+            )
+
+        // Execute demo shot
+        controller
+            .rightBumper()
+            .and(controller.a()) // Make sure we are trying to shoot speaker
+            .and(readyToShoot)
+            .onTrue(
+                Commands.parallel(
+                    Commands.waitSeconds(0.5),
+                    Commands.waitUntil(controller.rightBumper().negate())
+                ).deadlineWith( // Deadline runs the below commands until 0.5 second have passed or the button is released
+                    rollers.runGoal(Rollers.Goal.SHOOTER_FEED),
+                    flywheels.runGoal(Flywheels.Goal.DEMO_SHOOT),
+                    pivot.runGoal(Pivot.Goal.DEMO_AIM),
+                    driveAimCommand({ RobotState.getDemoAimingParameters().drivetrainAngle }, { 1.0 }),
+                    Commands.runOnce({ noteSimulation?.animateShoot() })
+                )
+                    .withName("Shoot Speaker")
+                    .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming) // Don't let this be interrupted
+                    .finallyDo { _ -> Beambreak.simClear() } // Remove note from the robot in sim
+            )
+
+        /**** Intake ****/
+        controller.leftBumper()
+            .and(DriverStation::isEnabled) // This makes it so it runs if you are holding the button while it enables
+            .whileTrue(
+                Commands.parallel(
+                    pivot.runGoal(Pivot.Goal.INTAKE),
+                    Commands.waitUntil(pivot::atGoal).andThen(
+                        flywheels.runGoal(Flywheels.Goal.DEMO_INTAKE)
+                            .alongWith(rollers.runGoal(Rollers.Goal.ALIGN_REVERSE_SLOW))
+                            .until(Beambreak.lowerBeambreak::isTripped)
+                            .andThen(
+                                ScheduleCommand(
+                                    Commands.sequence(
+                                        Commands.runOnce({ noteSimulation?.animateAlign() }),
+                                        rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).until(Beambreak.upperBeambreak::isTripped),
+                                        rollers.runGoal(Rollers.Goal.ALIGN_REVERSE_SLOW).until(Beambreak.upperBeambreak::isClear),
+                                        rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).until(Beambreak.upperBeambreak::isTripped),
+                                        rollers.runGoal(Rollers.Goal.ALIGN_FORWARD_SLOW).withTimeout(0.075),
+                                        rollers.runGoal(Rollers.Goal.ALIGN_REVERSE_SLOW).withTimeout(0.05),
+                                    )
+                                        .deadlineWith(pivot.runGoal(Pivot.Goal.INTAKE))
+                                        .alongWith(ScheduleCommand(controller.rumbleCommand().withTimeout(2.0)))
+                                        .onlyIf { Beambreak.hasNote }
+                                        .withInterruptBehavior(Command.InterruptionBehavior.kCancelIncoming)
+                                        .withTimeout(3.0)
+                                        .withName("Note Align")
+                                )
+                            )
+                    )
+                ).withName("Teleop Intake")
+            )
+
+        controller.start().whileTrue(rollers.runGoal(Rollers.Goal.FLOOR_EJECT).withName("Floor Eject").afterSimDelay(0.5) { Beambreak.simClear(); noteSimulation?.clearNote() })
+
+        /**** Misc. ****/
+        controller.back().onTrue(Commands.runOnce({ drive.setGyroAngle(allianceSwitch(blue = Rotation2d(), red = Rotation2d(Math.PI))) }).withName("Gyro Reset"))
+    }
 
     private fun bindButtons() {
         val pivotDisabled = overrides.switchOne

@@ -35,6 +35,7 @@ class Pivot(private val io: PivotIO): SubsystemBase() {
         IDLE({ 0.0 }),
         INTAKE(LoggedTunableNumber("Pivot/IntakeAngleDegrees", 0.0)),
         SPEAKER_AIM({ RobotState.getStandardAimingParameters().pivotAngle.inDegrees }),
+        DEMO_AIM({ RobotState.getDemoAimingParameters().pivotAngle.inDegrees }),
         AMP(LoggedTunableNumber("Pivot/AmpAngleDegrees", 0.0)),
         PODIUM(LoggedTunableNumber("Pivot/PodiumAngleDegrees", 19.0)),
         CUSTOM(LoggedTunableNumber("Pivot/CustomGoal", 0.0)),

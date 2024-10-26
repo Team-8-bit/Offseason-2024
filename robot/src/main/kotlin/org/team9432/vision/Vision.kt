@@ -16,7 +16,7 @@ import org.team9432.lib.constants.EvergreenFieldConstants.isOnField
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
-class Vision(private val io: VisionIO) {
+class Vision(private val io: VisionIO, private val isDemo: Boolean) {
     private val inputs = LoggedVisionIOInputs()
 
     private val poseEstimator = PhotonPoseEstimator(
@@ -37,7 +37,28 @@ class Vision(private val io: VisionIO) {
         Logger.recordOutput("Vision/Connected", inputs.isConnected)
         Logger.recordOutput("Vision/TrackedTagIds", *inputs.results.targets.mapNotNull { apriltagFieldLayout.getTagPose(it.fiducialId).getOrNull() }.toTypedArray())
 
-        if (inputs.isConnected) applyToPoseEstimator(inputs.results)
+        if (inputs.isConnected) {
+            if (isDemo) {
+                applyDemoResults(inputs.results)
+            } else {
+                applyToPoseEstimator(inputs.results)
+            }
+        }
+    }
+
+    private fun applyDemoResults(result: PhotonPipelineResult) {
+        val tagTransform = result.targets.firstOrNull()?.bestCameraToTarget
+
+        if (tagTransform == null) {
+            RobotState.applyDemoTagPose(null)
+            return
+        }
+
+        val tagPoseFromRobot = Pose3d(RobotState.currentPose).transformBy(VisionConstants.robotToCamera).transformBy(tagTransform)
+
+        Logger.recordOutput("Vision/DemoTagFromRobot", tagPoseFromRobot)
+
+        RobotState.applyDemoTagPose(tagPoseFromRobot)
     }
 
     private fun applyToPoseEstimator(result: PhotonPipelineResult) {
@@ -75,7 +96,7 @@ class Vision(private val io: VisionIO) {
         Logger.recordOutput("Vision/TagAvgDistance", avgDist)
 
 
-        var deviation = visionPointBlankDevs.times(avgDist * distanceFactor);
+        var deviation = visionPointBlankDevs.times(avgDist * distanceFactor)
         if (estimatedPose.targetsUsed.size == 1) {
             deviation = deviation.times(2.0)
         }

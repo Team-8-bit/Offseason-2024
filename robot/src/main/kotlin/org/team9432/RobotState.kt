@@ -3,13 +3,17 @@ package org.team9432
 import edu.wpi.first.math.Matrix
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator
 import edu.wpi.first.math.geometry.Pose2d
+import edu.wpi.first.math.geometry.Pose3d
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap
 import edu.wpi.first.math.kinematics.ChassisSpeeds
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.numbers.N1
 import edu.wpi.first.math.numbers.N3
 import edu.wpi.first.math.util.Units
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d
 import org.littletonrobotics.junction.Logger
 import org.team9432.lib.RobotPeriodicManager
 import org.team9432.lib.constants.EvergreenFieldConstants
@@ -30,6 +34,7 @@ object RobotState {
 
     private var currentChassisSpeeds = ChassisSpeeds()
     private var previousVisionMeasurementTimeStamp: Double = -1.0
+    private var latestDemoTagPose: Pose3d? = null
 
     fun applyOdometryObservation(currentTimeSeconds: Double, gyroRotation: Rotation2d, modulePositions: Array<SwerveModulePosition?>) {
         latestAimingParameters.invalidate()
@@ -51,12 +56,18 @@ object RobotState {
         currentChassisSpeeds = velocity
     }
 
+    fun applyDemoTagPose(tagPose: Pose3d?) {
+        if (tagPose != null) latestDemoAimingParameters.invalidate()
+        latestDemoTagPose = tagPose
+    }
+
     val currentPose: Pose2d get() = poseEstimator.estimatedPosition
 
     data class AimingParameters(val shooterSpeeds: ShooterSpeeds, val drivetrainAngle: Rotation2d, val pivotAngle: Angle)
 
     private var latestAimingParameters = CachedValue<AimingParameters>()
     private var latestFeedAimingParameters = CachedValue<AimingParameters>()
+    private var latestDemoAimingParameters = CachedValue<AimingParameters>()
 
     var shouldDisableShootOnMove = { false }
     var shouldUsePivotSetpoints = { true }
@@ -67,6 +78,44 @@ object RobotState {
             latestAimingParameters.invalidate()
             field = value
         }
+
+    fun getDemoAimingParameters(): AimingParameters {
+        // Return the latest aiming parameters if they haven't changed
+        latestDemoAimingParameters.ifValid { cachedValue -> return cachedValue }
+
+        val robotPose = currentPose
+
+        val targetPose = latestDemoTagPose ?: return latestDemoAimingParameters.value ?: AimingParameters(ShooterSpeeds(0.0, 0.0), robotPose.rotation, 0.0.degrees)
+        val targetPose2d = targetPose.toPose2d()
+
+        val drivetrainAngleTarget = robotPose.angleTo(targetPose2d).asRotation2d
+
+        val basePivotPosition = Translation2d(
+            Units.inchesToMeters(-1.0),
+            Units.inchesToMeters(15.5)
+        )
+
+        val tagTargetPosition = Translation2d(targetPose.x, targetPose.z)
+
+        val angle = basePivotPosition.angleTo(tagTargetPosition)
+
+        Logger.recordOutput("DemoShot/PivotAngle", angle.inDegrees + 50)
+
+        val mechanism = Mechanism2d(3.0, 3.0)
+        mechanism.getRoot("Base", basePivotPosition.x, basePivotPosition.y).append(MechanismLigament2d("Arm", 0.0, 5.0))
+        mechanism.getRoot("Tag", tagTargetPosition.x, tagTargetPosition.y).append(MechanismLigament2d("Arm2", 0.0, 5.0))
+
+        Logger.recordOutput("DemoShot/Mechanism", mechanism)
+
+        val output = AimingParameters(
+            shooterSpeeds = ShooterSpeeds(5000.0, 5000.0),
+            drivetrainAngle = drivetrainAngleTarget,
+            pivotAngle = 50.0.degrees - angle
+        )
+
+        latestDemoAimingParameters.value = output
+        return output
+    }
 
     fun getStandardAimingParameters(): AimingParameters {
         // Return the latest aiming parameters if they haven't changed
