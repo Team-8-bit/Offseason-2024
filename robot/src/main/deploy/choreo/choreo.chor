@@ -1,0 +1,440 @@
+{
+ "name":"choreo",
+ "version":"v2025.0.0",
+ "type":"Swerve",
+ "variables":{
+  "expressions":{
+   "CenterX":{
+    "dimension":"Length",
+    "var":{
+     "exp":"(54 ft + 3.25 in) / 2",
+     "val":8.270875
+    }
+   },
+   "CenterSpacing":{
+    "dimension":"Length",
+    "var":{
+     "exp":"5 ft + 6 in",
+     "val":1.6764
+    }
+   },
+   "StartOnLineX":{
+    "dimension":"Length",
+    "var":{
+     "exp":"1.4 m",
+     "val":1.4
+    }
+   },
+   "SpikeX":{
+    "dimension":"Length",
+    "var":{
+     "exp":"9 ft + 6 in",
+     "val":2.8956
+    }
+   },
+   "CenterY":{
+    "dimension":"Length",
+    "var":{
+     "exp":"(26 ft + 11.25 in) / 2",
+     "val":4.105275
+    }
+   },
+   "SpikeSpacing":{
+    "dimension":"Length",
+    "var":{
+     "exp":"4 ft + 9 in",
+     "val":1.4478
+    }
+   }
+  },
+  "poses":{
+   "S2":{
+    "x":{
+     "exp":"S2Note.x() + CenterPickupOffset.x()",
+     "val":2.6456
+    },
+    "y":{
+     "exp":"S2Note.y() + CenterPickupOffset.y()",
+     "val":5.553075000000001
+    },
+    "heading":{
+     "exp":"S2Note.heading() + CenterPickupOffset.heading()",
+     "val":3.141592653589793
+    }
+   },
+   "SourceStart":{
+    "x":{
+     "exp":"StartOnLineX",
+     "val":1.4
+    },
+    "y":{
+     "exp":"2.8 m",
+     "val":2.8
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
+   "S1":{
+    "x":{
+     "exp":"S1Note.x() + CenterPickupOffset.x()",
+     "val":2.6456
+    },
+    "y":{
+     "exp":"S1Note.y() + CenterPickupOffset.y()",
+     "val":7.000874999999999
+    },
+    "heading":{
+     "exp":"S1Note.heading() + CenterPickupOffset.heading()",
+     "val":3.141592653589793
+    }
+   },
+   "C3":{
+    "x":{
+     "exp":"C3Note.x() + CenterPickupOffset.x()",
+     "val":8.020875
+    },
+    "y":{
+     "exp":"C3Note.y() + CenterPickupOffset.y()",
+     "val":4.105275
+    },
+    "heading":{
+     "exp":"C3Note.heading() + CenterPickupOffset.heading()",
+     "val":3.141592653589793
+    }
+   },
+   "AmpFarShot":{
+    "x":{
+     "exp":"4 m",
+     "val":4.0
+    },
+    "y":{
+     "exp":"6 m",
+     "val":6.0
+    },
+    "heading":{
+     "exp":"-3 rad",
+     "val":-3.0
+    }
+   },
+   "C1":{
+    "x":{
+     "exp":"C1Note.x() + CenterPickupOffset.x()",
+     "val":8.020875
+    },
+    "y":{
+     "exp":"C1Note.y() + CenterPickupOffset.y()",
+     "val":7.458075
+    },
+    "heading":{
+     "exp":"C1Note.heading() + CenterPickupOffset.heading()",
+     "val":3.141592653589793
+    }
+   },
+   "C4":{
+    "x":{
+     "exp":"C4Note.x() + CenterPickupOffset.x()",
+     "val":8.020875
+    },
+    "y":{
+     "exp":"C4Note.y() + CenterPickupOffset.y()",
+     "val":2.4288749999999997
+    },
+    "heading":{
+     "exp":"C4Note.heading() + CenterPickupOffset.heading()",
+     "val":3.141592653589793
+    }
+   },
+   "CenterPickupOffset":{
+    "x":{
+     "exp":"-0.25 m",
+     "val":-0.25
+    },
+    "y":{
+     "exp":"0 m",
+     "val":0.0
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
+   "C2Note":{
+    "x":{
+     "exp":"CenterX",
+     "val":8.270875
+    },
+    "y":{
+     "exp":"CenterY + (CenterSpacing * 1)",
+     "val":5.781675
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "AmpStart":{
+    "x":{
+     "exp":"StartOnLineX",
+     "val":1.4
+    },
+    "y":{
+     "exp":"7.36 m",
+     "val":7.36
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
+   "S3Note":{
+    "x":{
+     "exp":"SpikeX",
+     "val":2.8956
+    },
+    "y":{
+     "exp":"CenterY + (SpikeSpacing * 0)",
+     "val":4.105275
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "C4Note":{
+    "x":{
+     "exp":"CenterX",
+     "val":8.270875
+    },
+    "y":{
+     "exp":"CenterY + (CenterSpacing * -1)",
+     "val":2.4288749999999997
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "SpeakerStart":{
+    "x":{
+     "exp":"1.25 m",
+     "val":1.25
+    },
+    "y":{
+     "exp":"S2Note.y()",
+     "val":5.553075000000001
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
+   "StageStart":{
+    "x":{
+     "exp":"StartOnLineX",
+     "val":1.4
+    },
+    "y":{
+     "exp":"S3Note.y()",
+     "val":4.105275
+    },
+    "heading":{
+     "exp":"180 deg",
+     "val":3.141592653589793
+    }
+   },
+   "C2":{
+    "x":{
+     "exp":"C2Note.x() + CenterPickupOffset.x()",
+     "val":8.020875
+    },
+    "y":{
+     "exp":"C2Note.y() + CenterPickupOffset.y()",
+     "val":5.781675
+    },
+    "heading":{
+     "exp":"C2Note.heading() + CenterPickupOffset.heading()",
+     "val":3.141592653589793
+    }
+   },
+   "C5Note":{
+    "x":{
+     "exp":"CenterX",
+     "val":8.270875
+    },
+    "y":{
+     "exp":"CenterY + (CenterSpacing * -2)",
+     "val":0.7524749999999994
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "S2Note":{
+    "x":{
+     "exp":"SpikeX",
+     "val":2.8956
+    },
+    "y":{
+     "exp":"CenterY + (SpikeSpacing * 1)",
+     "val":5.553075000000001
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "C1Note":{
+    "x":{
+     "exp":"CenterX",
+     "val":8.270875
+    },
+    "y":{
+     "exp":"CenterY + (CenterSpacing * 2)",
+     "val":7.458075
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "S3":{
+    "x":{
+     "exp":"S3Note.x() + CenterPickupOffset.x()",
+     "val":2.6456
+    },
+    "y":{
+     "exp":"S3Note.y() + CenterPickupOffset.y()",
+     "val":4.105275
+    },
+    "heading":{
+     "exp":"S3Note.heading() + CenterPickupOffset.heading()",
+     "val":3.141592653589793
+    }
+   },
+   "C3Note":{
+    "x":{
+     "exp":"CenterX",
+     "val":8.270875
+    },
+    "y":{
+     "exp":"CenterY + (CenterSpacing * 0)",
+     "val":4.105275
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "S1Note":{
+    "x":{
+     "exp":"SpikeX",
+     "val":2.8956
+    },
+    "y":{
+     "exp":"CenterY + (SpikeSpacing * 2)",
+     "val":7.000874999999999
+    },
+    "heading":{
+     "exp":"0 rad",
+     "val":0.0
+    }
+   },
+   "AmpCloseShot":{
+    "x":{
+     "exp":"2.64 m",
+     "val":2.64
+    },
+    "y":{
+     "exp":"6.84 m",
+     "val":6.84
+    },
+    "heading":{
+     "exp":"-2.65 rad",
+     "val":-2.65
+    }
+   },
+   "C5":{
+    "x":{
+     "exp":"C5Note.x() + CenterPickupOffset.x()",
+     "val":8.020875
+    },
+    "y":{
+     "exp":"C5Note.y() + CenterPickupOffset.y()",
+     "val":0.7524749999999994
+    },
+    "heading":{
+     "exp":"C5Note.heading() + CenterPickupOffset.heading()",
+     "val":3.141592653589793
+    }
+   }
+  }
+ },
+ "config":{
+  "frontLeft":{
+   "x":{
+    "exp":"6.875 in",
+    "val":0.174625
+   },
+   "y":{
+    "exp":"9.875 in",
+    "val":0.25082499999999996
+   }
+  },
+  "backLeft":{
+   "x":{
+    "exp":"-6.875 in",
+    "val":-0.174625
+   },
+   "y":{
+    "exp":"-9.875 in",
+    "val":-0.25082499999999996
+   }
+  },
+  "mass":{
+   "exp":"150 lb",
+   "val":68.0388555
+  },
+  "inertia":{
+   "exp":"500 lb ft ^ 2",
+   "val":21.070055046902404
+  },
+  "gearing":{
+   "exp":"5.9",
+   "val":5.9
+  },
+  "radius":{
+   "exp":"1.92 in",
+   "val":0.048768
+  },
+  "vmax":{
+   "exp":"4000 rpm",
+   "val":418.87902047863906
+  },
+  "tmax":{
+   "exp":"0.5 N m",
+   "val":0.5
+  },
+  "bumper":{
+   "front":{
+    "exp":"13 in",
+    "val":0.3302
+   },
+   "side":{
+    "exp":"16 in",
+    "val":0.4064
+   },
+   "back":{
+    "exp":"18.5 in",
+    "val":0.4699
+   }
+  },
+  "differentialTrackWidth":{
+   "exp":"22 in",
+   "val":0.5588
+  }
+ },
+ "generationFeatures":[]
+}

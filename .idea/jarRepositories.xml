@@ -52,6 +52,16 @@
       <option name="url" value="file:/$PROJECT_DIR$/../../../Public/wpilib/2024/maven/" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="WPILocal" />
+      <option name="name" value="WPILocal" />
+      <option name="url" value="file:/$PROJECT_DIR$/../../../Public/wpilib/2024/maven/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="WPILocal" />
+      <option name="name" value="WPILocal" />
+      <option name="url" value="file:/$PROJECT_DIR$/../../../Public/wpilib/2024/maven/" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="WPIFRCMavenVendorCacheRelease" />
       <option name="name" value="WPIFRCMavenVendorCacheRelease" />
       <option name="url" value="https://frcmaven.wpi.edu/artifactory/vendor-mvn-release" />
@@ -149,6 +159,21 @@
     <remote-repository>
       <option name="id" value="WPILocal" />
       <option name="name" value="WPILocal" />
+      <option name="url" value="file:/$PROJECT_DIR$/../Public/wpilib/2024/maven/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="WPILocal" />
+      <option name="name" value="WPILocal" />
+      <option name="url" value="file:/$PROJECT_DIR$/../Public/wpilib/2024/maven" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="WPILocal" />
+      <option name="name" value="WPILocal" />
+      <option name="url" value="file:/$PROJECT_DIR$/../Public/wpilib/2024/maven" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="WPILocal" />
+      <option name="name" value="WPILocal" />
       <option name="url" value="file:/$PROJECT_DIR$/../Public/wpilib/2024/maven" />
     </remote-repository>
     <remote-repository>
@@ -169,17 +194,7 @@
     <remote-repository>
       <option name="id" value="WPILocal" />
       <option name="name" value="WPILocal" />
-      <option name="url" value="file:/$USER_HOME$/Public/wpilib/2024/maven" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="WPILocal" />
-      <option name="name" value="WPILocal" />
-      <option name="url" value="file:/$USER_HOME$/Public/wpilib/2024/maven" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="WPILocal" />
-      <option name="name" value="WPILocal" />
-      <option name="url" value="file:/$USER_HOME$/Public/wpilib/2024/maven/" />
+      <option name="url" value="file:/$PROJECT_DIR$/../../Public/wpilib/2024/maven" />
     </remote-repository>
   </component>
 </project>

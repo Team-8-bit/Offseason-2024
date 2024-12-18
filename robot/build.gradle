@@ -38,20 +38,14 @@ deploy {
     }
 }
 
-tasks.register('generateTrajectories', JavaExec) {
-    dependsOn "classes"
-    mainClass = "org.team9432.auto.paths.MainKt"
-    classpath = sourceSets.main.runtimeClasspath
-}
-
 project.compileKotlin.dependsOn(createVersionFile)
 gversion {
-    srcDir       = "src/main/kotlin/"
+    srcDir = "src/main/kotlin/"
     classPackage = "org.team9432"
-    className    = "BuildConstants"
-    dateFormat   = "yyyy-MM-dd '@' h:mm:ss a z"
-    timeZone     = "MST"
-    language     = "kotlin"
+    className = "BuildConstants"
+    dateFormat = "yyyy-MM-dd '@' h:mm:ss a z"
+    timeZone = "MST"
+    language = "kotlin"
 }
 
 repositories {
@@ -89,7 +83,6 @@ def includeDesktopSupport = false
 dependencies {
     // Team libraries
     implementation("org.team9432.lib:robot-lib")
-    implementation("org.team9432.lib:choreo-generator")
     implementation("org.team9432.lib:annotation")
     ksp("org.team9432.lib:annotation")
 
@@ -111,8 +104,6 @@ dependencies {
 
     wpi.sim.enableRelease().forEach { simulationRelease(it) }
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1-Beta")
-
     // Swerve sim
     implementation("org.dyn4j:dyn4j:5.0.2")
 
@@ -124,7 +115,7 @@ dependencies {
     nativeRelease("org.littletonrobotics.akit.conduit:conduit-wpilibio:3.2.1")
 
     // Choreolib
-    implementation("com.choreo.lib:ChoreoLib-java:2024.2.3")
+    implementation("choreo:ChoreoLib-java:2025.0.0-beta-3")
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Phoenix 6
@@ -136,9 +127,6 @@ dependencies {
 
     // REVLib
     implementation("com.revrobotics.frc:REVLib-java:2024.2.1")
-
-    // DogLog
-    implementation("com.github.jonahsnider:doglog:2024.5.8")
 }
 
 // Simulation configuration (e.g. environment variables).
